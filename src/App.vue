@@ -1,28 +1,38 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="main-layout">
+    <FileExplorer />
+    <div class="editor-area">
+      <TopBar/>
+      <Editor />
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import FileExplorer from "./components/FileExplorer";
+import Editor from "./components/Editor";
+import TopBar from "./components/TopBar"
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    FileExplorer,
+    Editor,
+    TopBar
+  },
+};
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+<style lang="scss" scoped>
+#main-layout {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  background: var(--color-secondary-light);
+
+  .editor-area {
+    display: flex;
+    flex-direction: column;
+  }
 }
 </style>
