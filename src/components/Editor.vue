@@ -1,87 +1,84 @@
 <template>
-  <codemirror
-    ref="cmEditor"
-    :value="code"
-    :options="cmOptions"
-    :autoCloseTags="true"
-    @ready="onCmReady"
-    @focus="onCmFocus"
-    @input="onCmCodeChange"
-  />
+  <div :class="['editor-area', getEditorMode]">
+    <div id="primary-editor" class="codemirror-instances">
+      <TopBar
+        :editor="getEditors.primary"
+        :activeFile="getActiveFiles[getEditors.primary]"
+        :openFiles="getOpenFiles[getEditors.primary]"
+      />
+      <CodeMirror
+        v-if="getActiveFiles[getEditors.primary]"
+        :file="getActiveFiles[getEditors.primary]"
+      />
+    </div>
+    <div
+      v-if="getEditorMode === 'multiple'"
+      id="secodary-editor"
+      class="codemirror-instances"
+    >
+      <TopBar
+        :editor="getEditors.secondary"
+        :activeFile="getActiveFiles[getEditors.secondary]"
+        :openFiles="getOpenFiles[getEditors.secondary]"
+      />
+      <CodeMirror
+        v-if="getActiveFiles[getEditors.secondary]"
+        :file="getActiveFiles[getEditors.secondary]"
+      />
+    </div>
+  </div>
 </template>
 
 <script>
-import { codemirror } from "vue-codemirror";
-import "codemirror/lib/codemirror.css";
-import "codemirror/mode/javascript/javascript.js";
-import "codemirror/mode/gfm/gfm"
-import "codemirror/mode/markdown/markdown"
-import "codemirror/theme/dracula.css";
-import "codemirror/theme/base16-light.css"
-import "codemirror/addon/edit/closebrackets"
-import "codemirror/addon/edit/closetag"
+import CodeMirror from "@/components/CodeMirror";
+import TopBar from "@/components/TopBar";
+import { mapActions, mapGetters } from "vuex";
+import { EDITORS } from "@/store/modules/Editor/initialState";
 
 export default {
   components: {
-    codemirror,
-  },
-  data() {
-    return {
-      code: `**hello** hai bye`,
-      cmOptions: {
-        // codemirror options
-        tabSize: 4,
-        mode: "text/javascript",
-        theme: "dracula",
-        lineNumbers: true,
-        line: true,
-        foldGutter: true,
-        highlightFormatting: true,
-        xml: true,
-        autoCloseBrackets: true,
-        autoCloseTags: true
-        // more codemirror options, 更多 codemirror 的高级配置...
-      },
-    };
-  },
-  methods: {
-    onCmReady(cm) {
-      console.log("the editor is readied!", cm);
-    },
-    onCmFocus(cm) {
-      console.log("the editor is focused!", cm);
-    },
-    onCmCodeChange(newCode) {
-      console.log("this is new code", newCode);
-      this.code = newCode;
-    },
+    CodeMirror,
+    TopBar,
   },
   computed: {
-    codemirror() {
-      return this.$refs.cmEditor.codemirror;
+    ...mapGetters("Editor", [
+      "getActiveEditor",
+      "getOpenFiles",
+      "getActiveFiles",
+    ]),
+    getEditors() {
+      return EDITORS;
+    },
+    getEditorMode() {
+      if (
+        this.getOpenFiles[EDITORS.secondary] &&
+        this.getOpenFiles[EDITORS.secondary] > 0
+      ) {
+        return "multiple";
+      } else {
+        return "single";
+      }
     },
   },
 };
 </script>
 
-<style lang="scss">
-.vue-codemirror {
-  height: 100%;
-  .CodeMirror {
-    height: 100%;
-    font-family: "Fira Code", monospace;
-    font-size: 16px !important;
-    // font-size: 2rem;
-    .CodeMirror-overlayscroll-vertical div,
-    .CodeMirror-overlayscroll-horizontal div {
-      background-color: rgba(18, 21, 27, 0.45) !important;
-    }
-    pre {
-      word-break: break-word;
-    }
+<style lang="scss" scoped>
+.editor-area {
+  display: grid;
+
+  &.single {
+    grid-template-columns: 1fr;
   }
-  .CodeMirror-gutters {
-    background-color: transparent !important;
+
+  &.multiple {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .codemirror-instances {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 }
 </style>

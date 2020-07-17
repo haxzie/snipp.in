@@ -1,17 +1,38 @@
 <template>
   <div class="topbar">
     <ul class="file-tabs">
-      <li class="active">hello.js <XIcon size="16" class="icon" /></li>
+      <li
+        v-for="file in openFiles"
+        :key="file.file_id"
+        :class="[{ active: file.file_id === activeFile.file_id }]"
+        @click="setActiveFile({ editor, file_id: file.file_id })"
+      >
+        {{ file.name }}
+        <XIcon
+          size="16"
+          class="icon"
+          @click.stop="closeFile({ editor, file_id: file.file_id })"
+        />
+      </li>
     </ul>
   </div>
 </template>
 
 <script>
 import { XIcon } from "vue-feather-icons";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   components: {
     XIcon,
+  },
+  props: {
+    editor: String,
+    openFiles: Array,
+    activeFile: Object,
+  },
+  methods: {
+    ...mapActions("Editor", ["closeFile", "setActiveFile"]),
   },
 };
 </script>
@@ -39,6 +60,7 @@ export default {
       flex-direction: row;
       align-items: center;
       border-radius: 5px 5px 0 0;
+      border-bottom: 2px solid var(--color-secondary);
 
       .icon {
         margin-left: 5px;
@@ -49,6 +71,11 @@ export default {
           cursor: pointer;
           background: var(--color-secondary-light);
         }
+      }
+
+      &:hover {
+        opacity: 1;
+        cursor: pointer;
       }
 
       &.active {

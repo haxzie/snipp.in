@@ -1,24 +1,26 @@
 <template>
   <div id="main-layout">
     <FileExplorer />
-    <div class="editor-area">
-      <TopBar/>
-      <Editor />
-    </div>
+    <Editor />
   </div>
 </template>
 
 <script>
 import FileExplorer from "./components/FileExplorer";
 import Editor from "./components/Editor";
-import TopBar from "./components/TopBar"
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   name: "App",
   components: {
     FileExplorer,
     Editor,
-    TopBar
+  },
+  methods: {
+    ...mapActions("Files", ["loadFiles"]),
+  },
+  async mounted() {
+    this.loadFiles();
   },
 };
 </script>
@@ -29,10 +31,5 @@ export default {
   display: grid;
   grid-template-columns: 300px 1fr;
   background: var(--color-secondary-light);
-
-  .editor-area {
-    display: flex;
-    flex-direction: column;
-  }
 }
 </style>

@@ -1,5 +1,6 @@
 export default function initialState() {
-    return {
-        
-    }
+  return {
+    files: {},
+    filesById: [],
+  };
 }
