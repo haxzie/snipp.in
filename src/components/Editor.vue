@@ -3,6 +3,7 @@
     ref="cmEditor"
     :value="code"
     :options="cmOptions"
+    :autoCloseTags="true"
     @ready="onCmReady"
     @focus="onCmFocus"
     @input="onCmCodeChange"
@@ -13,7 +14,12 @@
 import { codemirror } from "vue-codemirror";
 import "codemirror/lib/codemirror.css";
 import "codemirror/mode/javascript/javascript.js";
+import "codemirror/mode/gfm/gfm"
+import "codemirror/mode/markdown/markdown"
 import "codemirror/theme/dracula.css";
+import "codemirror/theme/base16-light.css"
+import "codemirror/addon/edit/closebrackets"
+import "codemirror/addon/edit/closetag"
 
 export default {
   components: {
@@ -21,14 +27,7 @@ export default {
   },
   data() {
     return {
-      code: `/**
- *  Welcome to JSONBin
- *  Learn more about JSONBin at https://github.com/haxzie/jsonbin
- * 
- *  Hack Awaayyy!!
- * 
- * /
-      `,
+      code: `**hello** hai bye`,
       cmOptions: {
         // codemirror options
         tabSize: 4,
@@ -36,6 +35,11 @@ export default {
         theme: "dracula",
         lineNumbers: true,
         line: true,
+        foldGutter: true,
+        highlightFormatting: true,
+        xml: true,
+        autoCloseBrackets: true,
+        autoCloseTags: true
         // more codemirror options, 更多 codemirror 的高级配置...
       },
     };
