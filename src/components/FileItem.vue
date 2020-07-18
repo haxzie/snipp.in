@@ -1,5 +1,5 @@
 <template>
-  <div class="file-item" @click="openFile(file.file_id)">
+  <div :class="['file-item', { active: isActive}]" @click="openFile(file.file_id)">
     <FileTextIcon class="icon" size="18" /><span>{{ file.name }}</span>
   </div>
 </template>
@@ -14,6 +14,7 @@ export default {
   },
   props: {
     file: Object,
+    isActive: Boolean
   },
   methods: {
     ...mapActions("Editor", ["openFile"]),
@@ -29,6 +30,11 @@ export default {
   padding: 10px 10px;
   margin: 0 5px;
   border-radius: 5px;
+
+  &.active {
+    // color: var(--color-primary);
+    background: var(--color-secondary);
+  }
 
   .icon {
     margin-right: 10px;

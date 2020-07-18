@@ -5,6 +5,7 @@
         :key="index"
         :is="file.type"
         :file="file"
+        :isActive="!!activeFiles[file.file_id]"
       />
   </div>
 </template>
@@ -15,7 +16,8 @@ import FolderItem from './FolderItem';
 
 export default {
     props: {
-        files: Array
+        files: Array,
+        activeFiles: Object
     },
     components: {
         FILE: FileItem,

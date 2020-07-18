@@ -14,7 +14,7 @@
       </div>
     </header>
     <div class="content-area">
-      <DirectoryListing :files="getFiles"/>
+      <DirectoryListing :files="getFiles" :activeFiles="activeFiles" />
     </div>
   </div>
 </template>
@@ -22,16 +22,28 @@
 <script>
 import { FilePlusIcon, FolderPlusIcon } from "vue-feather-icons";
 import { mapGetters, mapActions } from "vuex";
-import DirectoryListing from './DirectoryListing';
+import DirectoryListing from "./DirectoryListing";
 
 export default {
   components: {
     FilePlusIcon,
     FolderPlusIcon,
-    DirectoryListing
+    DirectoryListing,
   },
   computed: {
-    ...mapGetters('Files', ['getFiles']),
+    ...mapGetters("Files", ["getFiles"]),
+    ...mapGetters("Editor", ["getActiveFiles"]),
+    activeFiles() {
+      return Object.keys(this.getActiveFiles).reduce((result, editor) => {
+        if (this.getActiveFiles[editor]) {
+          return Object.assign(result, {
+            [this.getActiveFiles[editor].file_id]: true,
+          });
+        } else {
+          return result;
+        }
+      }, {});
+    },
   },
   methods: {
     ...mapActions("Files", ["createFile"]),

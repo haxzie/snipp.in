@@ -49,20 +49,25 @@ export default {
   },
   methods: {
     onCmReady(cm) {
-      console.log("the editor is readied!", cm);
+      console.log("the editor is readied!");
     },
     onCmFocus(cm) {
-      console.log("the editor is focused!", cm);
+      console.log("the editor is focused!");
     },
     onCmCodeChange(newCode) {
-      console.log("this is new code", newCode);
       this.code = newCode;
+      this.$emit('contentChanged', newCode);
     },
   },
   computed: {
     codemirror() {
       return this.$refs.cmEditor.codemirror;
     },
+  },
+  watch: {
+    file(newFile) {
+      this.code = newFile.contents || '';
+    }
   },
   created() {
     this.code = this.file? this.file.contents: ''

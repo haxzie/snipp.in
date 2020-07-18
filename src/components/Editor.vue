@@ -9,6 +9,10 @@
       <CodeMirror
         v-if="getActiveFiles[getEditors.primary]"
         :file="getActiveFiles[getEditors.primary]"
+        @contentChanged="
+          (contents) =>
+            updateContents(getActiveFiles[getEditors.primary].file_id, contents)
+        "
       />
     </div>
     <div
@@ -34,6 +38,7 @@ import CodeMirror from "@/components/CodeMirror";
 import TopBar from "@/components/TopBar";
 import { mapActions, mapGetters } from "vuex";
 import { EDITORS } from "@/store/modules/Editor/initialState";
+import debounce from "lodash/debounce";
 
 export default {
   components: {
@@ -59,6 +64,15 @@ export default {
         return "single";
       }
     },
+  },
+  methods: {
+    ...mapActions("Files", ["updateFileContents"]),
+    updateContents(file_id, contents) {
+      this.debouncedFileUpdate({ file_id, contents });
+    },
+  },
+  created() {
+    this.debouncedFileUpdate = debounce(this.updateFileContents, 1000);
   },
 };
 </script>

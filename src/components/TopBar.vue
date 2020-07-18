@@ -61,6 +61,11 @@ export default {
       align-items: center;
       border-radius: 5px 5px 0 0;
       border-bottom: 2px solid var(--color-secondary);
+      margin-right: 1px;
+
+      &:last-child {
+        margin-right: 0;
+      }
 
       .icon {
         margin-left: 5px;
