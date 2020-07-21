@@ -77,7 +77,7 @@ export default {
 
 <style lang="scss">
 .vue-codemirror {
-  height: 100%;
+  min-height: 100%;
   .CodeMirror {
     height: 100%;
     font-family: "Fira Code", monospace;

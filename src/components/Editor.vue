@@ -6,14 +6,19 @@
         :activeFile="getActiveFiles[getEditors.primary]"
         :openFiles="getOpenFiles[getEditors.primary]"
       />
-      <CodeMirror
-        v-if="getActiveFiles[getEditors.primary]"
-        :file="getActiveFiles[getEditors.primary]"
-        @contentChanged="
-          (contents) =>
-            updateContents(getActiveFiles[getEditors.primary].file_id, contents)
-        "
-      />
+      <div class="scroll-wrapper">
+        <CodeMirror
+          v-if="getActiveFiles[getEditors.primary]"
+          :file="getActiveFiles[getEditors.primary]"
+          @contentChanged="
+            (contents) =>
+              updateContents(
+                getActiveFiles[getEditors.primary].file_id,
+                contents
+              )
+          "
+        />
+      </div>
     </div>
     <div
       v-if="getEditorMode === 'multiple'"
@@ -80,6 +85,8 @@ export default {
 <style lang="scss" scoped>
 .editor-area {
   display: grid;
+  height: 100%;
+  overflow: hidden;
 
   &.single {
     grid-template-columns: 1fr;
@@ -89,10 +96,20 @@ export default {
     grid-template-columns: 1fr 1fr;
   }
 
-  .codemirror-instances {
+  .scroll-wrapper {
+    height: 100%;
     flex: 1;
     display: flex;
     flex-direction: column;
+    overflow: auto;
+  }
+
+  .codemirror-instances {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
   }
 }
 </style>

@@ -28,6 +28,7 @@ export default {
 <style lang="scss" scoped>
 #main-layout {
   height: 100%;
+  overflow: hidden;
   display: grid;
   grid-template-columns: 300px 1fr;
   background: var(--color-secondary-light);

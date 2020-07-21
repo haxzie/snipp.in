@@ -13,9 +13,9 @@
         </div>
       </div>
     </header>
-    <div class="content-area">
+    <simplebar class="content-area">
       <DirectoryListing :files="getFiles" :activeFiles="activeFiles" />
-    </div>
+    </simplebar>
   </div>
 </template>
 
@@ -48,7 +48,7 @@ export default {
   methods: {
     ...mapActions("Files", ["createFile"]),
     createNewFile() {
-      this.createFile();
+      this.createFile({ editable: true });
     },
     createNewFolder() {},
   },
@@ -59,11 +59,14 @@ export default {
 .file-explorer {
   background: var(--color-secondary-light);
   z-index: 9;
+  display: flex;
+  flex-direction: column;
   header {
     display: flex;
     flex-direction: row;
     padding: 5px 10px 5px 10px;
     align-items: center;
+    z-index: 99;
 
     h4 {
       font-weight: bold;
@@ -112,7 +115,8 @@ export default {
     }
   }
 
-  .directory-listing {
+  .content-area {
+    flex: 1;
     display: flex;
     flex-direction: column;
   }
