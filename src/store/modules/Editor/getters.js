@@ -7,9 +7,11 @@ export default {
   getOpenFiles: (state, getters, rootState, rootGetters) => {
     return Object.keys(state.openFiles).reduce((result, editor) => {
       return Object.assign(result, {
-        [editor]: state.openFiles[editor].map((file_id) =>
-          rootGetters["Files/getFile"](file_id)
-        ),
+        [editor]: state.openFiles[editor].reduce((file_results, file_id) => {
+          const file = rootGetters["Files/getFile"](file_id);
+          if (file) file_results.push(file);
+          return file_results;
+        }, []),
       });
     }, {});
   },

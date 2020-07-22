@@ -25,29 +25,25 @@ export default {
    * @param {String} editor Id/name of the editor
    * @param {String} file_id id of the file to be closed
    */
-  closeFile: async ({ state, commit }, { editor, file_id }) => {
-    // remove the file from the open editors
-    commit(types.SET_OPEN_FILES, {
-      ...state.openFiles,
-      [editor]:
-        // check if there are any open files in the editor
-        state.openFiles[editor] && state.openFiles[editor].length > 0
-          ? state.openFiles[editor].filter((id) => id !== file_id)
-          : null,
-    });
-
+  closeFile: async ({ state, commit, dispatch }, { editor, file_id }) => {
     // check if the file is currently opened
     if (state.activeFiles[editor] === file_id) {
       console.log({ editor, file_id, isActive: true });
       //set the first file in the editor's open files as the active file
-      commit(types.SET_ACTIVE_FILES, {
-        ...state.activeFiles,
-        [editor]:
-          state.openFiles[editor] && state.openFiles[editor].length > 0
-            ? state.openFiles[editor][0]
-            : null,
+      await dispatch("setActiveFile", {
+        editor,
+        file_id:
+          state.openFiles[editor].filter((id) => id !== file_id)[0] || null,
       });
     }
+
+    // remove the file from the open editors
+    commit(types.SET_OPEN_FILES, {
+      ...state.openFiles,
+      // check if there are any open files in the editor
+      [editor]: state.openFiles[editor].filter((id) => id !== file_id),
+    });
+    // debugger
   },
 
   /**
@@ -55,34 +51,14 @@ export default {
    * used when a file is being deleted
    * @param {String} file_id id of the file to be closed
    */
-  closeFileFromAllEditor: async ({ state, commit }, { file_id }) => {
+  closeFileFromAllEditor: async ({ state, dispatch }, { file_id }) => {
     // remove the file from the open files list of all editors
-    console.log(state.openFiles);
-    commit(
-      types.SET_OPEN_FILES,
-      Object.keys(state.openFiles).reduce((result, editor) => {
-        return Object.assign(result, {
-          [editor]: state.openFiles[editor].filter(
-            (_file_id) => _file_id !== file_id
-          ),
-        });
-      }, {})
-    );
-    console.log(state.openFiles);
-    // if the file is active in any editor, the active file to another file or none
-    commit(
-      types.SET_ACTIVE_FILES,
-      Object.keys(state.activeFiles).reduce((result, editor) => {
-        return Object.assign(result, {
-          [editor]:
-            state.activeFiles[editor] === file_id
-              ? state.openFiles[editor] && state.openFiles[editor].length > 0
-                ? state.openFiles[editor][0]
-                : null
-              : state.activeFiles[editor],
-        });
-      }, {})
-    );
+    const editors = Object.keys(state.openFiles);
+    for (let i = 0; i < editors.length; i++) {
+      if (state.openFiles[editors[i]].includes(file_id)) {
+        await dispatch("closeFile", { editor: editors[i], file_id });
+      }
+    }
   },
 
   /**

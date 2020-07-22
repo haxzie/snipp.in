@@ -89,6 +89,7 @@ export default {
   },
   deleteFile: async ({ state, commit, dispatch }, { file_id }) => {
     await dispatch('Editor/closeFileFromAllEditor', { file_id }, { root: true });
+    console.log('back to delete file')
     commit(types.SET_FILES, omit(state.files, file_id));
     db.transaction("rw", db.files, async () => {
       // Mark bigfoots:

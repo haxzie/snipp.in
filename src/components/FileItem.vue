@@ -1,43 +1,51 @@
 <template>
-  <div
-    :class="['file-item', { active: isActive }]"
-    @click="openFile({ file_id: file.file_id })"
-    @dblclick="readonly = !readonly"
-  >
-    <FileTextIcon class="icon" size="18" />
-    <form @submit.prevent="$refs.input.blur()">
-      <input
-        :ref="'input'"
-        type="text"
-        v-model="filename"
-        :readonly="readonly"
-        size="2"
-        @blur="changeFileName"
-      />
-    </form>
+  <div :class="['file-item', { active: isActive }]">
+    <div
+      class="clickable-area"
+      @click="openFile({ file_id: file.file_id })"
+      @dblclick="readonly = !readonly"
+    >
+      <FileTextIcon class="icon" size="18" />
+      <form @submit.prevent="$refs.input.blur()">
+        <input
+          :ref="'input'"
+          type="text"
+          v-model="filename"
+          :readonly="readonly"
+          size="2"
+          @blur="changeFileName"
+        />
+      </form>
+    </div>
     <div class="context-menu">
       <MoreVerticalIcon
         class="trigger-icon"
         size="18"
         @click="toggleContextMenu"
       />
-      <div v-if="showContextMenu" class="options">
-        <div class="option-item" @click="openRenameMode">
-          <edit3-icon size="18" class="icon" />Rename
+      <SlideYUpTransition>
+        <div
+          v-if="showContextMenu"
+          class="options"
+          v-click-outside="toggleContextMenu"
+        >
+          <div class="option-item" @click="openRenameMode">
+            <edit3-icon size="18" class="icon" />Rename
+          </div>
+          <div class="option-item">
+            <download-icon size="18" class="icon" />Download File
+          </div>
+          <div class="option-item">
+            <copy-icon size="18" class="icon" />Duplicate File
+          </div>
+          <div class="option-item">
+            <clipboard-icon size="18" class="icon" />Copy contents
+          </div>
+          <div class="option-item" @click="deleteCurrentFile">
+            <trash2-icon size="18" class="icon" />Delete File
+          </div>
         </div>
-        <div class="option-item">
-          <download-icon size="18" class="icon" />Download File
-        </div>
-        <div class="option-item">
-          <copy-icon size="18" class="icon" />Duplicate File
-        </div>
-        <div class="option-item">
-          <clipboard-icon size="18" class="icon" />Copy contents
-        </div>
-        <div class="option-item" @click="deleteCurrentFile">
-          <trash2-icon size="18" class="icon" />Delete File
-        </div>
-      </div>
+      </SlideYUpTransition>
     </div>
     <!-- <span>{{ file.name }}</span> -->
   </div>
@@ -54,6 +62,7 @@ import {
   ClipboardIcon,
 } from "vue-feather-icons";
 import { mapActions } from "vuex";
+import { SlideYUpTransition } from "vue2-transitions";
 
 export default {
   components: {
@@ -63,7 +72,8 @@ export default {
     Edit3Icon,
     DownloadIcon,
     CopyIcon,
-    ClipboardIcon
+    ClipboardIcon,
+    SlideYUpTransition,
   },
   props: {
     file: Object,
@@ -89,17 +99,17 @@ export default {
       }
     },
     openRenameMode() {
+      this.showContextMenu = false;
       this.readonly = false;
       this.$refs.input.focus();
-      this.showContextMenu = false;
     },
     toggleContextMenu() {
       this.showContextMenu = !this.showContextMenu;
     },
     deleteCurrentFile() {
-        this.deleteFile({ file_id: this.file.file_id });
-        this.showContextMenu = !this.showContextMenu;
-    }
+      this.showContextMenu = !this.showContextMenu;
+      this.deleteFile({ file_id: this.file.file_id });
+    },
   },
   watch: {
     readonly(value) {
@@ -123,8 +133,8 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 2px 5px 2px 10px;
-  margin: 0 5px;
+  padding: 2px 5px 2px 0;
+  margin: 2px 5px;
   border-radius: 5px;
 
   &.active {
@@ -132,6 +142,12 @@ export default {
     background: var(--color-secondary);
   }
 
+  .clickable-area {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    padding: 3px 10px;
+  }
   .icon {
     margin-right: 10px;
     width: 20px;
@@ -164,7 +180,7 @@ export default {
   }
 
   .context-menu {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     align-items: center;
@@ -219,8 +235,11 @@ export default {
     cursor: pointer;
     color: var(--font-color);
 
-    .context-menu .trigger-icon {
-      visibility: visible;
+    .context-menu {
+      display: flex;
+      .trigger-icon {
+        visibility: visible;
+      }
     }
   }
 

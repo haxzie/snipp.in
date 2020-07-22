@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-// import createLogger from "vuex/dist/logger";
+import createLogger from "vuex/dist/logger";
 import modules from "./modules";
 
 Vue.use(Vuex);
@@ -33,5 +33,5 @@ export default new Vuex.Store({
   },
   mutations: {},
   strict: debug,
-  // plugins: debug ? [createLogger()] : [] // set logger only for development
+  plugins: debug ? [createLogger()] : [] // set logger only for development
 });
