@@ -1,21 +1,21 @@
 <template>
-  <div class="topbar">
+  <simplebar class="topbar">
     <ul class="file-tabs">
-      <li
-        v-for="file in openFiles"
-        :key="file.file_id"
-        :class="[{ active: file.file_id === activeFile.file_id }]"
-        @click="setActiveFile({ editor, file_id: file.file_id })"
-      >
-        {{ file.name }}
-        <XIcon
-          size="16"
-          class="icon"
-          @click.stop="closeFile({ editor, file_id: file.file_id })"
-        />
-      </li>
+        <li
+          v-for="file in openFiles"
+          :key="file.file_id"
+          :class="[{ active: file.file_id === activeFile.file_id }]"
+          @click="setActiveFile({ editor, file_id: file.file_id })"
+        >
+          <span>{{ file.name }}</span>
+          <XIcon
+            size="16"
+            class="icon"
+            @click.stop="closeFile({ editor, file_id: file.file_id })"
+          />
+        </li>
     </ul>
-  </div>
+  </simplebar>
 </template>
 
 <script>
@@ -42,6 +42,7 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
+  overflow: auto;
 
   .file-tabs {
     list-style-type: none;
@@ -62,6 +63,14 @@ export default {
       border-radius: 5px 5px 0 0;
       border-bottom: 2px solid var(--color-secondary);
       margin-right: 1px;
+      max-width: 150px;
+
+      span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        pointer-events: none;
+      }
 
       &:last-child {
         margin-right: 0;

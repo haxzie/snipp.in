@@ -1,18 +1,20 @@
-import Vue from 'vue';
-import App from './App.vue'
-import store from "./store"
-import './styles/global.scss'
-import WebFont from 'webfontloader';
-import simplebar from 'simplebar-vue';
-import 'simplebar/dist/simplebar.min.css';
-import vClickOutside from 'v-click-outside';
+import Vue from "vue";
+import App from "./App.vue";
+import store from "./store";
+import "./styles/global.scss";
+import WebFont from "webfontloader";
+import simplebar from "simplebar-vue";
+import "simplebar/dist/simplebar.min.css";
+import vClickOutside from "v-click-outside";
+import VTooltip from "v-tooltip";
 
-Vue.component('simplebar', simplebar);
+Vue.component("simplebar", simplebar);
 Vue.use(vClickOutside);
+Vue.use(VTooltip);
 
 WebFont.load({ google: { families: ["Inter", "Fira Code"] } });
 new Vue({
-    // router,
-    store,
-    render: (h) => h(App),
-  }).$mount("#app");
+  // router,
+  store,
+  render: (h) => h(App),
+}).$mount("#app");

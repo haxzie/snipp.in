@@ -3,13 +3,11 @@
     <header>
       <h4>Hacker Space</h4>
       <div class="menu">
-        <div class="icon-wrapper">
+        <div v-tooltip="'Create new folder'" class="icon-wrapper">
           <FolderPlusIcon size="18" class="icon" @click="createNewFolder" />
-          <span class="tooltip">Create Folder</span>
         </div>
-        <div class="icon-wrapper">
+        <div v-tooltip="'Create new file'" class="icon-wrapper">
           <FilePlusIcon size="18" class="icon" @click="createNewFile" />
-          <span class="tooltip">Create File</span>
         </div>
       </div>
     </header>
@@ -61,6 +59,10 @@ export default {
   z-index: 9;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
   header {
     display: flex;
     flex-direction: row;
@@ -80,22 +82,6 @@ export default {
     .icon-wrapper {
       position: relative;
 
-      .tooltip {
-        position: absolute;
-        background: var(--color-secondary);
-        top: 35px;
-        left: -10px;
-        white-space: nowrap;
-        display: none;
-        padding: 5px 10px;
-        border-radius: 5px;
-      }
-
-      &:hover {
-        .tooltip {
-          display: flex;
-        }
-      }
     }
     .icon {
       padding: 7px;
@@ -117,8 +103,10 @@ export default {
 
   .content-area {
     flex: 1;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    overflow: auto;
   }
 }
 </style>
