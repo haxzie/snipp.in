@@ -15,6 +15,6 @@ export default function initialState() {
     activeFiles: {
       [EDITORS.primary]: null,
       [EDITORS.secondary]: null
-    }
+    },
   };
 }

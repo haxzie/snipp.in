@@ -3,15 +3,15 @@
     <ul class="file-tabs">
         <li
           v-for="file in openFiles"
-          :key="file.file_id"
-          :class="[{ active: file.file_id === activeFile.file_id }]"
-          @click="setActiveFile({ editor, file_id: file.file_id })"
+          :key="file.id"
+          :class="[{ active: file.id === (activeFile? activeFile.id: null) }]"
+          @click="setActiveFile({ editor, id: file.id })"
         >
           <span>{{ file.name }}</span>
           <XIcon
             size="16"
             class="icon"
-            @click.stop="closeFile({ editor, file_id: file.file_id })"
+            @click.stop="closeFile({ editor, id: file.id })"
           />
         </li>
     </ul>

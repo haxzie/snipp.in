@@ -1,72 +1,85 @@
 <template>
-  <div :class="['file-item', { active: isActive }]">
-    <div
-      class="clickable-area"
-      @click="openFile({ id: file.id })"
-      @dblclick="readonly = !readonly"
-    >
-      <FileTextIcon class="icon" size="18" />
-      <form @submit.prevent="$refs.input.blur()">
-        <input
-          :ref="'input'"
-          type="text"
-          v-model="filename"
-          :readonly="readonly"
-          size="2"
-          @blur="changeFileName"
+  <div class="directory-wrapper">
+    <div :class="['file-item', { active: isActive }]">
+      <div class="clickable-area" @click="toggleShowChildren" @dblclick="readonly = !readonly">
+        <FolderMinusIcon v-if="showChildren" class="icon" size="18"/>
+        <FolderIcon v-else class="icon" size="18" />
+        <form @submit.prevent="$refs.input.blur()">
+          <input
+            :ref="'input'"
+            type="text"
+            v-model="filename"
+            :readonly="readonly"
+            size="2"
+            @blur="changeFileName"
+          />
+        </form>
+      </div>
+      <div class="context-menu">
+        <MoreVerticalIcon
+          class="trigger-icon no-margin"
+          size="18"
+          @click="toggleContextMenu"
         />
-      </form>
+        <SlideYUpTransition>
+          <div
+            v-if="showContextMenu"
+            class="options"
+            v-click-outside="toggleContextMenu"
+          >
+            <div class="option-item" @click="createNewFile">
+              <file-plus-icon size="18" class="icon" />Create File
+            </div>
+            <div class="option-item" @click="createNewFolder">
+              <folder-plus-icon size="18" class="icon" />Create Folder
+            </div>
+            <div class="option-item" @click="openRenameMode">
+              <edit3-icon size="18" class="icon" />Rename
+            </div>
+            <div class="option-item" @click="deleteCurrentFolder">
+              <trash2-icon size="18" class="icon" />Delete Folder
+            </div>
+          </div>
+        </SlideYUpTransition>
+      </div>
     </div>
-    <div class="context-menu">
-      <MoreVerticalIcon
-        class="trigger-icon"
-        size="18"
-        @click="toggleContextMenu"
-      />
-      <SlideYUpTransition>
-        <div
-          v-if="showContextMenu"
-          class="options"
-          v-click-outside="toggleContextMenu"
-        >
-          <div class="option-item" @click="openRenameMode">
-            <edit3-icon size="18" class="icon" />Rename
-          </div>
-          <div class="option-item">
-            <download-icon size="18" class="icon" />Download File
-          </div>
-          <div class="option-item">
-            <copy-icon size="18" class="icon" />Duplicate File
-          </div>
-          <div class="option-item">
-            <clipboard-icon size="18" class="icon" />Copy contents
-          </div>
-          <div class="option-item" @click="deleteCurrentFile">
-            <trash2-icon size="18" class="icon" />Delete File
-          </div>
-        </div>
-      </SlideYUpTransition>
-    </div>
-    <!-- <span>{{ file.name }}</span> -->
+    <!-- <SlideYUpTransition> -->
+      <div v-if="showChildren" class="files">
+        <component
+          v-for="child in getChildren(file.id)"
+          :key="child.id"
+          :is="child.type"
+          :file="child"
+          :isActive="!!getActiveFileList[child.id]"
+        />
+      </div>
+    <!-- </SlideYUpTransition> -->
   </div>
 </template>
 
 <script>
 import {
-  FileTextIcon,
+  FolderIcon,
+  FolderPlusIcon,
+  FilePlusIcon,
   MoreVerticalIcon,
   Trash2Icon,
   Edit3Icon,
   DownloadIcon,
   CopyIcon,
   ClipboardIcon,
+  FolderMinusIcon
 } from "vue-feather-icons";
-import { mapActions } from "vuex";
-import { SlideYUpTransition } from "vue2-transitions";
+import { mapActions, mapGetters } from "vuex";
+import { SlideYUpTransition, FadeTransition } from "vue2-transitions";
+import FileItem from "./FileItem";
+import DirectoryItem from "./DirectoryItem";
+import { fileTypes } from "../models/vFile.model";
 
 export default {
+  name: "directory",
   components: {
-    FileTextIcon,
+    FolderIcon,
     MoreVerticalIcon,
     Trash2Icon,
     Edit3Icon,
@@ -74,6 +87,12 @@ export default {
     CopyIcon,
     ClipboardIcon,
     SlideYUpTransition,
+    FolderPlusIcon,
+    FolderMinusIcon,
+    FilePlusIcon,
+    [fileTypes.FILE]: FileItem,
+    [fileTypes.DIRECTORY]: DirectoryItem,
+    FadeTransition,
   },
   props: {
     file: Object,
@@ -84,16 +103,27 @@ export default {
       readonly: true,
       filename: "",
       showContextMenu: false,
+      showChildren: false
     };
   },
+  computed: {
+    ...mapGetters("Editor", ["getChildren", "getActiveFileList"]),
+    children() {
+      const cs = this.getChildren(this.file.id);
+      return cs;
+    },
+  },
   methods: {
-    ...mapActions("Editor", ["openFile"]),
-    ...mapActions("Files", ["renameFile", "deleteFile"]),
+    ...mapActions("Files", [
+      "renameFile",
+      "deleteDirectory",
+      "createFile",
+      "createDirectory",
+    ]),
     changeFileName() {
       if (this.filename) {
         this.renameFile({ id: this.file.id, name: this.filename });
         this.readonly = true;
-        this.openFile({ id: this.file.id });
       } else {
         this.deleteFile({ id: this.file.id });
       }
@@ -106,10 +136,22 @@ export default {
     toggleContextMenu() {
       this.showContextMenu = !this.showContextMenu;
     },
-    deleteCurrentFile() {
+    deleteCurrentFolder() {
       this.showContextMenu = !this.showContextMenu;
-      this.deleteFile({ id: this.file.id });
+      this.deleteDirectory({ id: this.file.id });
     },
+    createNewFile() {
+      this.showChildren = true;
+      this.createFile({ parent: this.file.id, editable: true });
+      this.showContextMenu = false;
+    },
+    createNewFolder() {
+      this.createDirectory({ parent: this.file.id, editable: true });
+      this.showContextMenu = false;
+    },
+     toggleShowChildren() {
+      this.showChildren = !this.showChildren
+    }
   },
   watch: {
     readonly(value) {
@@ -125,10 +167,24 @@ export default {
       this.$refs.input.focus();
     }
   },
+  created() {
+    this.fileTypes = fileTypes;
+  },
 };
 </script>
 
 <style lang="scss" scoped>
+.directory-wrapper {
+  display: flex;
+  flex-direction: column;
+
+  .files {
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 .file-item {
   display: flex;
   flex-direction: row;
@@ -191,6 +247,12 @@ export default {
       visibility: hidden;
       padding: 5px;
       border-radius: 5px;
+      margin-right: 5px;
+
+      &.no-margin {
+        margin-right: 0;
+      }
+
       &:hover {
         background: var(--color-secondary-light);
       }

@@ -1,13 +1,17 @@
 import { v4 as uuid } from 'uuid'
 
+export const fileTypes = {
+    FILE: "file",
+    DIRECTORY: "directory"
+}
 export default class VFile {
-    constructor({ file_id, folder_id, name, contents, created_at, editable }) {
-        this.file_id = file_id || `file_${uuid()}`;
-        this.folder_id = folder_id || 'root';
+    constructor({ id, parent, type = fileTypes.FILE, name, contents, created_at, editable }) {
+        this.id = id || `${type}_${uuid()}`;
+        this.parent = parent || 'root';
         this.name = name || '';
-        this.contents = contents;
+        this.contents = contents || '';
         this.created_at = created_at || Date.now();
-        this.type = "FILE"
+        this.type = type
         this.editable = editable || false;
     }
 }

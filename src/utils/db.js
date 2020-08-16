@@ -2,8 +2,7 @@ import Dexie from 'dexie';
 
 const db = new Dexie('hspace');
 db.version(1).stores({
-    files: 'file_id, folder_id, name, contents, created_at',
-    folders: 'folder_id, parent_id, name, color',
+    files: 'id, parent, name, type, contents, created_at',
 });
 
 export default db;

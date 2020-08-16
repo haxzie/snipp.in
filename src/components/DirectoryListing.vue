@@ -3,10 +3,10 @@
     <FadeTransition group>
       <component
         v-for="(file) in files"
-        :key="file.file_id"
+        :key="file.id"
         :is="file.type"
         :file="file"
-        :isActive="!!activeFiles[file.file_id]"
+        :isActive="!!getActiveFileList[file.id]"
       />
     </FadeTransition>
   </div>
@@ -14,8 +14,10 @@
 
 <script>
 import FileItem from "./FileItem";
-import FolderItem from "./FolderItem";
+import DirectoryItem from "./DirectoryItem";
 import { FadeTransition } from "vue2-transitions";
+import { fileTypes } from '../models/vFile.model';
+import { mapGetters } from 'vuex';
 
 export default {
   props: {
@@ -23,10 +25,16 @@ export default {
     activeFiles: Object,
   },
   components: {
-    FILE: FileItem,
-    FOLDER: FolderItem,
+    [fileTypes.FILE]: FileItem,
+    [fileTypes.DIRECTORY]: DirectoryItem,
     FadeTransition,
   },
+  computed:{
+    ...mapGetters("Editor", ["getActiveFileList"])
+  },
+  created() {
+    this.fileTypes = fileTypes
+  }
 };
 </script>
 

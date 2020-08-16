@@ -13,7 +13,7 @@
           @contentChanged="
             (contents) =>
               updateContents(
-                getActiveFiles[getEditors.primary].file_id,
+                getActiveFiles[getEditors.primary].id,
                 contents
               )
           "
@@ -72,8 +72,8 @@ export default {
   },
   methods: {
     ...mapActions("Files", ["updateFileContents"]),
-    updateContents(file_id, contents) {
-      this.debouncedFileUpdate({ file_id, contents });
+    updateContents(id, contents) {
+      this.debouncedFileUpdate({ id, contents });
     },
   },
   created() {

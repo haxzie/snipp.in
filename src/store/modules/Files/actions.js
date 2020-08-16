@@ -1,5 +1,5 @@
 import { types } from "./mutations";
-import VFile from "@/models/vFile.model";
+import VFile, { fileTypes } from "@/models/vFile.model";
 import db from "@/utils/db";
 import Dexie from "dexie";
 import omit from "lodash/omit";
@@ -12,10 +12,11 @@ export default {
     db.files.toArray((files) => {
       const filesObject = files.reduce((result, item) => {
         Object.assign(result, {
-          [item.file_id]: new VFile({ ...item, editable: false }),
+          [item.id]: new VFile({ ...item, editable: false }),
         });
         return result;
       }, {});
+      console.log({ filesObject });
       commit(types.SET_FILES, filesObject);
     });
   },
@@ -25,33 +26,44 @@ export default {
    */
   createFile: async ({ state, commit, dispatch }, fileDetails) => {
     const details = fileDetails ? fileDetails : {};
-    const file = new VFile({ ...details });
+    const file = new VFile({ ...details, type: fileTypes.FILE });
     commit(types.SET_FILES, {
       ...state.files,
-      [file.file_id]: file,
+      [file.id]: file,
     });
-    db.files.add(file);
-    // dispatch("Editor/openFile", file.file_id, { root: true });
+    db.files.add(file, ["id"]).catch((error) => {
+      console.error(error);
+    });
+    // dispatch("Editor/openFile", file.id, { root: true });
   },
 
-  updateFileContents: async (
-    { state, commit, dispatch },
-    { file_id, contents }
-  ) => {
+  createDirectory: async ({ state, commit }, directoryDetails) => {
+    const details = directoryDetails ? directoryDetails : {};
+    const directory = new VFile({ ...details, type: fileTypes.DIRECTORY });
     commit(types.SET_FILES, {
       ...state.files,
-      [file_id]: {
-        ...state.files[file_id],
+      [directory.id]: directory,
+    });
+    db.files.add(directory, ["id"]).catch((error) => {
+      console.error(error);
+    });
+  },
+
+  updateFileContents: async ({ state, commit, dispatch }, { id, contents }) => {
+    commit(types.SET_FILES, {
+      ...state.files,
+      [id]: {
+        ...state.files[id],
         contents,
       },
     });
     db.transaction("rw", db.files, async () => {
       // Mark bigfoots:
       await db.files
-        .where("file_id")
-        .equals(file_id)
+        .where("id")
+        .equals(id)
         .modify({ contents });
-      console.log(`file ${file_id} updated!`);
+      console.log(`file ${id} updated!`);
     })
       .catch(Dexie.ModifyError, (error) => {
         // ModifyError did occur
@@ -61,23 +73,23 @@ export default {
         console.error("Generic error: " + error);
       });
   },
-  renameFile: async ({ state, commit }, { file_id, name }) => {
+  renameFile: async ({ state, commit }, { id, name }) => {
     commit(types.SET_FILES, {
       ...state.files,
-      [file_id]: {
-        ...state.files[file_id],
+      [id]: {
+        ...state.files[id],
         name,
-        editable: false
+        editable: false,
       },
     });
 
     db.transaction("rw", db.files, async () => {
       // Mark bigfoots:
       await db.files
-        .where("file_id")
-        .equals(file_id)
+        .where("id")
+        .equals(id)
         .modify({ name });
-      console.log(`file ${file_id} renamed!`);
+      console.log(`file ${id} renamed!`);
     })
       .catch(Dexie.ModifyError, (error) => {
         // ModifyError did occur
@@ -87,17 +99,46 @@ export default {
         console.error("Generic error: " + error);
       });
   },
-  deleteFile: async ({ state, commit, dispatch }, { file_id }) => {
-    await dispatch('Editor/closeFileFromAllEditor', { file_id }, { root: true });
-    console.log('back to delete file')
-    commit(types.SET_FILES, omit(state.files, file_id));
+  deleteFile: async ({ state, commit, dispatch }, { id }) => {
+    await dispatch("Editor/closeFileFromAllEditor", { id }, { root: true });
+    console.log("back to delete file");
+    commit(types.SET_FILES, omit(state.files, id));
     db.transaction("rw", db.files, async () => {
       // Mark bigfoots:
       await db.files
-        .where("file_id")
-        .equals(file_id)
+        .where("id")
+        .equals(id)
         .delete();
-      console.log(`file ${file_id} deleted!`);
+      console.log(`file ${id} deleted!`);
+    })
+      .catch(Dexie.ModifyError, (error) => {
+        // ModifyError did occur
+        console.error(error.failures.length + " items failed to modify");
+      })
+      .catch((error) => {
+        console.error("Generic error: " + error);
+      });
+  },
+  deleteDirectory: async ({ state, commit, dispatch, rootGetters }, { id }) => {
+    const children = rootGetters["Editor/getChildren"](id);
+    // delete all the children of the directory first
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      if (child.type === fileTypes.DIRECTORY) {
+        await dispatch("deleteDirectory", { id: child.id });
+      } else {
+        await dispatch("deleteFile", { id: child.id });
+      }
+    }
+    // then delete the directory
+    commit(types.SET_FILES, omit(state.files, id));
+    db.transaction("rw", db.files, async () => {
+      // Mark bigfoots:
+      await db.files
+        .where("id")
+        .equals(id)
+        .delete();
+      console.log(`file ${id} deleted!`);
     })
       .catch(Dexie.ModifyError, (error) => {
         // ModifyError did occur

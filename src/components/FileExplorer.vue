@@ -12,7 +12,7 @@
       </div>
     </header>
     <simplebar class="content-area">
-      <DirectoryListing :files="getFiles" :activeFiles="activeFiles" />
+      <DirectoryListing :files="getChildren('root')" :activeFiles="getActiveFileList" />
     </simplebar>
   </div>
 </template>
@@ -30,25 +30,16 @@ export default {
   },
   computed: {
     ...mapGetters("Files", ["getFiles"]),
-    ...mapGetters("Editor", ["getActiveFiles"]),
-    activeFiles() {
-      return Object.keys(this.getActiveFiles).reduce((result, editor) => {
-        if (this.getActiveFiles[editor]) {
-          return Object.assign(result, {
-            [this.getActiveFiles[editor].file_id]: true,
-          });
-        } else {
-          return result;
-        }
-      }, {});
-    },
+    ...mapGetters("Editor", ["getActiveFiles", "getActiveFileList", "getChildren"])
   },
   methods: {
-    ...mapActions("Files", ["createFile"]),
+    ...mapActions("Files", ["createFile", "createDirectory"]),
     createNewFile() {
       this.createFile({ editable: true });
     },
-    createNewFolder() {},
+    createNewFolder() {
+      this.createDirectory({ editable: true });
+    },
   },
 };
 </script>
@@ -63,6 +54,7 @@ export default {
   overflow: hidden;
   min-width: 0;
   min-height: 0;
+  border-right: 1px solid var(--border-color);
   header {
     display: flex;
     flex-direction: row;
