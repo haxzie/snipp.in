@@ -1,7 +1,12 @@
-# test-codemirror
+# Hacker Space
+> A Fast, tiny, in-browser, IndexedDB powered editor and Snipper manager
+
+Built with Vue.js, Dexie and CodeMirror  
 
 ## Project setup
 ```
+git clone https://github.com/haxzie/hspace
+cd hspace
 npm install
 ```
 
