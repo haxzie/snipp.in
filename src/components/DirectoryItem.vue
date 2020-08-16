@@ -125,7 +125,7 @@ export default {
         this.renameFile({ id: this.file.id, name: this.filename });
         this.readonly = true;
       } else {
-        this.deleteFile({ id: this.file.id });
+        this.deleteCurrentFolder({ id: this.file.id });
       }
     },
     openRenameMode() {

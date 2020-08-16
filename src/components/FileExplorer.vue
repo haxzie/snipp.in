@@ -12,7 +12,10 @@
       </div>
     </header>
     <simplebar class="content-area">
-      <DirectoryListing :files="getChildren('root')" :activeFiles="getActiveFileList" />
+      <DirectoryListing v-if="children && children.length > 0" :files="children" :activeFiles="getActiveFileList" />
+      <div v-else class="help-text">
+        <p>No Snippets found, click on the create icons to start creating snippets</p>
+      </div>
     </simplebar>
   </div>
 </template>
@@ -30,7 +33,10 @@ export default {
   },
   computed: {
     ...mapGetters("Files", ["getFiles"]),
-    ...mapGetters("Editor", ["getActiveFiles", "getActiveFileList", "getChildren"])
+    ...mapGetters("Editor", ["getActiveFiles", "getActiveFileList", "getChildren"]),
+    children() {
+      return this.getChildren('root');
+    }
   },
   methods: {
     ...mapActions("Files", ["createFile", "createDirectory"]),
@@ -99,6 +105,13 @@ export default {
     display: flex;
     flex-direction: column;
     overflow: auto;
+
+    .help-text {
+      display: flex;
+      padding: 10px;
+      opacity: 0.7;
+      text-align: center;
+    }
   }
 }
 </style>

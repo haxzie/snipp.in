@@ -32,7 +32,7 @@
           <div class="option-item" @click="openRenameMode">
             <edit3-icon size="18" class="icon" />Rename
           </div>
-          <div class="option-item">
+          <!-- <div class="option-item">
             <download-icon size="18" class="icon" />Download File
           </div>
           <div class="option-item">
@@ -40,7 +40,7 @@
           </div>
           <div class="option-item">
             <clipboard-icon size="18" class="icon" />Copy contents
-          </div>
+          </div> -->
           <div class="option-item" @click="deleteCurrentFile">
             <trash2-icon size="18" class="icon" />Delete File
           </div>
