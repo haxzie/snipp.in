@@ -205,7 +205,7 @@ export default {
     padding: 3px 10px;
   }
   .icon {
-    margin-right: 10px;
+    margin-right: 5px;
     width: 20px;
   }
 

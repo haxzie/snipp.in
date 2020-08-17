@@ -1,4 +1,4 @@
-# Hacker Space
+# SnippIn
 > A Fast, tiny, in-browser, IndexedDB powered editor and Snipper manager
 
 Built with Vue.js, Dexie and CodeMirror  

@@ -1,7 +1,7 @@
 <template>
   <div class="file-explorer">
     <header>
-      <h4>Hacker Space</h4>
+      <h4>Snipp.in</h4>
       <div class="menu">
         <div v-tooltip="'Create new folder'" class="icon-wrapper">
           <FolderPlusIcon size="18" class="icon" @click="createNewFolder" />
