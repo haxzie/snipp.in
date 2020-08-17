@@ -3,7 +3,7 @@ module.exports = {
     config.module.rules.delete("eslint");
   },
   configureWebpack: {
-    // plugins: [new BundleAnalyzerPlugin()]
+    // plugins: [new BundleAnalyzerPlugin()],
     optimization: {
       splitChunks: {
         chunks: "all",

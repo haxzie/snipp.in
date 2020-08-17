@@ -7,6 +7,7 @@ import simplebar from "simplebar-vue";
 import "simplebar/dist/simplebar.min.css";
 import vClickOutside from "v-click-outside";
 import VTooltip from "v-tooltip";
+import router from "./routes";
 
 Vue.component("simplebar", simplebar);
 Vue.use(vClickOutside);
@@ -14,7 +15,7 @@ Vue.use(VTooltip);
 
 WebFont.load({ google: { families: ["Inter", "Fira Code"] } });
 new Vue({
-  // router,
+  router,
   store,
   render: (h) => h(App),
 }).$mount("#app");
