@@ -8,8 +8,7 @@
           v-for="file in openFiles"
           :key="file.id"
           :class="[{ active: file.id === (activeFile? activeFile.id: null) }]"
-          @click="setActiveFile({ editor, id: file.id })"
-          
+          @click="setActiveFile({ editor, id: file.id })"    
         >
           <span>{{ file.name }}</span>
           <XIcon
