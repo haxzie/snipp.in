@@ -2,11 +2,11 @@
   <div class="file-explorer">
     <header>
       <h4>Snipp.in</h4>
-      <div class="menu">
-        <div v-tooltip="'Create new folder'" class="icon-wrapper">
+      <div class="menu" >
+        <div v-tooltip="'Create new folder'" class="icon-wrapper" v-shortkey="['ctrl', 'alt', 'f']" @shortkey="createNewFolder">
           <FolderPlusIcon size="18" class="icon" @click="createNewFolder" />
         </div>
-        <div v-tooltip="'Create new file'" class="icon-wrapper">
+        <div v-tooltip="'Create new file'" class="icon-wrapper" v-shortkey="['ctrl', 'alt', 'n']" @shortkey="createNewFile" >
           <FilePlusIcon size="18" class="icon" @click="createNewFile" />
         </div>
       </div>

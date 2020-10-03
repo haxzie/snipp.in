@@ -1,17 +1,18 @@
 <template>
   <simplebar class="topbar">
-    <ul class="file-tabs">
+    <ul class="file-tabs" v-shortkey="['ctrl', 'alt', 'w']" @shortkey="closeFile({ editor, id: activeFile.id })">
         <li
           v-for="file in openFiles"
           :key="file.id"
           :class="[{ active: file.id === (activeFile? activeFile.id: null) }]"
           @click="setActiveFile({ editor, id: file.id })"
+          
         >
           <span>{{ file.name }}</span>
           <XIcon
             size="16"
             class="icon"
-            @click.stop="closeFile({ editor, id: file.id })"
+            @click.stop="closeFile({ editor, id: file.id }) "
           />
         </li>
     </ul>

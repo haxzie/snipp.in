@@ -12,6 +12,7 @@ import router from "./routes";
 Vue.component("simplebar", simplebar);
 Vue.use(vClickOutside);
 Vue.use(VTooltip);
+Vue.use(require('vue-shortkey'));
 
 WebFont.load({ google: { families: ["Inter", "Fira Code"] } });
 new Vue({
