@@ -1,7 +1,7 @@
 <template>
   <simplebar class="topbar">
     <ul class="file-tabs" 
-      v-shortkey="['ctrl', 'alt', 'w']" 
+      v-shortkey="['alt', 'w']" 
       @shortkey="closeFile({ editor, id: activeFile.id })"
     >
         <li
