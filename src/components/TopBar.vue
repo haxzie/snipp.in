@@ -1,6 +1,9 @@
 <template>
   <simplebar class="topbar">
-    <ul class="file-tabs">
+    <ul class="file-tabs" 
+      v-shortkey="['alt', 'w']" 
+      @shortkey="closeFile({ editor, id: activeFile.id })"
+    >
         <li
           v-for="file in openFiles"
           :key="file.id"
