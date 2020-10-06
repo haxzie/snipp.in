@@ -117,14 +117,20 @@ export default {
         this.$refs.input.focus();
       }
     },
+    file: {
+      immediate: true,
+      handler() {
+        this.readonly = !this.file.editable;
+        this.filename = this.file.name;
+        if (this.file.editable) {
+          setTimeout(() => {
+            this.$refs.input.focus();
+          }, 200)
+        }
+      },
+    },
   },
-  mounted() {
-    this.readonly = !this.file.editable;
-    this.filename = this.file.name;
-    if (this.file.editable) {
-      this.$refs.input.focus();
-    }
-  },
+  mounted() {},
 };
 </script>
 

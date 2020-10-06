@@ -3,20 +3,35 @@
     <header>
       <h4>Snipp.in</h4>
       <div class="menu">
-        <div v-tooltip="'Create new folder (Ctrl+Alt+N)'" class="icon-wrapper"
-          v-shortkey="['ctrl', 'alt', 'n']" @shortkey="createNewFolder">
+        <div
+          v-tooltip="'Create new folder (Ctrl+Alt+N)'"
+          class="icon-wrapper"
+          v-shortkey="['ctrl', 'alt', 'n']"
+          @shortkey="createNewFolder"
+        >
           <FolderPlusIcon size="18" class="icon" @click="createNewFolder" />
         </div>
-        <div v-tooltip="'Create new file (Alt+N)'" class="icon-wrapper" 
-          v-shortkey="['alt', 'n']" @shortkey="createNewFile" >
+        <div
+          v-tooltip="'Create new file (Alt+N)'"
+          class="icon-wrapper"
+          v-shortkey="['alt', 'n']"
+          @shortkey="createNewFile"
+        >
           <FilePlusIcon size="18" class="icon" @click="createNewFile" />
         </div>
       </div>
     </header>
     <simplebar class="content-area">
-      <DirectoryListing v-if="children && children.length > 0" :files="children" :activeFiles="getActiveFileList" />
+      <DirectoryListing
+        v-if="children && children.length > 0"
+        :files="children"
+        :activeFiles="getActiveFileList"
+      />
       <div v-else class="help-text">
-        <p>No Snippets found, click on the create icons to start creating snippets</p>
+        <p>
+          No Snippets found, click on the create icons to start creating
+          snippets
+        </p>
       </div>
     </simplebar>
   </div>
@@ -35,10 +50,16 @@ export default {
   },
   computed: {
     ...mapGetters("Files", ["getFiles"]),
-    ...mapGetters("Editor", ["getActiveFiles", "getActiveFileList", "getChildren"]),
+    ...mapGetters("Editor", [
+      "getActiveFiles",
+      "getActiveFileList",
+      "getChildren",
+    ]),
     children() {
-      return this.getChildren('root');
-    }
+      if (this.getFiles) {
+        return this.getChildren("root");
+      }
+    },
   },
   methods: {
     ...mapActions("Files", ["createFile", "createDirectory"]),
@@ -81,7 +102,6 @@ export default {
 
     .icon-wrapper {
       position: relative;
-
     }
     .icon {
       padding: 7px;

@@ -33,8 +33,7 @@ export default {
 
       await dispatch("setActiveFile", {
         editor,
-        id:
-          state.openFiles[editor].filter((_id) => _id !== id)[0] || null,
+        id: state.openFiles[editor].filter((_id) => _id !== id)[0] || null,
       });
     }
 
@@ -42,7 +41,9 @@ export default {
     commit(types.SET_OPEN_FILES, {
       ...state.openFiles,
       // check if there are any open files in the editor
-      [editor]: state.openFiles[editor].filter((_id) => _id !== id),
+      [editor]: state.openFiles[editor]
+        ? state.openFiles[editor].filter((_id) => _id !== id)
+        : [],
     });
     // debugger
   },

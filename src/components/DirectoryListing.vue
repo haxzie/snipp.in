@@ -34,7 +34,7 @@ export default {
   },
   created() {
     this.fileTypes = fileTypes
-  }
+  },
 };
 </script>
 

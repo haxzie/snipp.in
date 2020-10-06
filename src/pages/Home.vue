@@ -2,17 +2,20 @@
   <div id="main-layout">
     <FileExplorer />
     <Editor />
+    <CommandCenter/>
   </div>
 </template>
 
 <script>
 import FileExplorer from "@/components/FileExplorer";
 import Editor from "@/components/Editor";
+import CommandCenter from "@/components/CommandCenter";
 
 export default {
   components: {
     FileExplorer,
     Editor,
+    CommandCenter
   },
 };
 </script>

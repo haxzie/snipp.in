@@ -1,23 +1,35 @@
 <template>
   <simplebar class="topbar">
-    <ul class="file-tabs" 
-      v-shortkey="['alt', 'w']" 
+    <ul
+      class="file-tabs"
+      v-shortkey="['alt', 'w']"
       @shortkey="closeFile({ editor, id: activeFile.id })"
     >
-        <li
-          v-for="file in openFiles"
-          :key="file.id"
-          :class="[{ active: file.id === (activeFile? activeFile.id: null) }]"
-          @click="setActiveFile({ editor, id: file.id })"
-          @click.middle="closeFile({ editor, id: file.id })"
-        >
-          <span>{{ file.name }}</span>
-          <XIcon
-            size="16"
-            class="icon"
-            @click.stop="closeFile({ editor, id: file.id })"
-          />
-        </li>
+      <li
+        v-for="file in openFiles"
+        :key="file.id"
+        :class="[{ active: file.id === (activeFile ? activeFile.id : null) }]"
+        @click="setActiveFile({ editor, id: file.id })"
+        @click.middle="closeFile({ editor, id: file.id })"
+      >
+        <span>{{ file.name }}</span>
+        <XIcon
+          size="16"
+          class="icon"
+          @click.stop="closeFile({ editor, id: file.id })"
+        />
+      </li>
+      <!-- Short cuts -->
+      <div
+        v-show="false"
+        v-shortkey="['alt', 'd']"
+        @shortkey="deleteFile({ id: activeFile? activeFile.id: null })"
+      ></div>
+      <div
+        v-show="false"
+        v-shortkey="['alt', 'r']"
+        @shortkey="openRenameMode({ id: activeFile? activeFile.id: null })"
+      ></div>
     </ul>
   </simplebar>
 </template>
@@ -37,6 +49,7 @@ export default {
   },
   methods: {
     ...mapActions("Editor", ["closeFile", "setActiveFile"]),
+    ...mapActions("Files", ["deleteFile", "openRenameMode"])
   },
 };
 </script>

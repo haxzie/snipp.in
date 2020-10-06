@@ -34,6 +34,7 @@ export default {
     db.files.add(file, ["id"]).catch((error) => {
       console.error(error);
     });
+    return file;
     // dispatch("Editor/openFile", file.id, { root: true });
   },
 
@@ -50,6 +51,8 @@ export default {
   },
 
   updateFileContents: async ({ state, commit, dispatch }, { id, contents }) => {
+    if (!id) return;
+
     commit(types.SET_FILES, {
       ...state.files,
       [id]: {
@@ -74,6 +77,8 @@ export default {
       });
   },
   renameFile: async ({ state, commit }, { id, name }) => {
+    if (!id) return;
+
     commit(types.SET_FILES, {
       ...state.files,
       [id]: {
@@ -99,7 +104,22 @@ export default {
         console.error("Generic error: " + error);
       });
   },
+
+  openRenameMode: async ({ state, commit }, { id }) => {
+    if (!id) return;
+
+    commit(types.SET_FILES, {
+      ...state.files,
+      [id]: {
+        ...state.files[id],
+        editable: true,
+      },
+    });
+  },
+
   deleteFile: async ({ state, commit, dispatch }, { id }) => {
+    if (!id) return;
+
     await dispatch("Editor/closeFileFromAllEditor", { id }, { root: true });
     console.log("back to delete file");
     commit(types.SET_FILES, omit(state.files, id));
@@ -120,6 +140,8 @@ export default {
       });
   },
   deleteDirectory: async ({ state, commit, dispatch, rootGetters }, { id }) => {
+    if (!id) return;
+    
     const children = rootGetters["Editor/getChildren"](id);
     // delete all the children of the directory first
     for (let i = 0; i < children.length; i++) {

@@ -2,7 +2,8 @@ import { v4 as uuid } from 'uuid'
 
 export const fileTypes = {
     FILE: "file",
-    DIRECTORY: "directory"
+    DIRECTORY: "directory",
+    MARKDOWN: "markdown"
 }
 export default class VFile {
     constructor({ id, parent, type = fileTypes.FILE, name, contents, created_at, editable }) {
