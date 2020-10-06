@@ -303,8 +303,8 @@ export default {
   position: absolute;
   bottom: 12px;
   right: 12px;
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   color: var(--font-color);
   background: var(--color-primary);
