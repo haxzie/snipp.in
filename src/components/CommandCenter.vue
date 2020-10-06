@@ -105,6 +105,12 @@ export default {
       parameter: "",
       commands: [
         {
+          command: "/k",
+          name: "Toggle command center",
+          shortcut: ["alt", "k"],
+          parameter: null,
+        },
+        {
           command: "/n",
           name: "Create new file",
           shortcut: ["alt", "n"],
@@ -211,6 +217,9 @@ export default {
 
       let activeFile = null;
       switch (commandToExecute.command) {
+        case "/k":
+          this.toggleCommandMenu();
+          break;
         case "/n":
           if (this.parameter && this.parameter.length > 0) {
             const file = await this.createFile({ name: this.parameter });
