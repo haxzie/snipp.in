@@ -9,7 +9,17 @@ export default {
    * Loads all the files available in the localstorage into the store
    */
   loadFiles: async ({ commit, dispatch }) => {
-    db.files.toArray((files) => {
+    db.transaction("rw", db.openFiles, db.activeFiles, db.files, async () => {
+      const openFiles = await db.openFiles.toArray();
+      const activeFiles = await db.activeFiles.toArray();
+      const files = await db.files.toArray();
+
+      await dispatch(
+        "Editor/reOpenFiles",
+        { openFiles: openFiles, activeFiles: activeFiles },
+        { root: true }
+      );
+
       const filesObject = files.reduce((result, item) => {
         Object.assign(result, {
           [item.id]: new VFile({ ...item, editable: false }),
@@ -18,7 +28,13 @@ export default {
       }, {});
       console.log({ filesObject });
       commit(types.SET_FILES, filesObject);
-    });
+    })
+      .then(() => {
+        console.log("transaction committed");
+      })
+      .catch((error) => {
+        console.error("Generic error: " + error);
+      });
   },
 
   /**
@@ -141,7 +157,7 @@ export default {
   },
   deleteDirectory: async ({ state, commit, dispatch, rootGetters }, { id }) => {
     if (!id) return;
-    
+
     const children = rootGetters["Editor/getChildren"](id);
     // delete all the children of the directory first
     for (let i = 0; i < children.length; i++) {
