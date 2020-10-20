@@ -109,13 +109,14 @@ export default {
     // debugger
 
     db.transaction("rw", db.openFiles, db.activeFiles, async () => {
-      // Mark bigfoots:
+      // removing closed files fron openFiles
       await db.openFiles
         .where("id")
         .equals(id)
         .delete();
       console.log(`file ${id} deleted!`);
 
+      // removing existing active file if no file is opened.
       if (state.openFiles[editor].length === 0) {
         await db.activeFiles.clear();
         console.log(`activeFiles emptied.`);
