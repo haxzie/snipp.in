@@ -1,5 +1,5 @@
 import { types } from "./mutations";
-import OpenFileFootprint from "@/models/openFileFooter.model";
+import OpenFileFootprint from "@/models/openFileFootprint.model";
 import db from "@/utils/db";
 import { EDITORS } from "./initialState";
 
@@ -89,6 +89,7 @@ export default {
     // check if the file is currently opened
     if (state.activeFiles[editor] === id) {
       console.log({ editor, id, isActive: true });
+
       //set the first file in the editor's open files as the active file
 
       await dispatch("setActiveFile", {
@@ -107,13 +108,18 @@ export default {
     });
     // debugger
 
-    db.transaction("rw", db.openFiles, async () => {
+    db.transaction("rw", db.openFiles, db.activeFiles, async () => {
       // Mark bigfoots:
       await db.openFiles
         .where("id")
         .equals(id)
         .delete();
       console.log(`file ${id} deleted!`);
+
+      if (state.openFiles[editor].length === 0) {
+        await db.activeFiles.clear();
+        console.log(`activeFiles emptied.`);
+      }
     })
       .then(() => {
         console.log("transaction done");
@@ -155,6 +161,7 @@ export default {
         id: id,
       });
 
+      // replaces the activeFile stored in IndexedDB with the new active file
       db.activeFiles.put(newActiveFile).catch((error) => {
         console.error(error);
       });
