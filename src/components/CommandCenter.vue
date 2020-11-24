@@ -119,7 +119,7 @@ export default {
         {
           command: "/f",
           name: "Create new folder",
-          shortcut: ["alt", "shift", "n"],
+          shortcut: ["ctrl", "alt", "n"],
           parameter: "Folder Name",
         },
         {
