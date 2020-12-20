@@ -7,7 +7,7 @@
         :openFiles="getOpenFiles[getEditors.primary]"
       />
       <div class="scroll-wrapper">
-        <CodeMirror
+        <CodeEditor
           v-if="getActiveFiles[getEditors.primary]"
           :file="getActiveFiles[getEditors.primary]"
           @contentChanged="
@@ -30,7 +30,7 @@
         :activeFile="getActiveFiles[getEditors.secondary]"
         :openFiles="getOpenFiles[getEditors.secondary]"
       />
-      <CodeMirror
+      <CodeEditor
         v-if="getActiveFiles[getEditors.secondary]"
         :file="getActiveFiles[getEditors.secondary]"
       />
@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import CodeMirror from "@/components/CodeMirror";
+import CodeEditor from "@/components/CodeEditor";
 import TopBar from "@/components/TopBar";
 import { mapActions, mapGetters } from "vuex";
 import { EDITORS } from "@/store/modules/Editor/initialState";
@@ -64,7 +64,7 @@ import { FilePlusIcon, FolderPlusIcon, GithubIcon, GitPullRequestIcon } from 'vu
 
 export default {
   components: {
-    CodeMirror,
+    CodeEditor,
     TopBar,
     FilePlusIcon, 
     FolderPlusIcon,
@@ -122,7 +122,7 @@ export default {
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: auto;
+    overflow: hidden;
   }
 
   .codemirror-instances {
