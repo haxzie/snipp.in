@@ -65,6 +65,8 @@ export default {
         json: "json",
         html: "html",
         css: "css",
+        md: "markdown",
+        csv: "csv"
       };
       if (this.file && this.file.name) {
         const nameParts = this.file.name.split(".");
