@@ -1,7 +1,7 @@
 # SnippIn
-> A Fast, tiny, in-browser, IndexedDB powered editor and Snipper manager
+> A Fast, tiny, in-browser, IndexedDB powered editor and Snippet manager
 
-Built with Vue.js, Dexie and CodeMirror  
+Built with [Vue.js](https://vuejs.org), [Dexie](https://dexie.org) and [Monaco Editor](https://microsoft.github.io/monaco-editor/)  
 
 ## Project setup
 ```
