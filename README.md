@@ -5,8 +5,8 @@ Built with Vue.js, Dexie and CodeMirror
 
 ## Project setup
 ```
-git clone https://github.com/haxzie/hspace
-cd hspace
+git clone https://github.com/haxzie/snipp.in snippin
+cd snippin
 npm install
 ```
 
