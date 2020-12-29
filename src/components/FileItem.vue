@@ -35,9 +35,9 @@
           <div class="option-item" @click="downloadFile">
             <download-icon size="18" class="icon" />Download File
           </div>
-          <div class="option-item">
+          <!--<div class="option-item">
             <copy-icon size="18" class="icon" />Duplicate File
-          </div>
+          </div>-->
           <div class="option-item" @click="copyFileContents">
             <clipboard-icon size="18" class="icon" />Copy contents
           </div>
