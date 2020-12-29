@@ -58,9 +58,9 @@ export default {
     },
     getLanguage() {
       const languageExts = {
-        js: "null",
-        jsx: "null",
-        ts: "javascript",
+        js: "javascript",
+        jsx: "javascript",
+        ts: "typescript",
         py: "python",
         json: "json",
         html: "html",
@@ -71,7 +71,7 @@ export default {
       if (this.file && this.file.name) {
         const nameParts = this.file.name.split(".");
         const ext = nameParts[nameParts.length - 1];
-        return languageExts[ext] ? languageExts[ext] === "javascript"? null : languageExts[ext] : "markdown";
+        return languageExts[ext];
       }
     },
   },
