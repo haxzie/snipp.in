@@ -1,8 +1,10 @@
 <template>
   <div
     class="file-explorer"
+    :class="{ 'highlighted': isDraggingOver }"
     @drop="handleDrop"
-    @dragover.prevent
+    @dragover.prevent="colorizeDirectoryItem(true)"
+    @dragleave.prevent="colorizeDirectoryItem(false)"
     @dragenter.prevent
   >
     <header>
@@ -53,6 +55,11 @@ export default {
     FolderPlusIcon,
     DirectoryListing,
   },
+  data() {
+    return {
+      isDraggingOver: false,
+    };
+  },
   computed: {
     ...mapGetters("Files", ["getFiles"]),
     ...mapGetters("Editor", [
@@ -77,6 +84,10 @@ export default {
     handleDrop(event) {
       const fileId = event.dataTransfer.getData('fileId');
       this.moveFile({ id: fileId, directoryId: 'root' });
+      this.colorizeDirectoryItem(false);
+    },
+    colorizeDirectoryItem(isDraggingOver) {
+      this.isDraggingOver = isDraggingOver;
     },
   },
 };
@@ -93,6 +104,11 @@ export default {
   min-width: 0;
   min-height: 0;
   border-right: 1px solid var(--border-color);
+
+  &.highlighted {
+    background-color: var(--color-secondary);
+  }
+
   header {
     display: flex;
     flex-direction: row;

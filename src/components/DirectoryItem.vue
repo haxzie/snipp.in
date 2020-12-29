@@ -1,12 +1,16 @@
 <template>
-  <div class="directory-wrapper">
+  <div
+    class="directory-wrapper"
+    :class="{ 'highlighted': isDraggingOver }"
+  >
     <div :class="['file-item', { active: isActive }]">
       <div
         class="clickable-area"
         @click="toggleShowChildren"
         @dblclick="readonly = !readonly"
         @drop.stop="handleDrop"
-        @dragover.prevent
+        @dragover.prevent.stop="colorizeDirectoryItem(true)"
+        @dragleave.prevent.stop="colorizeDirectoryItem(false)"
         @dragenter.prevent
       >
         <FolderMinusIcon v-if="showChildren" class="icon" size="18"/>
@@ -110,7 +114,8 @@ export default {
       readonly: true,
       filename: "",
       showContextMenu: false,
-      showChildren: false
+      showChildren: false,
+      isDraggingOver: false,
     };
   },
   computed: {
@@ -128,6 +133,9 @@ export default {
       "createDirectory",
       "moveFile",
     ]),
+    colorizeDirectoryItem(isDraggingOver) {
+      this.isDraggingOver = isDraggingOver;
+    },
     changeFileName() {
       if (this.filename) {
         this.renameFile({ id: this.file.id, name: this.filename });
@@ -163,6 +171,7 @@ export default {
     handleDrop(event) {
       const fileId = event.dataTransfer.getData('fileId');
       this.moveFile({ id: fileId, directoryId: this.file.id });
+      this.colorizeDirectoryItem(false);
       this.showChildren = true;
     },
   },
@@ -190,6 +199,10 @@ export default {
 .directory-wrapper {
   display: flex;
   flex-direction: column;
+
+  &.highlighted {
+    background-color: var(--color-secondary);
+  }
 
   .files {
     margin-left: 10px;
