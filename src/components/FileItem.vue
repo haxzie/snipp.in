@@ -32,15 +32,15 @@
           <div class="option-item" @click="openRenameMode">
             <edit3-icon size="18" class="icon" />Rename
           </div>
-          <!-- <div class="option-item">
+          <div class="option-item">
             <download-icon size="18" class="icon" />Download File
           </div>
           <div class="option-item">
             <copy-icon size="18" class="icon" />Duplicate File
           </div>
-          <div class="option-item">
+          <div class="option-item" @click="copyFileContents">
             <clipboard-icon size="18" class="icon" />Copy contents
-          </div> -->
+          </div>
           <div class="option-item" @click="deleteCurrentFile">
             <trash2-icon size="18" class="icon" />Delete File
           </div>
@@ -110,6 +110,9 @@ export default {
       this.showContextMenu = !this.showContextMenu;
       this.deleteFile({ id: this.file.id });
     },
+    copyFileContents() {
+      navigator.clipboard.writeText(this.file.contents);
+    },
   },
   watch: {
     readonly(value) {
@@ -125,7 +128,7 @@ export default {
         if (this.file.editable) {
           setTimeout(() => {
             this.$refs.input.focus();
-          }, 200)
+          }, 200);
         }
       },
     },
