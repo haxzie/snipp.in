@@ -32,7 +32,7 @@
           <div class="option-item" @click="openRenameMode">
             <edit3-icon size="18" class="icon" />Rename
           </div>
-          <div class="option-item">
+          <div class="option-item" @click="downloadFile">
             <download-icon size="18" class="icon" />Download File
           </div>
           <div class="option-item">
@@ -63,6 +63,7 @@ import {
 } from "vue-feather-icons";
 import { mapActions } from "vuex";
 import { SlideYUpTransition } from "vue2-transitions";
+import { saveAs } from "file-saver";
 
 export default {
   components: {
@@ -112,6 +113,12 @@ export default {
     },
     copyFileContents() {
       navigator.clipboard.writeText(this.file.contents);
+    },
+    downloadFile() {
+      const fileBlob = new Blob([this.file.contents], {
+        type: "text/plain;charset=utf-8",
+      });
+      saveAs(fileBlob, this.file.name);
     },
   },
   watch: {
