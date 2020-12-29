@@ -4,6 +4,8 @@
       class="clickable-area"
       @click="openFile({ id: file.id })"
       @dblclick="readonly = !readonly"
+      draggable
+      @dragstart="handleDrag"
     >
       <FileTextIcon class="icon" size="18" />
       <form @submit.prevent="$refs.input.blur()">
@@ -109,6 +111,11 @@ export default {
     deleteCurrentFile() {
       this.showContextMenu = !this.showContextMenu;
       this.deleteFile({ id: this.file.id });
+    },
+    handleDrag(event) {
+      event.dataTransfer.dropEffect = 'move';
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('fileId', this.file.id);
     },
   },
   watch: {

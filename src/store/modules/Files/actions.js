@@ -42,6 +42,7 @@ export default {
    */
   createFile: async ({ state, commit, dispatch }, fileDetails) => {
     const details = fileDetails ? fileDetails : {};
+    console.log(fileDetails);
     const file = new VFile({ ...details, type: fileTypes.FILE });
     commit(types.SET_FILES, {
       ...state.files,
@@ -52,6 +53,33 @@ export default {
     });
     return file;
     // dispatch("Editor/openFile", file.id, { root: true });
+  },
+
+  moveFile: async ({ state, commit, dispatch }, { id, directoryId }) => {
+    if (!id) return;
+
+    commit(types.SET_FILES, {
+      ...state.files,
+      [id]: {
+        ...state.files[id],
+        parent: directoryId,
+        editable: false,
+      },
+    });
+
+    db.transaction("rw", db.files, async () => {
+      await db.files
+        .where("id")
+        .equals(id)
+        .modify({ parent: directoryId });
+      console.log(`file ${id} moved to ${directoryId}!`);
+    })
+      .catch(Dexie.ModifyError, (error) => {
+        console.error(error.failures.length + " items failed to modify");
+      })
+      .catch((error) => {
+        console.error("Generic error: " + error);
+      }); 
   },
 
   createDirectory: async ({ state, commit }, directoryDetails) => {

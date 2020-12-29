@@ -1,7 +1,14 @@
 <template>
   <div class="directory-wrapper">
     <div :class="['file-item', { active: isActive }]">
-      <div class="clickable-area" @click="toggleShowChildren" @dblclick="readonly = !readonly">
+      <div
+        class="clickable-area"
+        @click="toggleShowChildren"
+        @dblclick="readonly = !readonly"
+        @drop="handleDrop"
+        @dragover.prevent
+        @dragenter.prevent
+      >
         <FolderMinusIcon v-if="showChildren" class="icon" size="18"/>
         <FolderIcon v-else class="icon" size="18" />
         <form @submit.prevent="$refs.input.blur()">
@@ -119,6 +126,7 @@ export default {
       "deleteDirectory",
       "createFile",
       "createDirectory",
+      "moveFile",
     ]),
     changeFileName() {
       if (this.filename) {
@@ -149,9 +157,15 @@ export default {
       this.createDirectory({ parent: this.file.id, editable: true });
       this.showContextMenu = false;
     },
-     toggleShowChildren() {
+    toggleShowChildren() {
       this.showChildren = !this.showChildren
-    }
+    },
+    handleDrop(event) {
+      const fileId = event.dataTransfer.getData('fileId');
+      const file = this.children.find((file) => file.id === fileId);
+      this.moveFile({ id: fileId, directoryId: this.file.id });
+      this.showChildren = true;
+    },
   },
   watch: {
     readonly(value) {
