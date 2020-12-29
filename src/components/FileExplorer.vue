@@ -1,5 +1,10 @@
 <template>
-  <div class="file-explorer">
+  <div
+    class="file-explorer"
+    @drop="handleDrop"
+    @dragover.prevent
+    @dragenter.prevent
+  >
     <header>
       <h4>Snipp.in</h4>
       <div class="menu">
@@ -62,12 +67,16 @@ export default {
     },
   },
   methods: {
-    ...mapActions("Files", ["createFile", "createDirectory"]),
+    ...mapActions("Files", ["createFile", "createDirectory", "moveFile"]),
     createNewFile() {
       this.createFile({ editable: true });
     },
     createNewFolder() {
       this.createDirectory({ editable: true });
+    },
+    handleDrop(event) {
+      const fileId = event.dataTransfer.getData('fileId');
+      this.moveFile({ id: fileId, directoryId: 'root' });
     },
   },
 };

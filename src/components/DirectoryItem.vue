@@ -5,7 +5,7 @@
         class="clickable-area"
         @click="toggleShowChildren"
         @dblclick="readonly = !readonly"
-        @drop="handleDrop"
+        @drop.stop="handleDrop"
         @dragover.prevent
         @dragenter.prevent
       >
@@ -162,7 +162,6 @@ export default {
     },
     handleDrop(event) {
       const fileId = event.dataTransfer.getData('fileId');
-      const file = this.children.find((file) => file.id === fileId);
       this.moveFile({ id: fileId, directoryId: this.file.id });
       this.showChildren = true;
     },
