@@ -71,7 +71,9 @@ export default {
       if (this.file && this.file.name) {
         const nameParts = this.file.name.split(".");
         const ext = nameParts[nameParts.length - 1];
-        return languageExts[ext];
+        return languageExts[ext] || "markdown"; // fallback to default syntax highlightning to be markdown
+      } else {
+        return "markdown"
       }
     },
   },
