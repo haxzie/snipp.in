@@ -104,7 +104,7 @@ export default {
   border-right: 1px solid var(--border-color);
 
   &.highlighted {
-    background-color: var(--color-secondary);
+    background-color: var(--drag-over-color);
   }
 
   header {

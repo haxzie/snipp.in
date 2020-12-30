@@ -202,7 +202,7 @@ export default {
   flex-direction: column;
 
   &.highlighted {
-    background-color: var(--color-secondary);
+    background-color: var(--drag-over-color);
   }
 
   .files {
