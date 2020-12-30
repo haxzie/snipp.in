@@ -5,9 +5,13 @@ export const types = {
   SET_ACTIVE_FILES: "SET_ACTIVE_FILES",
   SET_ACTIVE_EDITOR: "SET_ACTIVE_EDITOR",
   RESET: "RESET",
+  SET_DRAGGING_ID: "SET_DRAGGING_ID",
 };
 
 export default {
+  [types.SET_DRAGGING_ID]: (state, draggingId) => {
+    state.draggingId = draggingId;
+  },
   [types.SET_OPEN_FILES]: (state, openFiles) => {
     state.openFiles = openFiles;
   },

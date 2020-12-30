@@ -1,10 +1,9 @@
 <template>
   <div
     class="file-explorer"
-    :class="{ 'highlighted': isDraggingOver }"
+    :class="{ 'highlighted': getDraggingId === 'root' }"
     @drop="handleDrop"
-    @dragover.prevent="colorizeDirectoryItem(true)"
-    @dragleave.prevent="colorizeDirectoryItem(false)"
+    @dragover.prevent="handleDragOver"
     @dragenter.prevent
   >
     <header>
@@ -46,7 +45,7 @@
 
 <script>
 import { FilePlusIcon, FolderPlusIcon } from "vue-feather-icons";
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions, mapMutations } from "vuex";
 import DirectoryListing from "./DirectoryListing";
 
 export default {
@@ -55,17 +54,13 @@ export default {
     FolderPlusIcon,
     DirectoryListing,
   },
-  data() {
-    return {
-      isDraggingOver: false,
-    };
-  },
   computed: {
     ...mapGetters("Files", ["getFiles"]),
     ...mapGetters("Editor", [
       "getActiveFiles",
       "getActiveFileList",
       "getChildren",
+      "getDraggingId",
     ]),
     children() {
       if (this.getFiles) {
@@ -74,6 +69,7 @@ export default {
     },
   },
   methods: {
+    ...mapMutations("Editor", { setDraggingId: "SET_DRAGGING_ID" }),
     ...mapActions("Files", ["createFile", "createDirectory", "moveFile"]),
     createNewFile() {
       this.createFile({ editable: true });
@@ -84,10 +80,12 @@ export default {
     handleDrop(event) {
       const fileId = event.dataTransfer.getData('fileId');
       this.moveFile({ id: fileId, directoryId: 'root' });
-      this.colorizeDirectoryItem(false);
+      this.setDraggingId('');
     },
-    colorizeDirectoryItem(isDraggingOver) {
-      this.isDraggingOver = isDraggingOver;
+    handleDragOver() {
+      if (this.getDraggingId !== 'root') {
+        this.setDraggingId('root'); 
+      }
     },
   },
 };

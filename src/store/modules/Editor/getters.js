@@ -44,4 +44,7 @@ export default {
     const children = files.filter((item) => item.parent === parent_id);
     return children;
   },
+  getDraggingId: (state) => {
+    return state.draggingId;
+  },
 };

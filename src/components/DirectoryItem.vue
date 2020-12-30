@@ -1,7 +1,7 @@
 <template>
   <div
     class="directory-wrapper"
-    :class="{ 'highlighted': isDraggingOver }"
+    :class="{ 'highlighted': getDraggingId === file.id }"
   >
     <div :class="['file-item', { active: isActive }]">
       <div
@@ -9,8 +9,7 @@
         @click="toggleShowChildren"
         @dblclick="readonly = !readonly"
         @drop.stop="handleDrop"
-        @dragover.prevent.stop="colorizeDirectoryItem(true)"
-        @dragleave.prevent.stop="colorizeDirectoryItem(false)"
+        @dragover.prevent.stop="handleDragOver"
         @dragenter.prevent
       >
         <FolderMinusIcon v-if="showChildren" class="icon" size="18"/>
@@ -81,7 +80,7 @@ import {
   ClipboardIcon,
   FolderMinusIcon
 } from "vue-feather-icons";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import { SlideYUpTransition, FadeTransition } from "vue2-transitions";
 import FileItem from "./FileItem";
 import DirectoryItem from "./DirectoryItem";
@@ -115,17 +114,17 @@ export default {
       filename: "",
       showContextMenu: false,
       showChildren: false,
-      isDraggingOver: false,
     };
   },
   computed: {
-    ...mapGetters("Editor", ["getChildren", "getActiveFileList"]),
+    ...mapGetters("Editor", ["getChildren", "getActiveFileList", "getDraggingId"]),
     children() {
       const cs = this.getChildren(this.file.id);
       return cs;
     },
   },
   methods: {
+    ...mapMutations("Editor", { setDraggingId: "SET_DRAGGING_ID" }),
     ...mapActions("Files", [
       "renameFile",
       "deleteDirectory",
@@ -133,9 +132,6 @@ export default {
       "createDirectory",
       "moveFile",
     ]),
-    colorizeDirectoryItem(isDraggingOver) {
-      this.isDraggingOver = isDraggingOver;
-    },
     changeFileName() {
       if (this.filename) {
         this.renameFile({ id: this.file.id, name: this.filename });
@@ -168,11 +164,16 @@ export default {
     toggleShowChildren() {
       this.showChildren = !this.showChildren
     },
+    handleDragOver() {
+      if (this.getDraggingId !== this.file.id) {
+        this.setDraggingId(this.file.id);
+      }
+    },
     handleDrop(event) {
       const fileId = event.dataTransfer.getData('fileId');
       this.moveFile({ id: fileId, directoryId: this.file.id });
-      this.colorizeDirectoryItem(false);
       this.showChildren = true;
+      this.setDraggingId('');
     },
   },
   watch: {
