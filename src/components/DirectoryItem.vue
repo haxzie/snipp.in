@@ -11,6 +11,8 @@
         class="clickable-area"
         @click="toggleShowChildren"
         @dblclick="readonly = !readonly"
+        draggable
+        @dragstart="handleDrag"
       >
         <FolderMinusIcon v-if="showChildren" class="icon" size="18" />
         <FolderIcon v-else class="icon" size="18" />
@@ -164,6 +166,7 @@ export default {
     createNewFolder() {
       this.createDirectory({ parent: this.file.id, editable: true });
       this.showContextMenu = false;
+      this.showChildren = true;
     },
     toggleShowChildren() {
       this.showChildren = !this.showChildren;
@@ -175,9 +178,16 @@ export default {
     },
     handleDrop(event) {
       const fileId = event.dataTransfer.getData("fileId");
+      this.setDraggingId("");
+      // prevent creating a black hole
+      if (fileId === this.file.id) return;
       this.moveFile({ id: fileId, directoryId: this.file.id });
       this.showChildren = true;
-      this.setDraggingId("");
+    },
+    handleDrag(event) {
+      event.dataTransfer.dropEffect = 'move';
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('fileId', this.file.id);
     },
   },
   watch: {
