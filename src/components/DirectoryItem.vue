@@ -1,18 +1,18 @@
 <template>
   <div
     class="directory-wrapper"
-    :class="{ 'highlighted': getDraggingId === file.id }"
+    :class="{ highlighted: getDraggingId === file.id }"
+    @drop.stop="handleDrop"
+    @dragover.prevent.stop="handleDragOver"
+    @dragenter.prevent
   >
     <div :class="['file-item', { active: isActive }]">
       <div
         class="clickable-area"
         @click="toggleShowChildren"
         @dblclick="readonly = !readonly"
-        @drop.stop="handleDrop"
-        @dragover.prevent.stop="handleDragOver"
-        @dragenter.prevent
       >
-        <FolderMinusIcon v-if="showChildren" class="icon" size="18"/>
+        <FolderMinusIcon v-if="showChildren" class="icon" size="18" />
         <FolderIcon v-else class="icon" size="18" />
         <form @submit.prevent="$refs.input.blur()">
           <input
@@ -54,15 +54,15 @@
       </div>
     </div>
     <!-- <SlideYUpTransition> -->
-      <div v-if="showChildren" class="files">
-        <component
-          v-for="child in getChildren(file.id)"
-          :key="child.id"
-          :is="child.type"
-          :file="child"
-          :isActive="!!getActiveFileList[child.id]"
-        />
-      </div>
+    <div v-if="showChildren" class="files">
+      <component
+        v-for="child in getChildren(file.id)"
+        :key="child.id"
+        :is="child.type"
+        :file="child"
+        :isActive="!!getActiveFileList[child.id]"
+      />
+    </div>
     <!-- </SlideYUpTransition> -->
   </div>
 </template>
@@ -78,7 +78,7 @@ import {
   DownloadIcon,
   CopyIcon,
   ClipboardIcon,
-  FolderMinusIcon
+  FolderMinusIcon,
 } from "vue-feather-icons";
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import { SlideYUpTransition, FadeTransition } from "vue2-transitions";
@@ -117,7 +117,11 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("Editor", ["getChildren", "getActiveFileList", "getDraggingId"]),
+    ...mapGetters("Editor", [
+      "getChildren",
+      "getActiveFileList",
+      "getDraggingId",
+    ]),
     children() {
       const cs = this.getChildren(this.file.id);
       return cs;
@@ -162,7 +166,7 @@ export default {
       this.showContextMenu = false;
     },
     toggleShowChildren() {
-      this.showChildren = !this.showChildren
+      this.showChildren = !this.showChildren;
     },
     handleDragOver() {
       if (this.getDraggingId !== this.file.id) {
@@ -170,10 +174,10 @@ export default {
       }
     },
     handleDrop(event) {
-      const fileId = event.dataTransfer.getData('fileId');
+      const fileId = event.dataTransfer.getData("fileId");
       this.moveFile({ id: fileId, directoryId: this.file.id });
       this.showChildren = true;
-      this.setDraggingId('');
+      this.setDraggingId("");
     },
   },
   watch: {
