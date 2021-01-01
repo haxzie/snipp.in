@@ -34,15 +34,15 @@
           <div class="option-item" @click="openRenameMode">
             <edit3-icon size="18" class="icon" />Rename
           </div>
-          <!-- <div class="option-item">
+          <div class="option-item" @click="saveFileAs">
             <download-icon size="18" class="icon" />Download File
           </div>
-          <div class="option-item">
+          <!--<div class="option-item">
             <copy-icon size="18" class="icon" />Duplicate File
-          </div>
-          <div class="option-item">
+          </div>-->
+          <div class="option-item" @click="copyFileContents">
             <clipboard-icon size="18" class="icon" />Copy contents
-          </div> -->
+          </div>
           <div class="option-item" @click="deleteCurrentFile">
             <trash2-icon size="18" class="icon" />Delete File
           </div>
@@ -65,6 +65,7 @@ import {
 } from "vue-feather-icons";
 import { mapActions } from "vuex";
 import { SlideYUpTransition } from "vue2-transitions";
+import { saveAs } from "file-saver";
 
 export default {
   components: {
@@ -89,7 +90,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions("Editor", ["openFile"]),
+    ...mapActions("Editor", ["openFile", "downloadFile"]),
     ...mapActions("Files", ["renameFile", "deleteFile"]),
     changeFileName() {
       if (this.filename) {
@@ -117,6 +118,14 @@ export default {
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('fileId', this.file.id);
     },
+    copyFileContents() {
+      navigator.clipboard.writeText(this.file.contents);
+      this.showContextMenu = false;
+    },
+    saveFileAs() {
+      this.downloadFile({ id: this.file.id })
+      this.showContextMenu = false;
+    },
   },
   watch: {
     readonly(value) {
@@ -132,7 +141,7 @@ export default {
         if (this.file.editable) {
           setTimeout(() => {
             this.$refs.input.focus();
-          }, 200)
+          }, 200);
         }
       },
     },

@@ -2,11 +2,14 @@ import { types } from "./mutations";
 import OpenFileFootprint from "@/models/openFileFootprint.model";
 import db from "@/utils/db";
 import { EDITORS } from "./initialState";
+import { saveAs } from "file-saver";
 
 export default {
   /**
    * Opens a file in active editor or primary editor
-   * @param {String} id id of the file
+   * @param {Object} context
+   * @param {Object} payload
+   * @param {String} payload.id id of the file to be opened
    */
   openFile: async ({ state, commit, dispatch }, { id }) => {
     // check if the file is already opened in the active editor
@@ -38,9 +41,11 @@ export default {
 
   /**
    * Opens a list of files in primary editor
-   * @param {Array} ids of the file
+   * @param {Object} context 
+   * @param {Object} payload
+   * @param {Array<Object>} payload.openFiles
+   * @param {Array<Object>} payload.activeFiles
    */
-
   reOpenFiles: async ({ state, commit }, { openFiles, activeFiles }) => {
     // check if the file is already opened in the active editor
     // if (!state.openFiles[state.activeEditor].includes(id)) {
@@ -82,8 +87,10 @@ export default {
 
   /**
    * Close a file from an editor
-   * @param {String} editor Id/name of the editor
-   * @param {String} id id of the file to be closed
+   * @param {Object} context
+   * @param {Object} payload
+   * @param {String} payload.editor Id/name of the editor
+   * @param {String} payload.id id of the file to be closed
    */
   closeFile: async ({ state, commit, dispatch }, { editor, id }) => {
     // check if the file is currently opened
@@ -133,7 +140,9 @@ export default {
   /**
    * Close a file from all the available editor
    * used when a file is being deleted
-   * @param {String} id id of the file to be closed
+   * @param {Object} context
+   * @param {Object} payload
+   * @param {String} payload.id id of the file to be closed
    */
   closeFileFromAllEditor: async ({ state, dispatch }, { id }) => {
     // remove the file from the open files list of all editors
@@ -147,8 +156,10 @@ export default {
 
   /**
    * Set a file as an active file in an editor
-   * @param {String} editor name of the editor
-   * @param {String} id id of the file to set active
+   * @param {Object} context
+   * @param {Object} payload
+   * @param {String} payload.editor name of the editor
+   * @param {String} payload.id id of the file to set active
    */
   setActiveFile: async ({ state, commit }, { editor, id }) => {
     commit(types.SET_ACTIVE_FILES, {
@@ -168,4 +179,18 @@ export default {
       });
     }
   },
+
+  /**
+   * Downloads a file
+   * @param {Object} context
+   * @param {Object} payload
+   * @param {String} payload.id File id 
+   */
+  downloadFile: async ({ rootGetters }, { id }) => {
+    const file = rootGetters['Files/getFile'](id);
+    const fileBlob = new Blob([file.contents], {
+      type: "text/plain;charset=utf-8",
+    });
+    saveAs(fileBlob, file.name);
+  }
 };

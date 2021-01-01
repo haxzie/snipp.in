@@ -126,14 +126,20 @@ export default {
           command: "/w",
           name: "Close active file",
           shortcut: ["alt", "w"],
-          parameter: false,
+          parameter: null,
         },
-        // {
-        //   command: "/s",
-        //   name: "Search files and folders",
-        //   shortcut: ["alt", "f"],
-        //   parameter: "Search Query",
-        // },
+        {
+          command: "/s",
+          name: "Download active file",
+          shortcut: [""],
+          parameter: null,
+        },
+        {
+          command: "/c",
+          name: "Copy active file to clipboard",
+          shortcut: [""],
+          parameter: null,
+        },
         {
           command: "/d",
           name: "Delete active file",
@@ -176,7 +182,7 @@ export default {
       "deleteFile",
       "renameFile",
     ]),
-    ...mapActions("Editor", ["closeFile", "openFile"]),
+    ...mapActions("Editor", ["closeFile", "openFile", "downloadFile"]),
     toggleCommandMenu() {
       this.showMenu = !this.showMenu;
       if (this.showMenu) {
@@ -255,6 +261,20 @@ export default {
           activeFile = this.getActiveFiles[this.getActiveEditor];
           if (this.parameter && this.parameter.length > 0 && activeFile) {
             this.renameFile({ id: activeFile.id, name: this.parameter });
+          }
+          this.toggleCommandMenu();
+          break;
+        case "/s":
+          activeFile = this.getActiveFiles[this.getActiveEditor];
+          if (activeFile) {
+            this.downloadFile({ id: activeFile.id });
+          }
+          this.toggleCommandMenu();
+          break;
+        case "/c":
+          activeFile = this.getActiveFiles[this.getActiveEditor];
+          if (activeFile) {
+            navigator.clipboard.writeText(activeFile.contents);
           }
           this.toggleCommandMenu();
           break;
