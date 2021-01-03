@@ -6,7 +6,7 @@
     @dragover.prevent.stop="handleDragOver"
     @dragenter.prevent
   >
-    <div :class="['file-item', { active: isActive }]">
+    <div :class="['file-item', { active: isActive || showContextMenu }]">
       <div
         class="clickable-area"
         @click="toggleShowChildren"
@@ -30,6 +30,7 @@
       <div class="context-menu">
         <MoreVerticalIcon
           class="trigger-icon no-margin"
+          :style="showContextMenu ? 'visibility: visible' : null"
           size="18"
           @click="toggleContextMenu"
         />
@@ -277,7 +278,6 @@ export default {
   }
 
   .context-menu {
-    display: none;
     align-items: center;
     justify-content: center;
     align-items: center;
@@ -285,6 +285,7 @@ export default {
     transition: 0.3s all ease-in-out;
 
     .trigger-icon {
+      display: block;
       visibility: hidden;
       padding: 5px;
       border-radius: 5px;
