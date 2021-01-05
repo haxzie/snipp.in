@@ -5,6 +5,7 @@
     @drop="handleDrop"
     @dragover.prevent="handleDragOver"
     @dragenter.prevent
+    @contextmenu.prevent="openContextMenu"
   >
     <header>
       <h4>Snipp.in</h4>
@@ -40,11 +41,27 @@
         </p>
       </div>
     </simplebar>
+    <SlideYUpTransition>
+      <div
+        ref="contextMenu"
+        v-show="isContextMenuToggled"
+        class="context-menu"
+        v-click-outside="closeContextMenu"
+      >
+        <div class="option-item" @click="createNewFile">
+          <file-plus-icon size="18" class="icon" />Create File
+        </div>
+        <div class="option-item" @click="createNewFolder">
+          <folder-plus-icon size="18" class="icon" />Create Folder
+        </div>
+      </div>
+    </SlideYUpTransition>
   </div>
 </template>
 
 <script>
 import { FilePlusIcon, FolderPlusIcon } from "vue-feather-icons";
+import { SlideYUpTransition } from "vue2-transitions";
 import { mapGetters, mapActions, mapMutations } from "vuex";
 import DirectoryListing from "./DirectoryListing";
 
@@ -53,6 +70,12 @@ export default {
     FilePlusIcon,
     FolderPlusIcon,
     DirectoryListing,
+    SlideYUpTransition,
+  },
+  data() {
+    return {
+      isContextMenuToggled: false,
+    };
   },
   computed: {
     ...mapGetters("Files", ["getFiles"]),
@@ -72,9 +95,11 @@ export default {
     ...mapMutations("Editor", { setDraggingId: "SET_DRAGGING_ID" }),
     ...mapActions("Files", ["createFile", "createDirectory", "moveFile"]),
     createNewFile() {
+      this.closeContextMenu();
       this.createFile({ editable: true });
     },
     createNewFolder() {
+      this.closeContextMenu();
       this.createDirectory({ editable: true });
     },
     handleDrop(event) {
@@ -86,6 +111,15 @@ export default {
       if (this.getDraggingId !== 'root') {
         this.setDraggingId('root'); 
       }
+    },
+    closeContextMenu() {
+      this.isContextMenuToggled = false;
+    },
+    openContextMenu(e) {
+      this.isContextMenuToggled = !this.isContextMenuToggled;
+
+      this.$refs.contextMenu.style.top = `${e.y}px`;
+      this.$refs.contextMenu.style.left = `${e.x}px`;
     },
   },
 };
@@ -156,6 +190,38 @@ export default {
       padding: 10px;
       opacity: 0.7;
       text-align: center;
+    }
+  }
+
+  .context-menu {
+    position: absolute;
+    width: 170px;
+    height: auto;
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
+    border-radius: 5px;
+    background: var(--color-secondary);
+    box-shadow: var(--smooth-shadow);
+    border: 1px solid var(--border-color);
+    padding: 5px;
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-radius: 3px;
+
+      .icon {
+        margin-right: 5px;
+        width: 20px;
+      }
+
+      &:hover {
+        cursor: pointer;
+        // background: var(--color-secondary-light);
+        color: var(--color-primary);
+      }
     }
   }
 }

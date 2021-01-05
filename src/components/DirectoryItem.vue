@@ -5,7 +5,7 @@
     @drop.stop="handleDrop"
     @dragover.prevent.stop="handleDragOver"
     @dragenter.prevent
-    @contextmenu.prevent="toggleContextMenu"
+    @contextmenu.prevent.stop="toggleContextMenu"
   >
     <div :class="['file-item', { active: isActive || showContextMenu }]">
       <div
