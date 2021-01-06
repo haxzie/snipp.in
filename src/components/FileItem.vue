@@ -6,6 +6,7 @@
       @dblclick="readonly = !readonly"
       draggable
       @dragstart="handleDrag"
+      @contextmenu.prevent.stop="toggleContextMenu"
     >
       <FileTextIcon class="icon" size="18" />
       <form @submit.prevent="$refs.input.blur()">
