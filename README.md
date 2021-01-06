@@ -1,3 +1,4 @@
+<!-- <img src=""> -->
 # SnippIn
 > A Fast, tiny, in-browser, IndexedDB powered editor and Snippet manager
 
