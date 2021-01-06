@@ -1,4 +1,5 @@
-<!-- <img src=""> -->
+<img src="https://raw.githubusercontent.com/haxzie/snipp.in/master/public/logo.png" width="50px" height="50px"/>
+
 # SnippIn
 > A Fast, tiny, in-browser, IndexedDB powered editor and Snippet manager
 
