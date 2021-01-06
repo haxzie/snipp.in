@@ -1,6 +1,6 @@
-<img src="https://raw.githubusercontent.com/haxzie/snipp.in/master/public/logo.png" width="50px" height="50px"/>
+<img src="https://raw.githubusercontent.com/haxzie/snipp.in/master/public/logo.png" width="80px" height="80px"/>
 
-# SnippIn
+# Snipp.in
 > A Fast, tiny, in-browser, IndexedDB powered editor and Snippet manager
 
 Built with [Vue.js](https://vuejs.org), [Dexie](https://dexie.org) and [Monaco Editor](https://microsoft.github.io/monaco-editor/)  
