@@ -3,6 +3,8 @@ import VFile, { fileTypes } from "@/models/vFile.model";
 import db from "@/utils/db";
 import Dexie from "dexie";
 import omit from "lodash/omit";
+import Fuse from 'fuse.js'
+
 
 export default {
   /**
@@ -79,7 +81,7 @@ export default {
       })
       .catch((error) => {
         console.error("Generic error: " + error);
-      }); 
+      });
   },
 
   createDirectory: async ({ state, commit }, directoryDetails) => {
@@ -214,4 +216,19 @@ export default {
         console.error("Generic error: " + error);
       });
   },
+  searchFiles: ({ state, commit }, {target: {value}}) => {
+    
+      const options = {
+        includeScore: true,
+        threshold: 0.2,
+        keys: ['name', 'contents']
+      }
+
+      const fuse = new Fuse(Object.values(state.files), options)
+
+      const filteredFiles = fuse.search(value).map(({ item }) => item)
+      commit(types.SET_FILTERED_FILES, filteredFiles);
+    
+   
+  }
 };
