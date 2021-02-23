@@ -30,13 +30,9 @@ export default {
   getActiveFileList: (state, getters, rootState, rootGetters) => {
     const activeFiles = getters["getActiveFiles"];
     return Object.keys(activeFiles).reduce((result, editor) => {
-      if (activeFiles[editor]) {
-        return Object.assign(result, {
+      return activeFiles[editor] ? Object.assign(result, {
           [activeFiles[editor].id]: true,
-        });
-      } else {
-        return result;
-      }
+        }) : result;
     }, {});
   },
   getChildren: (state, getters, rootState, rootGetters) => (parent_id) => {

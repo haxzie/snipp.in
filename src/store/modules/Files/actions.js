@@ -190,11 +190,9 @@ export default {
     // delete all the children of the directory first
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
-      if (child.type === fileTypes.DIRECTORY) {
-        await dispatch("deleteDirectory", { id: child.id });
-      } else {
-        await dispatch("deleteFile", { id: child.id });
-      }
+      await (child.type === fileTypes.DIRECTORY
+        ? dispatch("deleteDirectory", { id: child.id })
+        : dispatch("deleteFile", { id: child.id }));
     }
     // then delete the directory
     commit(types.SET_FILES, omit(state.files, id));

@@ -81,14 +81,8 @@ export default {
       return EDITORS;
     },
     getEditorMode() {
-      if (
-        this.getOpenFiles[EDITORS.secondary] &&
-        this.getOpenFiles[EDITORS.secondary] > 0
-      ) {
-        return "multiple";
-      } else {
-        return "single";
-      }
+      return this.getOpenFiles[EDITORS.secondary] &&
+        this.getOpenFiles[EDITORS.secondary] > 0 ? "multiple" : "single";
     },
   },
   methods: {

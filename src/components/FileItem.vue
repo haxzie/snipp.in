@@ -76,7 +76,6 @@ export default {
     Trash2Icon,
     Edit3Icon,
     DownloadIcon,
-    CopyIcon,
     ClipboardIcon,
     SlideYUpTransition,
   },
