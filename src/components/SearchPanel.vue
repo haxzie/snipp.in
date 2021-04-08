@@ -7,7 +7,7 @@
       <div class="search-input-wrapper">
         <input
           type="text"
-          placeholder="Search Files and Contents..."
+          placeholder="Search files..."
           class="search-input"
           @input="searchFiles"
           v-model="searchInput"
@@ -32,7 +32,7 @@
       </div>
 
       <div group v-if="searchInput == ''" class="help-text">
-        <p>Type in your query to search files</p>
+        <p>Type in your query to search your files</p>
       </div>
     </div>
   </div>
