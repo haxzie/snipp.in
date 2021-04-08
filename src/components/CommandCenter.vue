@@ -326,7 +326,7 @@ export default {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  color: var(--font-color);
+  color: var(--color-secondary);
   background: var(--color-primary);
   transition: 0.1s all ease-in-out;
 
@@ -387,7 +387,7 @@ export default {
 
         #command-input {
           font-weight: bold;
-          color: var(--color-accent);
+          color: var(--color-primary);
         }
 
         .parameter-input {

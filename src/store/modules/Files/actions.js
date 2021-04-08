@@ -3,6 +3,7 @@ import VFile, { fileTypes } from "@/models/vFile.model";
 import db from "@/utils/db";
 import Dexie from "dexie";
 import omit from "lodash/omit";
+import Fuse from "fuse.js";
 
 export default {
   /**
@@ -26,11 +27,10 @@ export default {
         });
         return result;
       }, {});
-      console.log({ filesObject });
       commit(types.SET_FILES, filesObject);
     })
       .then(() => {
-        console.log("transaction committed");
+        console.log("Loaded existing files successfully");
       })
       .catch((error) => {
         console.error("Generic error: " + error);
@@ -41,8 +41,17 @@ export default {
    * Creates a new file
    */
   createFile: async ({ state, commit, dispatch }, fileDetails) => {
+    /**
+     * Show the explorer panel while files are being created
+     */
+    try {
+      dispatch("UI/showExplorerPanel", null, { root: true });
+    } catch (error) {
+      console.error("Unable to commit active panel to explorer");
+      console.error(error);
+    }
+
     const details = fileDetails ? fileDetails : {};
-    console.log(fileDetails);
     const file = new VFile({ ...details, type: fileTypes.FILE });
     commit(types.SET_FILES, {
       ...state.files,
@@ -79,10 +88,20 @@ export default {
       })
       .catch((error) => {
         console.error("Generic error: " + error);
-      }); 
+      });
   },
 
-  createDirectory: async ({ state, commit }, directoryDetails) => {
+  createDirectory: async ({ state, commit, dispatch }, directoryDetails) => {
+    /**
+     * Show the explorer panel while directories are being created
+     */
+    try {
+      dispatch("UI/showExplorerPanel", null, { root: true });
+    } catch (error) {
+      console.error("Unable to commit active panel to explorer");
+      console.error(error);
+    }
+
     const details = directoryDetails ? directoryDetails : {};
     const directory = new VFile({ ...details, type: fileTypes.DIRECTORY });
     commit(types.SET_FILES, {
@@ -165,7 +184,6 @@ export default {
     if (!id) return;
 
     await dispatch("Editor/closeFileFromAllEditor", { id }, { root: true });
-    console.log("back to delete file");
     commit(types.SET_FILES, omit(state.files, id));
     db.transaction("rw", db.files, async () => {
       // Mark bigfoots:
@@ -213,5 +231,17 @@ export default {
       .catch((error) => {
         console.error("Generic error: " + error);
       });
+  },
+  searchFiles: ({ state, commit }, { target: { value } }) => {
+    const options = {
+      includeScore: true,
+      threshold: 0.2,
+      keys: ["name", "contents"],
+    };
+
+    const fuse = new Fuse(Object.values(state.files), options);
+
+    const filteredFiles = fuse.search(value).map(({ item }) => item);
+    commit(types.SET_FILTERED_FILES, filteredFiles);
   },
 };
