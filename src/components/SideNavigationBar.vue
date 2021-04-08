@@ -5,12 +5,13 @@
     </div>
     <div class="menu expand">
       <div
-        v-for="menuItem in menuOptions"
+        v-for="menuItem in getPanels"
         :key="menuItem.id"
-        :class="['menu-icon', { active: activeOption === menuItem.id }]"
+        :class="['menu-icon', { active: getActivePanelId === menuItem.id }]"
         @click="
-          () =>
-            $emit('change', activeOption === menuItem.id ? null : menuItem.id)
+          setActivePanelId({
+            id: getActivePanelId === menuItem.id ? null : menuItem.id,
+          })
         "
       >
         <component :is="menuItem.icon" size="20" />
@@ -18,10 +19,17 @@
       </div>
     </div>
     <div class="menu">
-      <div v-for="menuItem in bottomMenu" :key="menuItem.id" class="menu-icon">
+      <a
+        v-for="menuItem in bottomMenu"
+        :key="menuItem.id"
+        class="menu-icon"
+        :href="menuItem.link"
+        rel="noreferrer noopener"
+        target="_blank"
+      >
         <component :is="menuItem.icon" size="20" />
         <span class="menu-tooltip">{{ menuItem.name }}</span>
-      </div>
+      </a>
     </div>
   </div>
 </template>
@@ -35,6 +43,7 @@ import {
   SettingsIcon,
   GithubIcon,
 } from "vue-feather-icons";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   components: {
@@ -45,26 +54,28 @@ export default {
     SettingsIcon,
     GithubIcon,
   },
-  props: {
-    menuOptions: Array,
-    activeOption: String,
-  },
   data() {
     return {
-      activeMenuItem: "explorer",
       bottomMenu: [
-        {
-          id: "settings",
-          icon: "SettingsIcon",
-          name: "Settings",
-        },
+        // {
+        //   id: "settings",
+        //   icon: "SettingsIcon",
+        //   name: "Settings",
+        // },
         {
           id: "github",
           icon: "GithubIcon",
           name: "GitHub",
+          link: "https://github.com/haxzie/snipp.in",
         },
       ],
     };
+  },
+  computed: {
+    ...mapGetters("UI", ["getActivePanelId", "getPanels"]),
+  },
+  methods: {
+    ...mapActions("UI", ["setActivePanelId"]),
   },
 };
 </script>
@@ -102,6 +113,7 @@ export default {
       margin-bottom: 5px;
       position: relative;
       transition: 0.3s all ease-in-out;
+      color: var(--font-color);
 
       .menu-tooltip {
         position: absolute;

@@ -3,8 +3,7 @@ import VFile, { fileTypes } from "@/models/vFile.model";
 import db from "@/utils/db";
 import Dexie from "dexie";
 import omit from "lodash/omit";
-import Fuse from 'fuse.js'
-
+import Fuse from "fuse.js";
 
 export default {
   /**
@@ -43,6 +42,16 @@ export default {
    * Creates a new file
    */
   createFile: async ({ state, commit, dispatch }, fileDetails) => {
+    /**
+     * Show the explorer panel while files are being created
+     */
+    try {
+      dispatch("UI/showExplorerPanel", null, { root: true });
+    } catch (error) {
+      console.error("Unable to commit active panel to explorer");
+      console.error(error);
+    }
+
     const details = fileDetails ? fileDetails : {};
     console.log(fileDetails);
     const file = new VFile({ ...details, type: fileTypes.FILE });
@@ -84,7 +93,17 @@ export default {
       });
   },
 
-  createDirectory: async ({ state, commit }, directoryDetails) => {
+  createDirectory: async ({ state, commit, dispatch }, directoryDetails) => {
+    /**
+     * Show the explorer panel while directories are being created
+     */
+    try {
+      dispatch("UI/showExplorerPanel", null, { root: true });
+    } catch (error) {
+      console.error("Unable to commit active panel to explorer");
+      console.error(error);
+    }
+
     const details = directoryDetails ? directoryDetails : {};
     const directory = new VFile({ ...details, type: fileTypes.DIRECTORY });
     commit(types.SET_FILES, {
@@ -216,19 +235,16 @@ export default {
         console.error("Generic error: " + error);
       });
   },
-  searchFiles: ({ state, commit }, {target: {value}}) => {
-    
-      const options = {
-        includeScore: true,
-        threshold: 0.2,
-        keys: ['name', 'contents']
-      }
+  searchFiles: ({ state, commit }, { target: { value } }) => {
+    const options = {
+      includeScore: true,
+      threshold: 0.2,
+      keys: ["name", "contents"],
+    };
 
-      const fuse = new Fuse(Object.values(state.files), options)
+    const fuse = new Fuse(Object.values(state.files), options);
 
-      const filteredFiles = fuse.search(value).map(({ item }) => item)
-      commit(types.SET_FILTERED_FILES, filteredFiles);
-    
-   
-  }
+    const filteredFiles = fuse.search(value).map(({ item }) => item);
+    commit(types.SET_FILTERED_FILES, filteredFiles);
+  },
 };

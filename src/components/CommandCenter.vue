@@ -387,7 +387,7 @@ export default {
 
         #command-input {
           font-weight: bold;
-          color: var(--color-accent);
+          color: var(--color-primary);
         }
 
         .parameter-input {

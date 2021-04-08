@@ -1,15 +1,12 @@
 <template>
   <main>
     <div id="main-layout">
-      <SideNavigationBar
-        :activeOption="activePanel"
-        :menuOptions="navigationOptions"
-        @change="setActivePanel"
-      />
-      <div v-show="activePanel" class="explorer-panel">
-        <FileExplorer :key="'explorer'" v-show="activePanel === 'explorer'" />
-        <SearchPanel :key="'search'" v-show="activePanel === 'search'" />
-        <TrashPanel :key="'trash'" v-show="activePanel === 'trash'" />
+      <SideNavigationBar />
+      <div v-show="getActivePanelId" class="explorer-panel">
+        <FileExplorer
+          v-if="getActivePanelId === 'explorer'"
+        />
+        <SearchPanel :key="'search'" v-if="getActivePanelId === 'search'" />
       </div>
       <Editor />
     </div>
@@ -23,7 +20,7 @@ import Editor from "@/components/Editor";
 import CommandCenter from "@/components/CommandCenter";
 import SideNavigationBar from "@/components/SideNavigationBar";
 import SearchPanel from "@/components/SearchPanel";
-import TrashPanel from "@/components/TrashPanel";
+import { mapGetters } from "vuex";
 
 export default {
   components: {
@@ -32,29 +29,12 @@ export default {
     CommandCenter,
     SideNavigationBar,
     SearchPanel,
-    TrashPanel,
   },
   data() {
-    return {
-      activePanel: "explorer",
-      navigationOptions: [
-        {
-          id: "explorer",
-          icon: "FileTextIcon",
-          name: "File Explorer",
-        },
-        {
-          id: "search",
-          icon: "SearchIcon",
-          name: "Search",
-        },
-        {
-          id: "trash",
-          icon: "TrashIcon",
-          name: "Trash",
-        },
-      ],
-    };
+    return {};
+  },
+  computed: {
+    ...mapGetters("UI", ["getActivePanelId"]),
   },
   methods: {
     setActivePanel(optionId) {
