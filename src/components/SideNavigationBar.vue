@@ -133,7 +133,7 @@ export default {
 
       &.active {
         background: var(--color-secondary-light);
-        color: var(--color-accent);
+        color: var(--color-primary);
         opacity: 1;
         border-radius: 5px;
 
