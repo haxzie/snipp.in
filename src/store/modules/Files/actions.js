@@ -27,11 +27,10 @@ export default {
         });
         return result;
       }, {});
-      console.log({ filesObject });
       commit(types.SET_FILES, filesObject);
     })
       .then(() => {
-        console.log("transaction committed");
+        console.log("Loaded existing files successfully");
       })
       .catch((error) => {
         console.error("Generic error: " + error);
@@ -53,7 +52,6 @@ export default {
     }
 
     const details = fileDetails ? fileDetails : {};
-    console.log(fileDetails);
     const file = new VFile({ ...details, type: fileTypes.FILE });
     commit(types.SET_FILES, {
       ...state.files,
@@ -186,7 +184,6 @@ export default {
     if (!id) return;
 
     await dispatch("Editor/closeFileFromAllEditor", { id }, { root: true });
-    console.log("back to delete file");
     commit(types.SET_FILES, omit(state.files, id));
     db.transaction("rw", db.files, async () => {
       // Mark bigfoots:
