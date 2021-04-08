@@ -1,23 +1,15 @@
 <template>
   <div
     class="file-explorer"
-    :class="{ 'highlighted': getDraggingId === 'root' }"
+    :class="{ highlighted: getDraggingId === 'root' }"
     @drop="handleDrop"
     @dragover.prevent="handleDragOver"
     @dragenter.prevent
     @contextmenu.prevent="openContextMenu"
   >
     <header>
-      <h4>Snipp.in</h4>
+      <h4>File Explorer</h4>
       <div class="menu">
-        <div
-          v-tooltip="'Create new folder (Ctrl+Alt+N)'"
-          class="icon-wrapper"
-          v-shortkey="['ctrl', 'alt', 'n']"
-          @shortkey="createNewFolder"
-        >
-          <FolderPlusIcon size="18" class="icon" @click="createNewFolder" />
-        </div>
         <div
           v-tooltip="'Create new file (Alt+N)'"
           class="icon-wrapper"
@@ -25,6 +17,14 @@
           @shortkey="createNewFile"
         >
           <FilePlusIcon size="18" class="icon" @click="createNewFile" />
+        </div>
+        <div
+          v-tooltip="'Create new folder (Ctrl+Alt+N)'"
+          class="icon-wrapper"
+          v-shortkey="['ctrl', 'alt', 'n']"
+          @shortkey="createNewFolder"
+        >
+          <FolderPlusIcon size="18" class="icon" @click="createNewFolder" />
         </div>
       </div>
     </header>
@@ -103,13 +103,13 @@ export default {
       this.createDirectory({ editable: true });
     },
     handleDrop(event) {
-      const fileId = event.dataTransfer.getData('fileId');
-      this.moveFile({ id: fileId, directoryId: 'root' });
-      this.setDraggingId('');
+      const fileId = event.dataTransfer.getData("fileId");
+      this.moveFile({ id: fileId, directoryId: "root" });
+      this.setDraggingId("");
     },
     handleDragOver() {
-      if (this.getDraggingId !== 'root') {
-        this.setDraggingId('root'); 
+      if (this.getDraggingId !== "root") {
+        this.setDraggingId("root");
       }
     },
     closeContextMenu() {
