@@ -2,6 +2,8 @@ import Vue from "vue";
 import Vuex from "vuex";
 import createLogger from "vuex/dist/logger";
 import modules from "./modules";
+import { DB_VERSION } from "@/utils/db";
+import { validateBackup } from "@/utils/validators"
 
 Vue.use(Vuex);
 const debug = process.env.NODE_ENV !== "production";
@@ -14,7 +16,7 @@ export default new Vuex.Store({
     //global state
   },
   actions: {
-    clearAll({ commit, dispatch }) {
+    clearAll: async ({ commit, dispatch }) => {
       // resetting state of the modules
       Object.keys(modules).forEach((moduleName) => {
         try {
@@ -29,9 +31,31 @@ export default new Vuex.Store({
         }
       });
       dispatch("clearCore");
+    },
+    generateBackupData: async ({ dispatch }) => {
+      const filesBackup = await dispatch("Files/createExportPayload", null, {
+        root: true,
+      });
+      const settingsBackup = await dispatch("UI/createExportPayload", null, {
+        root: true,
+      });
+      const date = new Date();
+      const backup = {
+        DB_VERSION,
+        created_at: date.toISOString(),
+        ...filesBackup,
+        ...settingsBackup,
+      };
+      return backup;
+    },
+    restoreBackup: async ({ dispatch }, { backup }) => {
+      const isValidBackup = validateBackup(backup);
+      if (isValidBackup) {
+        console.log("Backup is valid");
+      }
     }
   },
   mutations: {},
   strict: debug,
-  plugins: debug ? [createLogger()] : [] // set logger only for development
+  plugins: debug ? [createLogger()] : [], // set logger only for development
 });

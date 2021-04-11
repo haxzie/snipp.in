@@ -25,6 +25,12 @@ const router = new Router({
           },
         ],
       },
+      children: [
+        {
+          path: "/settings",
+          component: () => import("@/components/Settings/SettingsModal")
+        }
+      ]
     },
     {
       // redirect everything else to home

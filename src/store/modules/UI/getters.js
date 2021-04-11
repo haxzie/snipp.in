@@ -6,5 +6,8 @@ export default {
  },
  getActivePanelId: (state) => {
    return state.activePanelId
+ },
+ getShowCommandCenter: (state) => {
+   return state.showCommandCenter
  }
 };

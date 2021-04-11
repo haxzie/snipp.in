@@ -67,7 +67,6 @@ import {
 } from "vue-feather-icons";
 import { mapActions } from "vuex";
 import { SlideYUpTransition } from "vue2-transitions";
-import { saveAs } from "file-saver";
 
 export default {
   components: {

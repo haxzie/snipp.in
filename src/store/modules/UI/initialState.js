@@ -16,6 +16,7 @@ export { PANELS };
 export default function initialState() {
   return {
     activePanelId: PANELS.explorer.id,
-    panelsById: ['explorer', 'search']
+    panelsById: ['explorer', 'search'],
+    showCommandCenter: false
   };
 }

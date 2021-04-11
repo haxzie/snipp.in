@@ -4,11 +4,11 @@
     v-shortkey="['alt', 'k']"
     @shortkey="toggleCommandMenu"
   >
-    <ZoomCenterTransition>
+    <!-- <ZoomCenterTransition>
       <div class="toggle" v-if="!showMenu" @click="toggleCommandMenu">
         <CommandIcon />
       </div>
-    </ZoomCenterTransition>
+    </ZoomCenterTransition> -->
 
     <SlideYUpTransition>
       <div
@@ -99,7 +99,6 @@ export default {
   },
   data() {
     return {
-      showMenu: false,
       activeCommand: null,
       command: "",
       parameter: "",
@@ -157,6 +156,14 @@ export default {
   },
   computed: {
     ...mapGetters("Editor", ["getActiveEditor", "getActiveFiles"]),
+    ...mapGetters("UI", ["getShowCommandCenter"]),
+    showMenu: {
+      get() {
+        return this.getShowCommandCenter;
+      }, set(val) {
+        this.setShowCommandCenter(val);
+      }
+    },
     filtererdCommands() {
       const regex = new RegExp(this.command ? this.command.trim() : "", "i");
       return this.commands
@@ -183,6 +190,7 @@ export default {
       "renameFile",
     ]),
     ...mapActions("Editor", ["closeFile", "openFile", "downloadFile"]),
+    ...mapActions("UI", ["setShowCommandCenter"]),
     toggleCommandMenu() {
       this.showMenu = !this.showMenu;
       if (this.showMenu) {

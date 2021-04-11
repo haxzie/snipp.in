@@ -232,7 +232,7 @@ export default {
         console.error("Generic error: " + error);
       });
   },
-  searchFiles: ({ state, commit }, { target: { value } }) => {
+  searchFiles: async ({ state, commit }, { target: { value } }) => {
     const options = {
       includeScore: true,
       threshold: 0.2,
@@ -244,4 +244,9 @@ export default {
     const filteredFiles = fuse.search(value).map(({ item }) => item);
     commit(types.SET_FILTERED_FILES, filteredFiles);
   },
+  createExportPayload: async ({ state }) => {
+    return {
+      files: state.files
+    }
+  }
 };
