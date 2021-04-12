@@ -28,7 +28,7 @@ export class Validator {
   }
 
   test(item) {
-    console.log({ item });
+
     const itemType = typeof item;
     if (itemType !== this.schema.type) {
       throw new Error("Item doesn't match the schema type");
@@ -38,7 +38,9 @@ export class Validator {
       const property = this.schema.properties[key];
       if (property.required) {
         if (!(key in item)) {
-          throw new Error(`Validation Failed. ${key} not present in the item`);
+          throw new Error(
+            `Validation Failed. key "${key}" not present in the item`
+          );
         }
       }
       if (property.type !== typeof item[key]) {
@@ -80,24 +82,19 @@ export const validateBackup = (backup) => {
   });
   const backupValidator = new Validator(backupSchema);
 
-  try {
-    const isValidBackup = backupValidator.test(backup);
-    if (isValidBackup) {
-      const filesToBackup = Object.keys(backup.files);
-      let isFilesValid = true;
-      for (let i = 0; i < filesToBackup.length; i++) {
-        const isValid = validateFile(backup.files[filesToBackup[i]]);
-        if (!isValid) {
-          isFilesValid = false;
-          break;
-        }
+  const isValidBackup = backupValidator.test(backup);
+  if (isValidBackup) {
+    const filesToBackup = Object.keys(backup.files);
+    let isFilesValid = true;
+    for (let i = 0; i < filesToBackup.length; i++) {
+      const isValid = validateFile(backup.files[filesToBackup[i]]);
+      if (!isValid) {
+        isFilesValid = false;
+        break;
       }
-      return isFilesValid;
-    } else {
-      return false;
     }
-  } catch (error) {
-    console.error(error);
+    return isFilesValid;
+  } else {
     return false;
   }
 };
@@ -137,10 +134,5 @@ export const validateFile = (file) => {
     additionalProperties: true,
   });
   const fileValidator = new Validator(fileSchema);
-  try {
-    return fileValidator.test(file);
-  } catch (error) {
-    console.error(error);
-    return false;
-  }
+  return fileValidator.test(file);
 };

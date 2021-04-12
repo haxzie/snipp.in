@@ -50,8 +50,9 @@ export default new Vuex.Store({
     },
     restoreBackup: async ({ dispatch }, { backup }) => {
       const isValidBackup = validateBackup(backup);
-      if (isValidBackup) {
+      if (isValidBackup && backup.files ) {
         console.log("Backup is valid");
+        await dispatch("Files/restoreFiles", { files: backup.files }, { root: true })
       }
     }
   },
