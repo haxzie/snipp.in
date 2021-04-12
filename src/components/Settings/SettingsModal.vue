@@ -55,16 +55,16 @@ export default {
           name: "Themes",
           component: "ThemeSettings",
         },
-        integrations: {
-          id: "integrations",
-          name: "Integrations",
-          component: "IntegrationSettings",
-        },
-        feature_preview: {
-          id: "feature_preview",
-          name: "Feature Preview",
-          component: "FeaturePreviews",
-        },
+        // integrations: {
+        //   id: "integrations",
+        //   name: "Integrations",
+        //   component: "IntegrationSettings",
+        // },
+        // feature_preview: {
+        //   id: "feature_preview",
+        //   name: "Feature Preview",
+        //   component: "FeaturePreviews",
+        // },
       },
     };
   },

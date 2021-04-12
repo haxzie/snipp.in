@@ -1,5 +1,7 @@
 <template>
-  <h1>Integrations</h1>
+   <div class="settings-contents">
+     <p>No Integrations Found</p>
+   </div>
 </template>
 
 <script>

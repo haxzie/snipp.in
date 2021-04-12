@@ -11,3 +11,31 @@
     --popup-background: rgba(54, 55, 73, 0.411);
     --smooth-shadow: 0 10px 16px rgba(11, 13, 19, 0);
 }
+
+.dark {
+    --color-secondary: #1e202e;
+    --color-secondary-light: #242633;
+    --drag-over-color: #2a2d41;
+    --color-input-background:rgb(54, 55, 73);
+    --font-color: #bfc2ca;
+    --color-primary: #0ae7a5;
+    --color-accent: #e7d80a;
+    --color-error: #f15609;
+    --border-color: rgb(32, 41, 61);
+    --popup-background: rgba(54, 55, 73, 0.411);
+    --smooth-shadow: 0 10px 16px rgba(11, 13, 19, 0);
+}
+
+.light {
+    --color-secondary: #FBFBFB;
+    --color-secondary-light: #EDF3F8;
+    --drag-over-color: #D8DFE9;
+    --color-input-background: #E3E9F4;
+    --font-color: #2B384D;
+    --color-primary: #2288E5;
+    --color-accent: #22E5AB;
+    --color-error: #f15609;
+    --border-color: #e6e9f0;
+    --popup-background: rgba(54, 55, 73, 0.411);
+    --smooth-shadow: 0 10px 16px rgba(11, 13, 19, 0);
+}
