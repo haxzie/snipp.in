@@ -36,7 +36,6 @@ export default {
         console.error("Generic error: " + error);
       });
   },
-
   /**
    * Creates a new file
    */
@@ -232,7 +231,7 @@ export default {
         console.error("Generic error: " + error);
       });
   },
-  searchFiles: ({ state, commit }, { target: { value } }) => {
+  searchFiles: async ({ state, commit }, { target: { value } }) => {
     const options = {
       includeScore: true,
       threshold: 0.2,
@@ -244,4 +243,30 @@ export default {
     const filteredFiles = fuse.search(value).map(({ item }) => item);
     commit(types.SET_FILTERED_FILES, filteredFiles);
   },
+  createExportPayload: async ({ state }) => {
+    return {
+      files: state.files
+    }
+  },
+  restoreFiles: async ({ state, commit }, { files }) => {
+    const newFiles = Object.keys(files).reduce((result, fileId) => {
+      return {
+        ...result,
+        [fileId]: new VFile(files[fileId])
+      }
+    }, {});
+
+    const newFilesList = {
+      ...state.files,
+      ...newFiles
+    }
+    commit(types.SET_FILES, newFilesList);
+    
+    // update the db
+    db.files.bulkPut(Object.keys(newFiles).map(file_id => newFiles[file_id])).catch(error => {
+      console.error(error)
+    });
+
+    return true;
+  }
 };

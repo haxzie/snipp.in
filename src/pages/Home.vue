@@ -3,14 +3,15 @@
     <div id="main-layout">
       <SideNavigationBar />
       <div v-show="getActivePanelId" class="explorer-panel">
-        <FileExplorer
-          v-if="getActivePanelId === 'explorer'"
-        />
+        <FileExplorer v-if="getActivePanelId === 'explorer'" />
         <SearchPanel :key="'search'" v-if="getActivePanelId === 'search'" />
       </div>
       <Editor />
     </div>
     <CommandCenter />
+    <SlideYUpTransition>
+      <router-view></router-view>
+    </SlideYUpTransition>
   </main>
 </template>
 
@@ -21,6 +22,7 @@ import CommandCenter from "@/components/CommandCenter";
 import SideNavigationBar from "@/components/SideNavigationBar";
 import SearchPanel from "@/components/SearchPanel";
 import { mapGetters } from "vuex";
+import { SlideYUpTransition } from "vue2-transitions";
 
 export default {
   components: {
@@ -29,6 +31,7 @@ export default {
     CommandCenter,
     SideNavigationBar,
     SearchPanel,
+    SlideYUpTransition,
   },
   data() {
     return {};

@@ -26,6 +26,7 @@
         :href="menuItem.link"
         rel="noreferrer noopener"
         target="_blank"
+        @click="menuItem.click ? menuItem.click() : null"
       >
         <component :is="menuItem.icon" size="20" />
         <span class="menu-tooltip">{{ menuItem.name }}</span>
@@ -42,6 +43,7 @@ import {
   TrashIcon,
   SettingsIcon,
   GithubIcon,
+  CommandIcon,
 } from "vue-feather-icons";
 import { mapActions, mapGetters } from "vuex";
 
@@ -53,15 +55,25 @@ export default {
     TrashIcon,
     SettingsIcon,
     GithubIcon,
+    CommandIcon,
   },
   data() {
     return {
       bottomMenu: [
-        // {
-        //   id: "settings",
-        //   icon: "SettingsIcon",
-        //   name: "Settings",
-        // },
+        {
+          id: "commandCenter",
+          icon: "CommandIcon",
+          name: "Commands/Shortcuts [Alt+K]",
+          click: this.toggleCommandCenter,
+        },
+        {
+          id: "settings",
+          icon: "SettingsIcon",
+          name: "Settings",
+          click: () => {
+            this.$router.push("/settings");
+          },
+        },
         {
           id: "github",
           icon: "GithubIcon",
@@ -72,10 +84,17 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("UI", ["getActivePanelId", "getPanels"]),
+    ...mapGetters("UI", [
+      "getActivePanelId",
+      "getPanels",
+      "getShowCommandCenter",
+    ]),
   },
   methods: {
-    ...mapActions("UI", ["setActivePanelId"]),
+    ...mapActions("UI", ["setActivePanelId", "setShowCommandCenter"]),
+    toggleCommandCenter() {
+      this.setShowCommandCenter(!this.getShowCommandCenter);
+    },
   },
 };
 </script>
