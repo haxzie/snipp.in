@@ -66,7 +66,6 @@ export default {
       const monaco = this.$refs.editor.monaco;
       monaco.editor.defineTheme("Dracula", DraculaTheme);
       monaco.editor.defineTheme("GitHub", GitHubTheme);
-
       this.applyAppTheme();
     },
   },
