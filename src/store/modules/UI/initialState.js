@@ -1,4 +1,4 @@
-const PANELS = {
+export const PANELS = {
   explorer: {
     id: "explorer",
     icon: "FileTextIcon",
@@ -11,11 +11,25 @@ const PANELS = {
   },
 };
 
-export { PANELS };
+export const THEMES = {
+  dark: "dark",
+  light: "light"
+}
+
+const getActiveTheme = () => {
+  const theme = localStorage.getItem("appTheme");
+  if (theme) {
+    return theme;
+  } else {
+    return THEMES.dark
+  }
+}
 
 export default function initialState() {
   return {
     activePanelId: PANELS.explorer.id,
-    panelsById: ['explorer', 'search']
+    panelsById: ['explorer', 'search'],
+    showCommandCenter: false,
+    activeTheme: getActiveTheme()
   };
 }

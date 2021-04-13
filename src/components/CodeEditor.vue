@@ -13,7 +13,10 @@
 <script>
 import MonacoEditor from "vue-monaco";
 // import NightOwl from "@/themes/NightOwl";
-import Dracula from "@/themes/Dracula";
+import DraculaTheme from "@/themes/Dracula";
+import GitHubTheme from "@/themes/GitHub";
+import { mapGetters } from "vuex";
+import { THEMES } from "@/store/modules/UI/initialState";
 // import BlackBoard from "@/themes/BlackBoard";
 // import CloudsMidnight from "@/themes/CloudsMidnight";
 
@@ -32,6 +35,7 @@ export default {
         selectOnLineNumbers: true,
         theme: "vs-dark",
         fontSize: 16,
+        fontLigatures: true,
         minimap: {
           enabled: false,
         },
@@ -43,15 +47,31 @@ export default {
       // this.code = newCode;
       this.$emit("contentChanged", newCode);
     },
-    editorDidMount(editor) {
+    applyAppTheme() {
       const monaco = this.$refs.editor.monaco;
+      switch (this.getActiveTheme) {
+        case THEMES.dark: {
+          monaco.editor.setTheme("Dracula");
+          break;
+        }
+        case THEMES.light: {
+          monaco.editor.setTheme("GitHub");
+          break;
+        }
+      }
+    },
+    editorDidMount(editor) {
       // monaco.editor.defineTheme("night-owl", NightOwl);
       // monaco.editor.setTheme("night-owl");
-      monaco.editor.defineTheme("Dracula", Dracula);
-      monaco.editor.setTheme("Dracula");
+      const monaco = this.$refs.editor.monaco;
+      monaco.editor.defineTheme("Dracula", DraculaTheme);
+      monaco.editor.defineTheme("GitHub", GitHubTheme);
+
+      this.applyAppTheme();
     },
   },
   computed: {
+    ...mapGetters("UI", ["getActiveTheme"]),
     editor() {
       return this.$refs.editor.monaco;
     },
@@ -65,20 +85,23 @@ export default {
         html: "html",
         css: "css",
         md: "markdown",
-        csv: "csv"
+        csv: "csv",
       };
       if (this.file && this.file.name) {
         const nameParts = this.file.name.split(".");
         const ext = nameParts[nameParts.length - 1];
         return languageExts[ext] || "markdown"; // fallback to default syntax highlightning to be markdown
       } else {
-        return "markdown"
+        return "markdown";
       }
     },
   },
   watch: {
     file(newFile) {
       this.code = newFile.contents || "";
+    },
+    getActiveTheme() {
+      this.applyAppTheme();
     },
     // code(newCode) {
     //   this.$emit("contentChanged", newCode);
@@ -94,5 +117,8 @@ export default {
 .monaco-editor {
   flex: 1;
   width: 100%;
+  * {
+    font-family: "Fira Code", monospace;
+  }
 }
 </style>

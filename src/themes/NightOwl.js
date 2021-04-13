@@ -3,7 +3,7 @@ export default {
   inherit: true,
   rules: [
     {
-      background: "011627",
+      background: "232e41",
       token: "",
     },
     {
