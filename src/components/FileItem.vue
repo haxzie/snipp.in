@@ -157,7 +157,7 @@ export default {
   flex-direction: row;
   align-items: center;
   padding: 2px 5px 2px 0;
-  margin: 0px 5px;
+  margin: 2px 5px;
   border-radius: 5px;
 
   &.active {
