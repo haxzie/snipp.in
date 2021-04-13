@@ -105,6 +105,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  border-right: 1px solid var(--border-color);
 
   .branding {
     padding: 10px;

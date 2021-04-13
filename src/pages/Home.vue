@@ -1,6 +1,6 @@
 <template>
   <main>
-    <div id="main-layout">
+    <div id="main-layout" :class="[{ hidePanel: !getActivePanelId }]">
       <SideNavigationBar />
       <div v-show="getActivePanelId" class="explorer-panel">
         <FileExplorer v-if="getActivePanelId === 'explorer'" />
@@ -55,12 +55,17 @@ main {
   position: relative;
 }
 #main-layout {
+  width: 100%;
   height: 100%;
   overflow: hidden;
   display: grid;
   grid-template-columns: 50px auto 1fr;
   background: var(--color-secondary-light);
   position: relative;
+
+  &.hidePanel {
+    grid-template-columns: 50px 1fr;
+  }
 
   .explorer-panel {
     width: 270px;
