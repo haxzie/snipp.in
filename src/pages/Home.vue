@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import FileExplorer from "@/components/FileExplorer";
+// import FileExplorer from "@/components/FileExplorer";
 import Editor from "@/components/Editor";
 import CommandCenter from "@/components/CommandCenter";
 import SideNavigationBar from "@/components/SideNavigationBar";
@@ -26,7 +26,8 @@ import { SlideYUpTransition } from "vue2-transitions";
 
 export default {
   components: {
-    FileExplorer,
+    FileExplorer: () => import("@/components/FileExplorer"),
+    // Editor: () => import("@/components/Editor"),
     Editor,
     CommandCenter,
     SideNavigationBar,
