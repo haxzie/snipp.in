@@ -1,30 +1,39 @@
 import db from "@/utils/db";
-// import Dexie from "dexie";
-import actions from "../storageActions";
+import * as Comlink from "comlink";
 
-export default {
+/**
+ * The driver object to expose all the necessary actions
+ */
+const Driver = {
   /**
    * @returns { openFiles, activeFiles, files }
    */
-  [actions.GET_ALL_FILES]: async () => {
+  async getAllFiles() {
     try {
-      const result = await db.transaction("r", db.openFiles, db.activeFiles, db.files, async () => {
-        const openFiles = await db.openFiles.toArray();
-        const activeFiles = await db.activeFiles.toArray();
-        const files = await db.files.toArray();
-        return { openFiles, activeFiles, files };
-      });
+      const result = await db.transaction(
+        "r",
+        db.openFiles,
+        db.activeFiles,
+        db.files,
+        async () => {
+          const openFiles = await db.openFiles.toArray();
+          const activeFiles = await db.activeFiles.toArray();
+          const files = await db.files.toArray();
+          return { openFiles, activeFiles, files };
+        }
+      );
       return result;
     } catch (error) {
       console.error(error);
       return { openFiles: null, activeFiles: null, files: null };
     }
   },
+
   /**
    * Creates a new file
    * @param {Object} file
    */
-  [actions.CREATE_FILE]: async ({ file }) => {
+  async createFile({ file }) {
     try {
       const newFile = await db.files.add(file, ["id"]);
       return newFile;
@@ -40,7 +49,7 @@ export default {
    * @param {String} param.id Id of the file
    * @param {String} param.parent_id Id of the parent
    */
-  [actions.MOVE_FILE]: async ({ id, parent_id }) => {
+  async moveFile({ id, parent_id }) {
     try {
       const movedFile = await db.transaction("rw", db.files, async () => {
         const result = await db.files
@@ -63,7 +72,7 @@ export default {
    * @param {String} param.id Id of the file
    * @param {String} param.name New name of the file
    */
-  [actions.RENAME_FILE]: async ({ id, name }) => {
+  async renameFile({ id, name }) {
     try {
       const renamedFile = await db.transaction("rw", db.files, async () => {
         // Mark bigfoots:
@@ -87,7 +96,7 @@ export default {
    * @param {String} param.id Id of the file
    * @param {String} param.contents Updated contents of the file
    */
-  [actions.UPDATE_FILE]: async ({ id, contents }) => {
+  async updateFile({ id, contents }) {
     try {
       const updatedFile = db.transaction("rw", db.files, async () => {
         // Mark bigfoots:
@@ -110,7 +119,7 @@ export default {
    * @param {Object} param
    * @param {String} param.id Id of the file
    */
-  [actions.DELETE_FILE]: async ({ id }) => {
+  async deleteFile({ id }) {
     try {
       const deletedFile = await db.transaction("rw", db.files, async () => {
         // Mark bigfoots:
@@ -133,7 +142,7 @@ export default {
    * @param {Object} param
    * @param {Object} param.filesObject Object containing files
    */
-  [actions.RESTORE_FILES]: async ({ filesObject }) => {
+  async restoreFiles({ filesObject }) {
     try {
       const restoredFiles = await db.files
         .bulkPut(
@@ -148,4 +157,94 @@ export default {
       return null;
     }
   },
+
+  /**
+   * Creates a footprint of the open file
+   * @param {Object} param
+   * @param {OpenFileFootprint} param.footPrint
+   */
+  async addOpenFile({ fileFootPrint }) {
+    try {
+      const fp = await db.openFiles.put(fileFootPrint, ["id"]);
+      return fp;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  },
+  /**
+   * Creates a footprint of an active file
+   * 
+   */
+  async addActiveFile({fileFootPrint}) {
+    try {
+      const fp = await db.activeFiles.put(fileFootPrint, ["id"]);
+      return fp;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  },
+
+  /**
+   * Removes the footprints of an open file
+   * @param {Object} param
+   * @param {String} param.id Id of the file
+   */
+  async removeOpenFile({ id }) {
+    try {
+      await db.openFiles
+      .where("id")
+      .equals(id)
+      .delete();
+      return true;
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  /**
+   * Removes the footprints of an active file
+   * @param {Object} param
+   * @param {String} param.id Id of the file
+   */
+  async removeActiveFile({ id }) {
+    try {
+      await db.activeFiles
+      .where("id")
+      .equals(id)
+      .delete();
+      return true;
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  /**
+   * Removes all the open file footprints
+   */
+  async clearOpenFiles() {
+    try {
+      await db.openFiles.clear();
+      return true;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  },
+
+  /**
+   * Removes all the active file footprints
+   */
+  async clearActiveFiles() {
+    try {
+      await db.activeFiles.clear();
+      return true;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  },
 };
+
+Comlink.expose(Driver);

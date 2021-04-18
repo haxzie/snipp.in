@@ -1,46 +1,47 @@
-import StorageActions from "../storageActions";
-const worker = new Worker("./DBWorker.js", { type: "module" });
-import controllers from "./Controllers";
-console.log("Initializing IndexedDB Storage drivers...")
+import * as Comlink from "comlink";
+const worker = new Worker("./worker.js", { type: "module" });
+console.log("Initializing IndexedDB Storage drivers...");
+const driver = Comlink.wrap(worker);
+
 export default {
   getAllFiles: async () => {
-    const files = await controllers[StorageActions.GET_ALL_FILES]();
+    const files = await driver.getAllFiles();
     return files;
   },
   create: async ({ file }) => {
-    worker.postMessage({
-      type: StorageActions.CREATE_FILE,
-      payload: { file },
-    });
+    await driver.createFile({ file });
   },
   move: async ({ id, parent_id }) => {
-    worker.postMessage({
-      type: StorageActions.MOVE_FILE,
-      payload: { id, parent_id },
-    });
+    await driver.moveFile({ id, parent_id });
   },
   update: async ({ id, contents }) => {
-    worker.postMessage({
-      type: StorageActions.UPDATE_FILE,
-      payload: { id, contents },
-    });
+    await driver.updateFile({ id, contents });
   },
   rename: async ({ id, name }) => {
-    worker.postMessage({
-      type: StorageActions.RENAME_FILE,
-      payload: { id, name },
-    });
+    await driver.rename({ id, name });
   },
   delete: async ({ id }) => {
-    worker.postMessage({
-      type: StorageActions.DELETE_FILE,
-      payload: { id },
-    });
+    await driver.deleteFile({ id });
   },
   restore: async ({ filesObject }) => {
-    worker.postMessage({
-      type: StorageActions.RESTORE_FILES,
-      payload: { filesObject },
-    });
+    await driver.restoreFiles({ filesObject });
   },
+  addOpenFile: async ({ fileFootPrint }) => {
+    await driver.addOpenFile({ fileFootPrint });
+  },
+  addActiveFile: async ({ fileFootPrint }) => {
+    await driver.addActiveFile({ fileFootPrint });
+  },
+  removeOpenFile: async ({ id }) => {
+    await driver.removeOpenFile({id});
+  },
+  removeActiveFile: async ({ id }) => {
+    await driver.removeActiveFile({id});
+  },
+  clearOpenFiles: async () => {
+    await driver.clearOpenFiles();
+  },
+  clearActiveFiles: async () => {
+    await driver.clearActiveFiles();
+  }
 };

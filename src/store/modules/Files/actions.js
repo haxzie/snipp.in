@@ -2,14 +2,14 @@ import { types } from "./mutations";
 import VFile, { fileTypes } from "@/models/vFile.model";
 import omit from "lodash/omit";
 import Fuse from "fuse.js";
-import StorageDriver from "@/utils/StorageDrivers/IndexedDB"; // Switch storage drivers if needed
+import fileStorage from "@/utils/StorageDrivers/IndexedDB"; // Switch storage drivers if needed
 
 export default {
   /**
    * Loads all the files available in the localstorage into the store
    */
   loadFiles: async ({ commit, dispatch }) => {
-    const { openFiles, activeFiles, files } = await StorageDriver.getAllFiles();
+    const { openFiles, activeFiles, files } = await fileStorage.getAllFiles();
     if (files) {
       const filesObject = files.reduce((result, item) => {
         Object.assign(result, {
@@ -46,7 +46,7 @@ export default {
       ...state.files,
       [file.id]: file,
     });
-    StorageDriver.create({ file });
+    fileStorage.create({ file });
     return file;
     // dispatch("Editor/openFile", file.id, { root: true });
   },
@@ -62,7 +62,7 @@ export default {
         editable: false,
       },
     });
-    StorageDriver.move({ id, parent_id: directoryId });
+    fileStorage.move({ id, parent_id: directoryId });
   },
 
   createDirectory: async ({ state, commit, dispatch }, directoryDetails) => {
@@ -82,7 +82,7 @@ export default {
       ...state.files,
       [directory.id]: directory,
     });
-    StorageDriver.create({ file: directory });
+    fileStorage.create({ file: directory });
   },
 
   updateFileContents: async ({ state, commit, dispatch }, { id, contents }) => {
@@ -94,7 +94,7 @@ export default {
         contents,
       },
     });
-    StorageDriver.update({ id, contents });
+    fileStorage.update({ id, contents });
   },
   renameFile: async ({ state, commit }, { id, name }) => {
     if (!id) return;
@@ -106,7 +106,7 @@ export default {
         editable: false,
       },
     });
-    StorageDriver.rename({ id, name });
+    fileStorage.rename({ id, name });
   },
 
   openRenameMode: async ({ state, commit }, { id }) => {
@@ -126,7 +126,7 @@ export default {
     console.log("Inside delete file")
     await dispatch("Editor/closeFileFromAllEditor", { id }, { root: true });
     commit(types.SET_FILES, omit(state.files, id));
-    StorageDriver.delete({ id });
+    fileStorage.delete({ id });
   },
   deleteDirectory: async ({ state, commit, dispatch, rootGetters }, { id }) => {
     if (!id) return;
@@ -177,7 +177,7 @@ export default {
     commit(types.SET_FILES, newFilesList);
 
     // update the db
-    StorageDriver.restore({ filesObject: newFilesList });
+    fileStorage.restore({ filesObject: newFilesList });
 
     return true;
   },
