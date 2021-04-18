@@ -95,10 +95,7 @@ export default {
   closeFile: async ({ state, commit, dispatch }, { editor, id }) => {
     // check if the file is currently opened
     if (state.activeFiles[editor] === id) {
-      console.log({ editor, id, isActive: true });
-
       //set the first file in the editor's open files as the active file
-
       await dispatch("setActiveFile", {
         editor,
         id: state.openFiles[editor].filter((_id) => _id !== id)[0] || null,
@@ -121,7 +118,7 @@ export default {
         .where("id")
         .equals(id)
         .delete();
-      console.log(`file ${id} deleted!`);
+      console.log(`footprints of ${id} deleted!`);
 
       // removing existing active file if no file is opened.
       if (state.openFiles[editor].length === 0) {

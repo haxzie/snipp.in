@@ -1,26 +1,16 @@
 import { types } from "./mutations";
 import VFile, { fileTypes } from "@/models/vFile.model";
-import db from "@/utils/db";
-import Dexie from "dexie";
 import omit from "lodash/omit";
 import Fuse from "fuse.js";
+import StorageDriver from "@/utils/StorageDrivers/IndexedDB"; // Switch storage drivers if needed
 
 export default {
   /**
    * Loads all the files available in the localstorage into the store
    */
   loadFiles: async ({ commit, dispatch }) => {
-    db.transaction("rw", db.openFiles, db.activeFiles, db.files, async () => {
-      const openFiles = await db.openFiles.toArray();
-      const activeFiles = await db.activeFiles.toArray();
-      const files = await db.files.toArray();
-
-      await dispatch(
-        "Editor/reOpenFiles",
-        { openFiles: openFiles, activeFiles: activeFiles },
-        { root: true }
-      );
-
+    const { openFiles, activeFiles, files } = await StorageDriver.getAllFiles();
+    if (files) {
       const filesObject = files.reduce((result, item) => {
         Object.assign(result, {
           [item.id]: new VFile({ ...item, editable: false }),
@@ -28,13 +18,13 @@ export default {
         return result;
       }, {});
       commit(types.SET_FILES, filesObject);
-    })
-      .then(() => {
-        console.log("Loaded existing files successfully");
-      })
-      .catch((error) => {
-        console.error("Generic error: " + error);
-      });
+    }
+
+    await dispatch(
+      "Editor/reOpenFiles",
+      { openFiles: openFiles, activeFiles: activeFiles },
+      { root: true }
+    );
   },
   /**
    * Creates a new file
@@ -56,9 +46,7 @@ export default {
       ...state.files,
       [file.id]: file,
     });
-    db.files.add(file, ["id"]).catch((error) => {
-      console.error(error);
-    });
+    StorageDriver.create({ file });
     return file;
     // dispatch("Editor/openFile", file.id, { root: true });
   },
@@ -74,20 +62,7 @@ export default {
         editable: false,
       },
     });
-
-    db.transaction("rw", db.files, async () => {
-      await db.files
-        .where("id")
-        .equals(id)
-        .modify({ parent: directoryId });
-      console.log(`file ${id} moved to ${directoryId}!`);
-    })
-      .catch(Dexie.ModifyError, (error) => {
-        console.error(error.failures.length + " items failed to modify");
-      })
-      .catch((error) => {
-        console.error("Generic error: " + error);
-      });
+    StorageDriver.move({ id, parent_id: directoryId });
   },
 
   createDirectory: async ({ state, commit, dispatch }, directoryDetails) => {
@@ -107,14 +82,11 @@ export default {
       ...state.files,
       [directory.id]: directory,
     });
-    db.files.add(directory, ["id"]).catch((error) => {
-      console.error(error);
-    });
+    StorageDriver.create({ file: directory });
   },
 
   updateFileContents: async ({ state, commit, dispatch }, { id, contents }) => {
     if (!id) return;
-
     commit(types.SET_FILES, {
       ...state.files,
       [id]: {
@@ -122,25 +94,10 @@ export default {
         contents,
       },
     });
-    db.transaction("rw", db.files, async () => {
-      // Mark bigfoots:
-      await db.files
-        .where("id")
-        .equals(id)
-        .modify({ contents });
-      console.log(`file ${id} updated!`);
-    })
-      .catch(Dexie.ModifyError, (error) => {
-        // ModifyError did occur
-        console.error(error.failures.length + " items failed to modify");
-      })
-      .catch((error) => {
-        console.error("Generic error: " + error);
-      });
+    StorageDriver.update({ id, contents });
   },
   renameFile: async ({ state, commit }, { id, name }) => {
     if (!id) return;
-
     commit(types.SET_FILES, {
       ...state.files,
       [id]: {
@@ -149,22 +106,7 @@ export default {
         editable: false,
       },
     });
-
-    db.transaction("rw", db.files, async () => {
-      // Mark bigfoots:
-      await db.files
-        .where("id")
-        .equals(id)
-        .modify({ name });
-      console.log(`file ${id} renamed!`);
-    })
-      .catch(Dexie.ModifyError, (error) => {
-        // ModifyError did occur
-        console.error(error.failures.length + " items failed to modify");
-      })
-      .catch((error) => {
-        console.error("Generic error: " + error);
-      });
+    StorageDriver.rename({ id, name });
   },
 
   openRenameMode: async ({ state, commit }, { id }) => {
@@ -181,24 +123,10 @@ export default {
 
   deleteFile: async ({ state, commit, dispatch }, { id }) => {
     if (!id) return;
-
+    console.log("Inside delete file")
     await dispatch("Editor/closeFileFromAllEditor", { id }, { root: true });
     commit(types.SET_FILES, omit(state.files, id));
-    db.transaction("rw", db.files, async () => {
-      // Mark bigfoots:
-      await db.files
-        .where("id")
-        .equals(id)
-        .delete();
-      console.log(`file ${id} deleted!`);
-    })
-      .catch(Dexie.ModifyError, (error) => {
-        // ModifyError did occur
-        console.error(error.failures.length + " items failed to modify");
-      })
-      .catch((error) => {
-        console.error("Generic error: " + error);
-      });
+    StorageDriver.delete({ id });
   },
   deleteDirectory: async ({ state, commit, dispatch, rootGetters }, { id }) => {
     if (!id) return;
@@ -215,21 +143,7 @@ export default {
     }
     // then delete the directory
     commit(types.SET_FILES, omit(state.files, id));
-    db.transaction("rw", db.files, async () => {
-      // Mark bigfoots:
-      await db.files
-        .where("id")
-        .equals(id)
-        .delete();
-      console.log(`file ${id} deleted!`);
-    })
-      .catch(Dexie.ModifyError, (error) => {
-        // ModifyError did occur
-        console.error(error.failures.length + " items failed to modify");
-      })
-      .catch((error) => {
-        console.error("Generic error: " + error);
-      });
+    await dispatch("deleteFile", { id });
   },
   searchFiles: async ({ state, commit }, { target: { value } }) => {
     const options = {
@@ -245,28 +159,26 @@ export default {
   },
   createExportPayload: async ({ state }) => {
     return {
-      files: state.files
-    }
+      files: state.files,
+    };
   },
   restoreFiles: async ({ state, commit }, { files }) => {
     const newFiles = Object.keys(files).reduce((result, fileId) => {
       return {
         ...result,
-        [fileId]: new VFile(files[fileId])
-      }
+        [fileId]: new VFile(files[fileId]),
+      };
     }, {});
 
     const newFilesList = {
       ...state.files,
-      ...newFiles
-    }
+      ...newFiles,
+    };
     commit(types.SET_FILES, newFilesList);
-    
+
     // update the db
-    db.files.bulkPut(Object.keys(newFiles).map(file_id => newFiles[file_id])).catch(error => {
-      console.error(error)
-    });
+    StorageDriver.restore({ filesObject: newFilesList });
 
     return true;
-  }
+  },
 };
