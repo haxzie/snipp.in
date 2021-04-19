@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "comlink": "^4.3.0",
     "core-js": "^3.6.5",
     "dexie": "^3.0.1",
     "file-saver": "^2.0.5",
@@ -36,7 +37,8 @@
     "node-sass": "^4.14.1",
     "sass-loader": "^9.0.2",
     "vue-template-compiler": "^2.6.11",
-    "webpack-bundle-analyzer": "^4.3.0"
+    "webpack-bundle-analyzer": "^4.3.0",
+    "worker-plugin": "^5.0.0"
   },
   "eslintConfig": {
     "root": true,

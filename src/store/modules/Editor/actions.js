@@ -1,8 +1,8 @@
 import { types } from "./mutations";
 import OpenFileFootprint from "@/models/openFileFootprint.model";
-import db from "@/utils/db";
 import { EDITORS } from "./initialState";
 import { saveAs } from "file-saver";
+import fileStorage from "@/utils/StorageDrivers/IndexedDB"; // Switch storage drivers if needed
 
 export default {
   /**
@@ -22,9 +22,7 @@ export default {
         editor: state.activeEditor,
         id: id,
       });
-      db.openFiles.add(newOpenFile, ["id"]).catch((error) => {
-        console.error(error);
-      });
+      fileStorage.addOpenFile({ fileFootPrint: newOpenFile });
     }
     // set as the active file in the editor
     // commit(types.SET_ACTIVE_FILES, {
@@ -95,10 +93,7 @@ export default {
   closeFile: async ({ state, commit, dispatch }, { editor, id }) => {
     // check if the file is currently opened
     if (state.activeFiles[editor] === id) {
-      console.log({ editor, id, isActive: true });
-
       //set the first file in the editor's open files as the active file
-
       await dispatch("setActiveFile", {
         editor,
         id: state.openFiles[editor].filter((_id) => _id !== id)[0] || null,
@@ -114,27 +109,12 @@ export default {
         : [],
     });
     // debugger
-
-    db.transaction("rw", db.openFiles, db.activeFiles, async () => {
-      // removing closed files fron openFiles
-      await db.openFiles
-        .where("id")
-        .equals(id)
-        .delete();
-      console.log(`file ${id} deleted!`);
-
-      // removing existing active file if no file is opened.
-      if (state.openFiles[editor].length === 0) {
-        await db.activeFiles.clear();
-        console.log(`activeFiles emptied.`);
-      }
-    })
-      .then(() => {
-        console.log("transaction done");
-      })
-      .catch((error) => {
-        console.error("Generic error: " + error);
-      });
+    await fileStorage.removeOpenFile({ id });
+    console.log(`footprints of ${id} deleted!`);
+    if (state.openFiles[editor].length === 0) {
+      await fileStorage.clearActiveFiles();
+      console.log(`activeFiles emptied.`);
+    }
   },
 
   /**
@@ -174,9 +154,7 @@ export default {
       });
 
       // replaces the activeFile stored in IndexedDB with the new active file
-      db.activeFiles.put(newActiveFile).catch((error) => {
-        console.error(error);
-      });
+      fileStorage.addActiveFile({ fileFootPrint: newActiveFile });
     }
   },
 
