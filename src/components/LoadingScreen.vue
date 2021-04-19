@@ -1,6 +1,9 @@
 <template>
   <div class="loading-screen">
-    <logo-skeleton />
+    <div class="content-wrapper">
+      <logo-skeleton size="150" class="logo"/>
+      <p>Loading Editor...</p>
+    </div>
     <ProgressView />
   </div>
 </template>
@@ -24,5 +27,22 @@ export default {
   align-items: center;
   justify-content: center;
   position: relative;
+
+  .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .logo {
+      opacity: 0.7;
+    }
+
+    p {
+      margin: 20px 0 0 0;
+      font-size: 1.2rem;
+      opacity: 0.7;
+    }
+  }
 }
 </style>
