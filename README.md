@@ -3,7 +3,12 @@
 # Snipp.in
 > A Fast, tiny, in-browser, IndexedDB powered editor and Snippet manager
 
-Built with [Vue.js](https://vuejs.org), [Dexie](https://dexie.org) and [Monaco Editor](https://microsoft.github.io/monaco-editor/)  
+Built with [Vue.js](https://vuejs.org), [Dexie](https://dexie.org) and [Monaco Editor](https://microsoft.github.io/monaco-editor/) . Snipp.in provides a clean and VSCode like familiar interface to save notes, tasks and code snippets directly in the browser. 
+> All the data is stored within your browser tab (IndexedDB). There is no cloud backup available so far but you can still create backups and restore/share your contents with others.
+
+![Screenshot_2021-04-13 Snipp in - In browser notes and code snippets](https://user-images.githubusercontent.com/53584487/115232100-fcb42300-a133-11eb-803f-45efa41fc719.png)
+![Screenshot_2021-04-12 Snipp in - In browser notes and code snippets](https://user-images.githubusercontent.com/53584487/115232151-05a4f480-a134-11eb-9033-cf696f38d1f2.png)
+
 
 ## Project setup
 ```
