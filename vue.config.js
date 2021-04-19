@@ -12,7 +12,7 @@ module.exports = {
       // new BundleAnalyzerPlugin(),
       new MonacoWebpackPlugin({
         // available options are documented at https://github.com/Microsoft/monaco-editor-webpack-plugin#options
-        languages: ["typescript", "javascript", "css", "html", "json", "python", "markdown"],
+        languages: ["javascript", "css", "html", "json", "python", "markdown"],
         features: ['!gotoSymbol'],
       }),
     ],
