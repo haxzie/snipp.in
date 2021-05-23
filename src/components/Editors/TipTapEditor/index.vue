@@ -546,8 +546,8 @@ export default {
         margin: 0 2px;
         padding: 0 5px;
         white-space: nowrap;
-        border: 1px solid #eaeaea;
-        background-color: #f8f8f8;
+        border: 1px solid var(--border-color);
+        background-color: var(--color-secondary-light);
         border-radius: 3px;
       }
 
