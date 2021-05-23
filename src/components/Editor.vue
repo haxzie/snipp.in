@@ -57,7 +57,10 @@
       <h3 class="menu-title">Get Started</h3>
       <ul class="menu">
         <li @click="createFile({ editable: true })">
-          <FilePlusIcon class="icon" size="18" /> Create new file
+          <FilePlusIcon class="icon" size="18" /> Create new empty file
+        </li>
+        <li @click="createFile({ editable: true, name: 'untitled.doc' })">
+          <FilePlusIcon class="icon" size="18" /> Create new document
         </li>
         <li @click="createDirectory({ editable: true })">
           <FolderPlusIcon class="icon" size="18" /> Create new Folder
