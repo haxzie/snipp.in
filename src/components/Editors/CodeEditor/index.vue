@@ -63,6 +63,7 @@ export default {
     editorDidMount(editor) {
       // monaco.editor.defineTheme("night-owl", NightOwl);
       // monaco.editor.setTheme("night-owl");
+      editor.focus();
       const monaco = this.$refs.editor.monaco;
       monaco.editor.defineTheme("Dracula", DraculaTheme);
       monaco.editor.defineTheme("GitHub", GitHubTheme);

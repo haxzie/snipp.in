@@ -11,9 +11,10 @@
         :openFiles="getOpenFiles[getEditors.primary]"
       />
       <div class="scroll-wrapper">
-        <CodeEditor
+        <component
           v-if="getActiveFiles[getEditors.primary]"
           :file="getActiveFiles[getEditors.primary]"
+          :is="getEditorForFile(getActiveFiles[getEditors.primary])"
           @contentChanged="
             (contents) =>
               updateContents(getActiveFiles[getEditors.primary].id, contents)
@@ -56,7 +57,10 @@
       <h3 class="menu-title">Get Started</h3>
       <ul class="menu">
         <li @click="createFile({ editable: true })">
-          <FilePlusIcon class="icon" size="18" /> Create new file
+          <FilePlusIcon class="icon" size="18" /> Create new empty file
+        </li>
+        <li @click="createFile({ editable: true, name: 'untitled.doc' })">
+          <FilePlusIcon class="icon" size="18" /> Create new document
         </li>
         <li @click="createDirectory({ editable: true })">
           <FolderPlusIcon class="icon" size="18" /> Create new Folder
@@ -88,7 +92,6 @@
 </template>
 
 <script>
-// import CodeEditor from "@/components/CodeEditor";
 import LoadingScreen from "@/components/LoadingScreen";
 import TopBar from "@/components/TopBar";
 import { mapActions, mapGetters } from "vuex";
@@ -102,7 +105,13 @@ import {
 } from "vue-feather-icons";
 
 const CodeEditor = () => ({
-  component: import(/* webpackPrefetch: true */ "@/components/CodeEditor.vue"),
+  component: import(/* webpackPrefetch: true */ "@/components/Editors/CodeEditor/index.vue"),
+  loading: LoadingScreen,
+  error: LoadingScreen,
+});
+
+const TipTapEditor = () => ({
+  component: import(/* webpackPrefetch: true */ "@/components/Editors/TipTapEditor/index.vue"),
   loading: LoadingScreen,
   error: LoadingScreen,
 });
@@ -115,6 +124,7 @@ export default {
     FolderPlusIcon,
     GithubIcon,
     GitPullRequestIcon,
+    TipTapEditor,
   },
   computed: {
     ...mapGetters("Editor", [
@@ -144,6 +154,22 @@ export default {
     ]),
     updateContents(id, contents) {
       this.debouncedFileUpdate({ id, contents });
+    },
+    getEditorForFile(file) {
+      let extension = null;
+      if (file && file.name) {
+        const { name } = file;
+        const fileParts = name.split(".");
+        extension =
+          fileParts.length > 1 ? fileParts.slice(-1).slice(-1)[0] : null;
+      }
+
+      switch (extension) {
+        case "doc":
+          return "TipTapEditor";
+        default:
+          return "CodeEditor";
+      }
     },
   },
   created() {
