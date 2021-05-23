@@ -397,7 +397,7 @@ export default {
       }
 
       blockquote {
-        border-left: 4px solid #dddddd;
+        border-left: 4px solid var(--font-color-light);
         padding: 0 15px;
         color: #777777;
       }
