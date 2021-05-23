@@ -129,7 +129,7 @@ export default {
 
   .tiptap-editor {
     width: 100%;
-    max-width: 800px;
+    max-width: 700px;
     margin: 0 auto;
     padding: 50px 15px;
     overflow-x: hidden;
