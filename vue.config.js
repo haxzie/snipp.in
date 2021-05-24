@@ -1,7 +1,7 @@
 const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
-
+  const WorkerPlugin = require('worker-plugin');
 module.exports = {
   chainWebpack: (config) => {
     config.module.rules.delete("eslint");
@@ -10,10 +10,42 @@ module.exports = {
     // plugins: [new BundleAnalyzerPlugin()],
     plugins: [
       // new BundleAnalyzerPlugin(),
+      new WorkerPlugin(),
       new MonacoWebpackPlugin({
         // available options are documented at https://github.com/Microsoft/monaco-editor-webpack-plugin#options
-        languages: ["typescript", "javascript", "css", "html", "json", "python", "markdown"],
-        features: ['!gotoSymbol'],
+        languages: [
+          "typescript",
+          "javascript",
+          "css",
+          "html",
+          "json",
+          "python",
+          "markdown",
+          "sql",
+          "shell",
+        ],
+        features: [
+          "anchorSelect",
+          "bracketMatching",
+          "caretOperations",
+          "clipboard",
+          "colorPicker",
+          "cursorUndo",
+          "dnd",
+          "documentSymbols",
+          "folding",
+          "fontZoom",
+          "format",
+          "hover",
+          "indentation",
+          "inlineHints",
+          "inspectTokens",
+          "linesOperations",
+          "linkedEditing",
+          "links",
+          "multicursor",
+          "wordHighlighter",
+        ],
       }),
     ],
     optimization: {
