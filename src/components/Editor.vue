@@ -100,7 +100,7 @@
       </ul>
     </div>
     <div
-      v-if="getDraggingId"
+      v-if="getDraggingFileId"
       class="draggable-area"
       @dragenter.prevent="enableDragAndDropMode"
       @dragover.prevent
@@ -112,6 +112,7 @@
         @dragover.prevent
       ></div>
       <div
+        v-if="getOpenFiles[EDITORS.primary].length > 0"
         :class="['area', { highlight: targetDropEditor === EDITORS.secondary }]"
         @dragenter.prevent="setTargetDropEditor(EDITORS.secondary)"
         @drop.stop="openDroppedFile"
@@ -172,7 +173,7 @@ export default {
       "getActiveEditor",
       "getOpenFiles",
       "getActiveFiles",
-      "getDraggingId",
+      "getDraggingFileId",
     ]),
     ...mapGetters("Files", ["getFile"]),
     getEditorMode() {
@@ -192,7 +193,7 @@ export default {
       "createFile",
       "createDirectory",
     ]),
-    ...mapActions("Editor", ["setActiveEditor", "openFile", "setDraggingId"]),
+    ...mapActions("Editor", ["setActiveEditor", "openFile", "setDraggingId", "setDraggingFileId"]),
     updateContents(id, contents) {
       this.debouncedFileUpdate({ id, contents });
     },
@@ -226,8 +227,9 @@ export default {
     },
     openDroppedFile(event) {
       const editorTopBeDropped = this.targetDropEditor;
-      const fileId = event.dataTransfer.getData("fileId");
-      this.setDraggingId(null);
+      const fileId = this.getDraggingFileId;
+      this.setDraggingId({ id: null });
+      this.setDraggingFileId({ id: null })
       const file = this.getFile(fileId);
       if (file && file.type !== fileTypes.DIRECTORY) {
         console.log({ id: fileId, editorTopBeDropped });
@@ -332,8 +334,8 @@ export default {
   }
 
   .draggable-area {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: row;
     width: 100%;
     height: 100%;
     position: absolute;
@@ -342,6 +344,7 @@ export default {
 
     .area {
       display: flex;
+      flex: 1;
       background: transparent;
 
       &.highlight {

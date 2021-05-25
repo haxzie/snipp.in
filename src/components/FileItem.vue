@@ -6,6 +6,7 @@
       @dblclick="readonly = !readonly"
       draggable
       @dragstart="handleDrag"
+      @dragend="handleDragEnd"
       @contextmenu.prevent.stop="toggleContextMenu"
     >
       <FileTextIcon class="icon" size="18" />
@@ -91,7 +92,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions("Editor", ["openFile", "downloadFile"]),
+    ...mapActions("Editor", ["openFile", "downloadFile", "setDraggingId", "setDraggingFileId"]),
     ...mapActions("Files", ["renameFile", "deleteFile"]),
     changeFileName() {
       if (this.filename) {
@@ -118,6 +119,13 @@ export default {
       event.dataTransfer.dropEffect = 'move';
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('fileId', this.file.id);
+      this.setDraggingFileId({ id: this.file.id });
+    },
+    handleDragEnd() {
+      setTimeout(() => {
+        this.setDraggingFileId({ id: null });
+        this.setDraggingId({ id: null });
+      }, 100);
     },
     copyFileContents() {
       navigator.clipboard.writeText(this.file.contents);

@@ -47,4 +47,7 @@ export default {
   getDraggingId: (state) => {
     return state.draggingId;
   },
+  getDraggingFileId: (state) => {
+    return state.draggingFileId;
+  }
 };
