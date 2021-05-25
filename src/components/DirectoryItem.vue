@@ -134,7 +134,7 @@ export default {
     },
   },
   methods: {
-    ...mapMutations("Editor", { setDraggingId: "SET_DRAGGING_ID" }),
+    ...mapActions("Editor", ["setDraggingId"]),
     ...mapActions("Files", [
       "renameFile",
       "deleteDirectory",
@@ -177,12 +177,12 @@ export default {
     },
     handleDragOver() {
       if (this.getDraggingId !== this.file.id) {
-        this.setDraggingId(this.file.id);
+        this.setDraggingId({ id: this.file.id });
       }
     },
     handleDrop(event) {
       const fileId = event.dataTransfer.getData("fileId");
-      this.setDraggingId("");
+      this.setDraggingId({ id: null });
       // prevent creating a black hole
       if (fileId === this.file.id) return;
       this.moveFile({ id: fileId, directoryId: this.file.id });
