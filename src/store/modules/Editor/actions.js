@@ -11,15 +11,16 @@ export default {
    * @param {Object} payload
    * @param {String} payload.id id of the file to be opened
    */
-  openFile: async ({ state, commit, dispatch }, { id }) => {
+  openFile: async ({ state, commit, dispatch }, { id, editor }) => {
+    editor = editor || state.activeEditor;
     // check if the file is already opened in the active editor
-    if (!state.openFiles[state.activeEditor].includes(id)) {
+    if (!state.openFiles[editor].includes(id)) {
       commit(types.SET_OPEN_FILES, {
         ...state.openFiles,
-        [state.activeEditor]: [...state.openFiles[state.activeEditor], id],
+        [editor]: [...state.openFiles[editor], id],
       });
       let newOpenFile = new OpenFileFootprint({
-        editor: state.activeEditor,
+        editor,
         id: id,
       });
       fileStorage.addOpenFile({ fileFootPrint: newOpenFile });
@@ -32,14 +33,14 @@ export default {
 
     // calling dispatch because activeFileId needs to be saved in indexedDB
     await dispatch("setActiveFile", {
-      editor: state.activeEditor,
+      editor: editor,
       id: id,
     });
   },
 
   /**
    * Opens a list of files in primary editor
-   * @param {Object} context 
+   * @param {Object} context
    * @param {Object} payload
    * @param {Array<Object>} payload.openFiles
    * @param {Array<Object>} payload.activeFiles
@@ -159,16 +160,30 @@ export default {
   },
 
   /**
+   * Sets the active Editor
+   */
+  setActiveEditor: async ({ commit }, { editor }) => {
+    commit(types.SET_ACTIVE_EDITOR, editor);
+  },
+
+  /**
    * Downloads a file
    * @param {Object} context
    * @param {Object} payload
-   * @param {String} payload.id File id 
+   * @param {String} payload.id File id
    */
   downloadFile: async ({ rootGetters }, { id }) => {
-    const file = rootGetters['Files/getFile'](id);
+    const file = rootGetters["Files/getFile"](id);
     const fileBlob = new Blob([file.contents], {
       type: "text/plain;charset=utf-8",
     });
     saveAs(fileBlob, file.name);
-  }
+  },
+
+  /**
+   * Sets the id of the dragging directory drop id
+   */
+  setDraggingId: async ({ commit }, id) => {
+    commit(types.SET_DRAGGING_ID, id);
+  },
 };

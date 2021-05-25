@@ -1,51 +1,62 @@
 <template>
   <div :class="['editor-area', getEditorMode]">
     <div
-      v-if="getOpenFiles[getEditors.primary].length > 0"
+      v-if="getOpenFiles[EDITORS.primary].length > 0"
       id="primary-editor"
       class="codemirror-instances"
+      @click="setActiveEditor({ editor: EDITORS.primary })"
     >
       <TopBar
-        :editor="getEditors.primary"
-        :activeFile="getActiveFiles[getEditors.primary]"
-        :openFiles="getOpenFiles[getEditors.primary]"
+        :editor="EDITORS.primary"
+        :activeFile="getActiveFiles[EDITORS.primary]"
+        :openFiles="getOpenFiles[EDITORS.primary]"
+        :isActive="getActiveEditor === EDITORS.primary"
       />
       <div class="scroll-wrapper">
         <component
-          v-if="getActiveFiles[getEditors.primary]"
-          :file="getActiveFiles[getEditors.primary]"
-          :is="getEditorForFile(getActiveFiles[getEditors.primary])"
+          v-if="getActiveFiles[EDITORS.primary]"
+          :file="getActiveFiles[EDITORS.primary]"
+          :is="getEditorForFile(getActiveFiles[EDITORS.primary])"
           @contentChanged="
             (contents) =>
-              updateContents(getActiveFiles[getEditors.primary].id, contents)
+              updateContents(getActiveFiles[EDITORS.primary].id, contents)
           "
         />
       </div>
     </div>
     <div
       v-if="
-        getOpenFiles[getEditors.secondary].length > 0 &&
+        getOpenFiles[EDITORS.secondary].length > 0 &&
           getEditorMode === 'multiple'
       "
       id="secodary-editor"
       class="codemirror-instances"
+      @click="setActiveEditor({ editor: EDITORS.secondary })"
     >
       <TopBar
-        :editor="getEditors.secondary"
-        :activeFile="getActiveFiles[getEditors.secondary]"
-        :openFiles="getOpenFiles[getEditors.secondary]"
+        :editor="EDITORS.secondary"
+        :activeFile="getActiveFiles[EDITORS.secondary]"
+        :openFiles="getOpenFiles[EDITORS.secondary]"
+        :isActive="getActiveEditor === EDITORS.secondary"
       />
-      <CodeEditor
-        v-if="getActiveFiles[getEditors.secondary]"
-        :file="getActiveFiles[getEditors.secondary]"
-      />
+      <div class="scroll-wrapper">
+        <component
+          v-if="getActiveFiles[EDITORS.secondary]"
+          :file="getActiveFiles[EDITORS.secondary]"
+          :is="getEditorForFile(getActiveFiles[EDITORS.secondary])"
+          @contentChanged="
+            (contents) =>
+              updateContents(getActiveFiles[EDITORS.secondary].id, contents)
+          "
+        />
+      </div>
     </div>
     <div
       class="welcome-texts"
       v-if="
         !(
-          getOpenFiles[getEditors.primary].length > 0 ||
-          getOpenFiles[getEditors.secondary].length > 0
+          getOpenFiles[EDITORS.primary].length > 0 ||
+          getOpenFiles[EDITORS.secondary].length > 0
         )
       "
     >
@@ -88,6 +99,25 @@
         </li>
       </ul>
     </div>
+    <div
+      v-if="getDraggingId"
+      class="draggable-area"
+      @dragenter.prevent="enableDragAndDropMode"
+      @dragover.prevent
+    >
+      <div
+        :class="['area', { highlight: targetDropEditor === EDITORS.primary }]"
+        @dragenter.prevent="setTargetDropEditor(EDITORS.primary)"
+        @drop.stop="openDroppedFile"
+        @dragover.prevent
+      ></div>
+      <div
+        :class="['area', { highlight: targetDropEditor === EDITORS.secondary }]"
+        @dragenter.prevent="setTargetDropEditor(EDITORS.secondary)"
+        @drop.stop="openDroppedFile"
+        @dragover.prevent
+      ></div>
+    </div>
   </div>
 </template>
 
@@ -103,15 +133,20 @@ import {
   GithubIcon,
   GitPullRequestIcon,
 } from "vue-feather-icons";
+import { fileTypes } from "@/models/vFile.model";
 
 const CodeEditor = () => ({
-  component: import(/* webpackPrefetch: true */ "@/components/Editors/CodeEditor/index.vue"),
+  component: import(
+    /* webpackPrefetch: true */ "@/components/Editors/CodeEditor/index.vue"
+  ),
   loading: LoadingScreen,
   error: LoadingScreen,
 });
 
 const TipTapEditor = () => ({
-  component: import(/* webpackPrefetch: true */ "@/components/Editors/TipTapEditor/index.vue"),
+  component: import(
+    /* webpackPrefetch: true */ "@/components/Editors/TipTapEditor/index.vue"
+  ),
   loading: LoadingScreen,
   error: LoadingScreen,
 });
@@ -126,19 +161,24 @@ export default {
     GitPullRequestIcon,
     TipTapEditor,
   },
+  data() {
+    return {
+      dragAndDropMode: false,
+      targetDropEditor: null,
+    };
+  },
   computed: {
     ...mapGetters("Editor", [
       "getActiveEditor",
       "getOpenFiles",
       "getActiveFiles",
+      "getDraggingId",
     ]),
-    getEditors() {
-      return EDITORS;
-    },
+    ...mapGetters("Files", ["getFile"]),
     getEditorMode() {
       if (
         this.getOpenFiles[EDITORS.secondary] &&
-        this.getOpenFiles[EDITORS.secondary] > 0
+        this.getOpenFiles[EDITORS.secondary].length > 0
       ) {
         return "multiple";
       } else {
@@ -152,6 +192,7 @@ export default {
       "createFile",
       "createDirectory",
     ]),
+    ...mapActions("Editor", ["setActiveEditor", "openFile", "setDraggingId"]),
     updateContents(id, contents) {
       this.debouncedFileUpdate({ id, contents });
     },
@@ -171,9 +212,32 @@ export default {
           return "CodeEditor";
       }
     },
+    enableDragAndDropMode() {
+      console.log(`dragenter`);
+      this.dragAndDropMode = true;
+    },
+    disableDragAndDropMode() {
+      this.dragAndDropMode = false;
+      this.targetDropEditor = null;
+    },
+    setTargetDropEditor(editor) {
+      console.log({ editor });
+      this.targetDropEditor = editor;
+    },
+    openDroppedFile(event) {
+      const editorTopBeDropped = this.targetDropEditor;
+      const fileId = event.dataTransfer.getData("fileId");
+      this.setDraggingId(null);
+      const file = this.getFile(fileId);
+      if (file && file.type !== fileTypes.DIRECTORY) {
+        console.log({ id: fileId, editorTopBeDropped });
+        this.openFile({ id: fileId, editor: editorTopBeDropped });
+      }
+    },
   },
   created() {
     this.debouncedFileUpdate = debounce(this.updateFileContents, 1000);
+    this.EDITORS = EDITORS;
   },
 };
 </script>
@@ -184,6 +248,7 @@ export default {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  position: relative;
 
   &.single {
     grid-template-columns: 1fr;
@@ -262,6 +327,25 @@ export default {
         &:active {
           opacity: 0.7;
         }
+      }
+    }
+  }
+
+  .draggable-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    .area {
+      display: flex;
+      background: transparent;
+
+      &.highlight {
+        background: var(--drag-over-background);
       }
     }
   }
