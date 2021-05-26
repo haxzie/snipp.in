@@ -19,8 +19,15 @@ if (process.env.NODE_ENV === 'production') {
     updatefound () {
       console.log('SERVICE WORKER','New content is downloading.')
     },
-    updated () {
-      console.log('SERVICE WORKER','New content is available; please refresh.')
+    updated (registration) {
+      console.log('SERVICE WORKER','New content is available; please refresh.');
+      // clear the cache
+      caches.keys().then(function(names) {
+        for (let name of names) caches.delete(name);
+      });
+      document.dispatchEvent(
+        new CustomEvent('swUpdated', { detail: registration })
+      )
     },
     offline () {
       console.log('SERVICE WORKER','No internet connection found. App is running in offline mode.')
