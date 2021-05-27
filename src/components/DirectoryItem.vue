@@ -15,8 +15,8 @@
         draggable
         @dragstart="handleDrag"
       >
-        <FolderMinusIcon v-if="showChildren" class="icon" size="18" />
-        <FolderIcon v-else class="icon" size="18" />
+        <FolderOpenIcon v-if="showChildren" class="icon" size="20" />
+        <FolderIcon v-else class="icon" size="20" />
         <form @submit.prevent="$refs.input.blur()">
           <input
             :ref="'input'"
@@ -73,7 +73,6 @@
 
 <script>
 import {
-  FolderIcon,
   FolderPlusIcon,
   FilePlusIcon,
   MoreVerticalIcon,
@@ -84,6 +83,8 @@ import {
   ClipboardIcon,
   FolderMinusIcon,
 } from "vue-feather-icons";
+import FolderIcon from "@/components/Icons/FolderIcon";
+import FolderOpenIcon from "@/components/Icons/FolderOpenIcon";
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import { SlideYUpTransition, FadeTransition } from "vue2-transitions";
 import FileItem from "./FileItem";
@@ -93,7 +94,6 @@ import { fileTypes } from "../models/vFile.model";
 export default {
   name: "directory",
   components: {
-    FolderIcon,
     MoreVerticalIcon,
     Trash2Icon,
     Edit3Icon,
@@ -107,6 +107,8 @@ export default {
     [fileTypes.FILE]: FileItem,
     [fileTypes.DIRECTORY]: DirectoryItem,
     FadeTransition,
+    FolderIcon,
+    FolderOpenIcon
   },
   props: {
     file: Object,
@@ -233,7 +235,7 @@ export default {
   flex-direction: row;
   align-items: center;
   padding: 2px 5px 2px 0;
-  margin: 0px 5px 2px 5px;
+  margin: 0px 5px 1px 5px;
   border-radius: 5px;
 
   &.active {

@@ -149,7 +149,7 @@ export default {
     const options = {
       includeScore: true,
       threshold: 0.2,
-      keys: ["name", "contents"],
+      keys: ["name"],
     };
 
     const fuse = new Fuse(Object.values(state.files), options);

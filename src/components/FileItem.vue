@@ -8,7 +8,7 @@
       @dragstart="handleDrag"
       @contextmenu.prevent.stop="toggleContextMenu"
     >
-      <FileTextIcon class="icon" size="18" />
+      <component :is="getFileIcon(file)" class="icon" size="20" />
       <form @submit.prevent="$refs.input.blur()">
         <input
           :ref="'input'"
@@ -19,6 +19,7 @@
           @blur="changeFileName"
         />
       </form>
+      <div class="active-indicator" v-if="isActive"></div>
     </div>
     <div class="context-menu">
       <MoreVerticalIcon
@@ -32,6 +33,7 @@
           v-if="showContextMenu"
           class="options"
           v-click-outside="toggleContextMenu"
+          @mouseleave.once="showContextMenu = false"
         >
           <div class="option-item" @click="openRenameMode">
             <edit3-icon size="18" class="icon" />Rename
@@ -51,6 +53,7 @@
         </div>
       </SlideYUpTransition>
     </div>
+
     <!-- <span>{{ file.name }}</span> -->
   </div>
 </template>
@@ -65,6 +68,12 @@ import {
   CopyIcon,
   ClipboardIcon,
 } from "vue-feather-icons";
+import FileIcon from "@/components/Icons/FileIcon";
+import FileJavascriptIcon from "@/components/Icons/FileJavascriptIcon";
+import FileMarkdownIcon from "@/components/Icons/FileMarkdownIcon";
+import FileJsonIcon from "@/components/Icons/FileJsonIcon";
+import FileDocumentIcon from "@/components/Icons/FileDocumentIcon";
+import FilePythonIcon from "@/components/Icons/FilePythonIcon";
 import { mapActions } from "vuex";
 import { SlideYUpTransition } from "vue2-transitions";
 
@@ -78,6 +87,12 @@ export default {
     CopyIcon,
     ClipboardIcon,
     SlideYUpTransition,
+    FileIcon,
+    FileJavascriptIcon,
+    FileMarkdownIcon,
+    FileJsonIcon,
+    FileDocumentIcon,
+    FilePythonIcon,
   },
   props: {
     file: Object,
@@ -115,17 +130,41 @@ export default {
       this.deleteFile({ id: this.file.id });
     },
     handleDrag(event) {
-      event.dataTransfer.dropEffect = 'move';
-      event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('fileId', this.file.id);
+      event.dataTransfer.dropEffect = "move";
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("fileId", this.file.id);
     },
     copyFileContents() {
       navigator.clipboard.writeText(this.file.contents);
       this.showContextMenu = false;
     },
     saveFileAs() {
-      this.downloadFile({ id: this.file.id })
+      this.downloadFile({ id: this.file.id });
       this.showContextMenu = false;
+    },
+    getFileIcon(file) {
+      let extension = null;
+      if (file && file.name) {
+        const { name } = file;
+        const fileParts = name.split(".");
+        extension =
+          fileParts.length > 1 ? fileParts.slice(-1).slice(-1)[0] : null;
+      }
+
+      switch (extension) {
+        case "js":
+          return "FileJavascriptIcon";
+        case "json":
+          return "FileJsonIcon";
+        case "md":
+          return "FileMarkdownIcon";
+        case "doc":
+          return "FileDocumentIcon";
+        case "py":
+          return "FilePythonIcon";
+        default:
+          return "FileIcon";
+      }
     },
   },
   watch: {
@@ -157,7 +196,7 @@ export default {
   flex-direction: row;
   align-items: center;
   padding: 2px 5px 2px 0;
-  margin: 0 5px 2px 5px;
+  margin: 0 5px 1px 5px;
   border-radius: 5px;
 
   &.active {
@@ -202,7 +241,15 @@ export default {
     }
   }
 
+  .active-indicator {
+    width: 5px;
+    height: 5px;
+    background: var(--color-primary);
+    border-radius: 50%;
+  }
+
   .context-menu {
+    display: none;
     align-items: center;
     justify-content: center;
     align-items: center;
