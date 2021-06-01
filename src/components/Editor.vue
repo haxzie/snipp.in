@@ -10,6 +10,8 @@
         :activeFile="getActiveFiles[getEditors.primary]"
         :openFiles="getOpenFiles[getEditors.primary]"
       />
+      <StockChart/>
+
       <div class="scroll-wrapper">
         <component
           v-if="getActiveFiles[getEditors.primary]"
@@ -103,6 +105,7 @@ import {
   GithubIcon,
   GitPullRequestIcon,
 } from "vue-feather-icons";
+import StockChart from "@/components/StockChart";
 
 const CodeEditor = () => ({
   component: import(/* webpackPrefetch: true */ "@/components/Editors/CodeEditor/index.vue"),
@@ -118,6 +121,7 @@ const TipTapEditor = () => ({
 
 export default {
   components: {
+    StockChart,
     CodeEditor,
     TopBar,
     FilePlusIcon,
