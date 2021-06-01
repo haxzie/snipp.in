@@ -12,7 +12,8 @@ export default {
   name: "StockChart",
   mounted() {
     const canvas = document.getElementById("stockChart")
-    canvas.height = 100
+    canvas.height = 110
+    canvas.width = 350
     const data = {
       labels: [
         "2019-05-20",
@@ -1008,9 +1009,12 @@ export default {
           80100,
           79600,
           79600],
+        pointRadius: 0,
+        pointHitRadius: 40,
         fill: true,
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 1
+        borderColor: 'rgb(100,241,241)',
+        borderWidth: 1,
+        tension: 0.5
       }]
     };
     const config = {
