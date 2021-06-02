@@ -11,15 +11,16 @@ export default {
    * @param {Object} payload
    * @param {String} payload.id id of the file to be opened
    */
-  openFile: async ({ state, commit, dispatch }, { id }) => {
+  openFile: async ({ state, commit, dispatch }, { id, editor }) => {
+    editor = editor || state.activeEditor;
     // check if the file is already opened in the active editor
-    if (!state.openFiles[state.activeEditor].includes(id)) {
+    if (!state.openFiles[editor].includes(id)) {
       commit(types.SET_OPEN_FILES, {
         ...state.openFiles,
-        [state.activeEditor]: [...state.openFiles[state.activeEditor], id],
+        [editor]: [...state.openFiles[editor], id],
       });
       let newOpenFile = new OpenFileFootprint({
-        editor: state.activeEditor,
+        editor,
         id: id,
       });
       fileStorage.addOpenFile({ fileFootPrint: newOpenFile });
@@ -32,14 +33,14 @@ export default {
 
     // calling dispatch because activeFileId needs to be saved in indexedDB
     await dispatch("setActiveFile", {
-      editor: state.activeEditor,
+      editor: editor,
       id: id,
     });
   },
 
   /**
    * Opens a list of files in primary editor
-   * @param {Object} context 
+   * @param {Object} context
    * @param {Object} payload
    * @param {Array<Object>} payload.openFiles
    * @param {Array<Object>} payload.activeFiles
@@ -113,7 +114,49 @@ export default {
     console.log(`footprints of ${id} deleted!`);
     if (state.openFiles[editor].length === 0) {
       await fileStorage.clearActiveFiles();
+      await fileStorage.clearOpenFiles();
       console.log(`activeFiles emptied.`);
+      // if one of the editors files is empty, always move things to primary editor
+      // and clear out secondarye editor by default
+      dispatch("swapEditorFiles");
+    }
+  },
+
+  swapEditorFiles: async ({ state, commit, dispatch }) => {
+    await fileStorage.clearActiveFiles();
+    await fileStorage.clearOpenFiles();
+    // if the primary editor is empty, move files from the secondary editor to primary
+    if (state.openFiles[EDITORS.primary].length === 0) {
+      if (state.openFiles[EDITORS.secondary].length > 0) {
+        const secondaryOpenFiles = state.openFiles[EDITORS.secondary];
+        const secondayActiveFile = state.activeFiles[EDITORS.secondary];
+        // swap the editor files
+        commit(types.SET_OPEN_FILES, {
+          [EDITORS.primary]: secondaryOpenFiles,
+          [EDITORS.secondary]: [],
+        });
+        // swap active files
+        commit(types.SET_ACTIVE_FILES, {
+          [EDITORS.primary]: secondayActiveFile,
+          [EDITORS.secondary]: null,
+        });
+        dispatch("setActiveEditor", { editors: EDITORS.primary });
+        // save the active file footprint
+        let newActiveFile = new OpenFileFootprint({
+          editor: EDITORS.primary,
+          id: secondayActiveFile,
+        });
+        // replaces the activeFile stored in IndexedDB with the new active file
+        fileStorage.addActiveFile({ fileFootPrint: newActiveFile });
+        // update footprints
+        secondaryOpenFiles.forEach((fileId) => {
+          let newOpenFile = new OpenFileFootprint({
+            editor: EDITORS.primary,
+            id: fileId,
+          });
+          fileStorage.addOpenFile({ fileFootPrint: newOpenFile });
+        });
+      }
     }
   },
 
@@ -141,15 +184,17 @@ export default {
    * @param {String} payload.editor name of the editor
    * @param {String} payload.id id of the file to set active
    */
-  setActiveFile: async ({ state, commit }, { editor, id }) => {
+  setActiveFile: async ({ state, commit, dispatch }, { editor, id }) => {
     commit(types.SET_ACTIVE_FILES, {
       ...state.activeFiles,
       [editor]: id,
     });
 
+    dispatch("setActiveEditor", { editor });
+
     if (id && editor) {
       let newActiveFile = new OpenFileFootprint({
-        editor: state.activeEditor,
+        editor: editor,
         id: id,
       });
 
@@ -159,16 +204,37 @@ export default {
   },
 
   /**
+   * Sets the active Editor
+   */
+  setActiveEditor: async ({ commit }, { editor }) => {
+    commit(types.SET_ACTIVE_EDITOR, editor);
+  },
+
+  /**
    * Downloads a file
    * @param {Object} context
    * @param {Object} payload
-   * @param {String} payload.id File id 
+   * @param {String} payload.id File id
    */
   downloadFile: async ({ rootGetters }, { id }) => {
-    const file = rootGetters['Files/getFile'](id);
+    const file = rootGetters["Files/getFile"](id);
     const fileBlob = new Blob([file.contents], {
       type: "text/plain;charset=utf-8",
     });
     saveAs(fileBlob, file.name);
-  }
+  },
+
+  /**
+   * Sets the id of the dragging directory drop id
+   */
+  setDraggingId: async ({ commit }, { id }) => {
+    commit(types.SET_DRAGGING_ID, id);
+  },
+
+  /**
+   * sets Id of the file being dragged
+   */
+  setDraggingFileId: async ({ commit }, { id }) => {
+    commit(types.SET_DRAGGING_FILE_ID, id);
+  },
 };
