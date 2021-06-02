@@ -136,6 +136,9 @@ export default {
       "getOpenFiles",
       "getActiveFiles",
     ]),
+    isStock() {
+      return this.getActiveFiles.PRIMARY.stock.isStock
+    },
     getEditors() {
       return EDITORS;
     },
@@ -149,9 +152,6 @@ export default {
         return "single";
       }
     },
-    isStock() {
-      return this.getActiveFiles["PRIMARY"].name.endsWith("_stock")
-    }
   },
   methods: {
     ...mapActions("Files", [
