@@ -8,7 +8,15 @@
       <li
         v-for="file in openFiles"
         :key="file.id"
-        :class="[{ active: file.id === (activeFile ? activeFile.id : null) }]"
+        :class="[
+          {
+            active: file.id === (activeFile && activeFile.id) && isActive,
+          },
+          {
+            inActive:
+              file.id === (activeFile && activeFile.id) && !isActive,
+          },
+        ]"
         @click="setActiveFile({ editor, id: file.id })"
         @click.middle="closeFile({ editor, id: file.id })"
       >
@@ -23,12 +31,12 @@
       <div
         v-show="false"
         v-shortkey="['alt', 'd']"
-        @shortkey="deleteFile({ id: activeFile? activeFile.id: null })"
+        @shortkey="deleteFile({ id: activeFile ? activeFile.id : null })"
       ></div>
       <div
         v-show="false"
         v-shortkey="['alt', 'r']"
-        @shortkey="openRenameMode({ id: activeFile? activeFile.id: null })"
+        @shortkey="openRenameMode({ id: activeFile ? activeFile.id : null })"
       ></div>
     </ul>
   </simplebar>
@@ -46,10 +54,11 @@ export default {
     editor: String,
     openFiles: Array,
     activeFile: Object,
+    isActive: Boolean,
   },
   methods: {
     ...mapActions("Editor", ["closeFile", "setActiveFile"]),
-    ...mapActions("Files", ["deleteFile", "openRenameMode"])
+    ...mapActions("Files", ["deleteFile", "openRenameMode"]),
   },
 };
 </script>
@@ -113,6 +122,10 @@ export default {
         color: var(--font-color);
         opacity: 1;
         border-bottom: 2px solid var(--color-primary);
+      }
+
+      &.inActive {
+        border-bottom: 2px solid var(--font-color);
       }
     }
   }

@@ -9,6 +9,13 @@ export default {
    * Loads all the files available in the localstorage into the store
    */
   loadFiles: async ({ commit, dispatch }) => {
+    // clears the storage to prevent mismatching storage structures
+    const initialFootPrintsCleared = localStorage.getItem("isInitialFootprintsClearedForv1");
+    if (!initialFootPrintsCleared) {
+      await fileStorage.clearActiveFiles();
+      await fileStorage.clearOpenFiles();
+      localStorage.setItem("isInitialFootprintsClearedForv1", "cleared");
+    }
     const { openFiles, activeFiles, files } = await fileStorage.getAllFiles();
     if (files) {
       const filesObject = files.reduce((result, item) => {
