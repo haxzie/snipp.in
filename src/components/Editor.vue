@@ -10,7 +10,7 @@
         :activeFile="getActiveFiles[getEditors.primary]"
         :openFiles="getOpenFiles[getEditors.primary]"
       />
-      <StockChart/>
+      <StockChart v-if="isStock"/>
 
       <div class="scroll-wrapper">
         <component
@@ -149,6 +149,9 @@ export default {
         return "single";
       }
     },
+    isStock() {
+      return this.getActiveFiles["PRIMARY"].name.endsWith("_stock")
+    }
   },
   methods: {
     ...mapActions("Files", [
