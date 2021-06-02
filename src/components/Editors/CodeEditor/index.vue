@@ -120,5 +120,7 @@ export default {
   * {
     font-family: "Fira Code", monospace;
   }
+  padding-top: 15px;
 }
+
 </style>
