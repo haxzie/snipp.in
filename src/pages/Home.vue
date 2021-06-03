@@ -8,6 +8,7 @@
       </div>
       <Editor />
     </div>
+    <FileCreationModal/>
     <CommandCenter />
     <SlideYUpTransition>
       <router-view></router-view>
@@ -23,6 +24,7 @@ import SideNavigationBar from "@/components/SideNavigationBar";
 import SearchPanel from "@/components/SearchPanel";
 import { mapGetters } from "vuex";
 import { SlideYUpTransition } from "vue2-transitions";
+import FileCreationModal from "@/components/FileCreationModal"
 
 export default {
   components: {
@@ -33,6 +35,7 @@ export default {
     SideNavigationBar,
     SearchPanel,
     SlideYUpTransition,
+    FileCreationModal
   },
   data() {
     return {};

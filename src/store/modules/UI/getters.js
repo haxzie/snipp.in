@@ -13,4 +13,10 @@ export default {
   getActiveTheme: (state) => {
     return state.activeTheme;
   },
+  getShowCreateFileModal: (state) => {
+    return state.showCreateFileModal;
+  },
+  getBootstrappedFileName: (state) => {
+    return state.bootstrappedFileName;
+  }
 };
