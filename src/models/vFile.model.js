@@ -16,8 +16,11 @@ export default class VFile {
         this.editable = editable || false;
         this.stock = stock || {
             isStock: false,
+            company: "",
+            buyHistory: [],
+            sellHistory: [],
             prices: [],
-            dates: [], //TODO: Change dates to nationality
+            dates: []
         }
     }
 }
