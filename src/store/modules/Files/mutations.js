@@ -8,9 +8,6 @@ export const types = {
 
 export default {
   [types.SET_FILES]: (state, files) => {
-    for (const [key, file] of Object.entries(files)) {
-      files[key].stock.isStock = file.name.endsWith("_stock")
-    }
     state.files = files;
     state.filesById = Object.keys(files);
   },

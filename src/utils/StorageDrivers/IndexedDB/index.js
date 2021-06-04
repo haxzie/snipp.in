@@ -17,8 +17,8 @@ export default {
   update: async ({ id, contents }) => {
     await driver.updateFile({ id, contents });
   },
-  rename: async ({ id, name }) => {
-    await driver.renameFile({ id, name });
+  rename: async ({ id, name, stock }) => {
+    await driver.renameFile({ id, name, stock });
   },
   delete: async ({ id }) => {
     await driver.deleteFile({ id });

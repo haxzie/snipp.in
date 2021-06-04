@@ -14,6 +14,10 @@ export default class VFile {
         this.created_at = created_at || Date.now();
         this.type = type
         this.editable = editable || false;
-        this.stock = {}
+        this.stock = {
+            isStock: false,
+            prices: [],
+            dates: [], //TODO: Change dates to nationality
+        }
     }
 }

@@ -96,17 +96,23 @@ export default {
     });
     fileStorage.update({ id, contents });
   },
+
   renameFile: async ({ state, commit }, { id, name }) => {
     if (!id) return;
+    const stock = {
+      // Set isStock value by file name
+      isStock: name.endsWith("_stock")
+    }
     commit(types.SET_FILES, {
       ...state.files,
       [id]: {
         ...state.files[id],
         name,
         editable: false,
+        stock: stock,
       },
     });
-    fileStorage.rename({ id, name });
+    fileStorage.rename({ id, name, stock});
   },
 
   openRenameMode: async ({ state, commit }, { id }) => {
