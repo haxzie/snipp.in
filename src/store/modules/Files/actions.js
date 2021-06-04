@@ -87,22 +87,43 @@ export default {
 
   updateFileContents: async ({ state, commit, dispatch }, { id, contents }) => {
     if (!id) return;
-    let stock = {
-      isStock: false
-    }
-    console.log(state.files[id].stock.isStock)
-    if (state.files[id].stock.isStock) {
+    let stock = state.files[id].stock
+    if (stock.isStock) {
       stock["isStock"] = true
-      contents.split("\n").map(content => {
+      // Remove unnecessary space, empty element
+      const stockContent = contents.split("\n").map(content => {
         return content.trim()
       }).filter(content => {
         return content !== ""
       })
+
+      stock["company"] = stockContent[1]
+
+      // Set buyHistory when //buy-start exist on stockContent
+      const indexBuyHistoryStart = stockContent.indexOf("//buy-start")
+      const indexBuyHistoryEnd = stockContent.indexOf("//buy-end")
+      if (indexBuyHistoryStart !== -1 && indexBuyHistoryEnd !== -1) {
+        stock["buyHistory"] = stockContent.slice(indexBuyHistoryStart + 1, indexBuyHistoryEnd).map(content => {
+          // as-is : string "2020-01-10,51023,300"
+          // to-be : array  ["2020-01-10", "51023", "300"]
+          return content.split(",")
+        })
+      }
+
+      // Set sellHistory when //sell-start exist on stockContent
+      const indexSellHistoryStart = stockContent.indexOf("//sell-start")
+      const indexSellHistoryEnd = stockContent.indexOf("//sell-end")
+      if (indexSellHistoryStart !== -1 && indexSellHistoryEnd !== -1) {
+        stock["sellHistory"] = stockContent.slice(indexSellHistoryStart + 1, indexSellHistoryEnd).map(content =>{
+          return content.split(",")
+        })
+      }
       commit(types.SET_FILES, {
         ...state.files,
         [id]: {
           ...state.files[id],
           contents,
+          stock,
         },
       });
     } else {
@@ -114,16 +135,13 @@ export default {
         },
       });
     }
-    console.log(stock)
     fileStorage.update({ id, contents, stock });
   },
 
   renameFile: async ({ state, commit }, { id, name }) => {
     if (!id) return;
-    const stock = {
-      // Set isStock value by file name
-      isStock: name.endsWith("_stock")
-    }
+    let currentStock = state.files[id].stock
+    currentStock.isStock = name.endsWith("_stock")
     commit(types.SET_FILES, {
       ...state.files,
       [id]: {
@@ -155,6 +173,7 @@ export default {
     commit(types.SET_FILES, omit(state.files, id));
     fileStorage.delete({ id });
   },
+
   deleteDirectory: async ({ state, commit, dispatch, rootGetters }, { id }) => {
     if (!id) return;
 
