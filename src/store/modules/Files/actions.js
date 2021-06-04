@@ -140,8 +140,10 @@ export default {
 
   renameFile: async ({ state, commit }, { id, name }) => {
     if (!id) return;
-    let currentStock = state.files[id].stock
-    currentStock.isStock = name.endsWith("_stock")
+    let stock = {}
+    Object.assign(stock, state.files[id].stock)
+    stock.isStock = name.endsWith("_stock")
+
     commit(types.SET_FILES, {
       ...state.files,
       [id]: {
@@ -151,7 +153,7 @@ export default {
         stock: stock,
       },
     });
-    fileStorage.rename({ id, name, stock});
+    fileStorage.rename({ id, name, stock });
   },
 
   openRenameMode: async ({ state, commit }, { id }) => {
