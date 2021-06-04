@@ -142,7 +142,7 @@ export default {
         {
           command: "/d",
           name: "Delete active file",
-          shortcut: ["alt", "x"],
+          shortcut: ["alt", "d"],
           parameter: null,
         },
         {
@@ -350,7 +350,7 @@ export default {
 }
 
 .command-center {
-  z-index: 9999;
+  z-index: 99;
 
   .command-menu {
     position: absolute;
