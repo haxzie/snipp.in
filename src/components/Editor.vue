@@ -67,10 +67,10 @@
 
       <h3 class="menu-title">Get Started</h3>
       <ul class="menu">
-        <li @click="createFile({ editable: true })">
+        <li @click="setShowCreateFileModal({ flag: true, filename: 'untitled' })">
           <FilePlusIcon class="icon" size="18" /> Create new empty file
         </li>
-        <li @click="createFile({ editable: true, name: 'untitled.doc' })">
+        <li @click="setShowCreateFileModal({ flag: true, filename: 'untitled.doc' })">
           <FilePlusIcon class="icon" size="18" /> Create new document
         </li>
         <li @click="createDirectory({ editable: true })">
@@ -194,6 +194,7 @@ export default {
       "createDirectory",
     ]),
     ...mapActions("Editor", ["setActiveEditor", "openFile", "setDraggingId", "setDraggingFileId"]),
+    ...mapActions("UI", ["setShowCreateFileModal"]),
     updateContents(id, contents) {
       this.debouncedFileUpdate({ id, contents });
     },

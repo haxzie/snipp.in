@@ -43,4 +43,13 @@ export default {
       settings: {},
     };
   },
+  /**
+   * Sets the create file modal visibility flag
+   */
+  setShowCreateFileModal: async ({ commit }, { flag, filename }) => {
+    if (filename) {
+      commit(types.SET_BOOTSTRAPPED_FILE_NAME, filename);
+    }
+    commit(types.SET_SHOW_CREATE_FILE_MODAL, flag);
+  }
 };
