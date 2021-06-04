@@ -96,14 +96,14 @@ const Driver = {
    * @param {String} param.id Id of the file
    * @param {String} param.contents Updated contents of the file
    */
-  async updateFile({ id, contents }) {
+  async updateFile({ id, contents, stock }) {
     try {
       const updatedFile = db.transaction("rw", db.files, async () => {
         // Mark bigfoots:
         const file = await db.files
           .where("id")
           .equals(id)
-          .modify({ contents });
+          .modify({ contents, stock });
         // console.log(`file ${id} updated!`);
         return file;
       });

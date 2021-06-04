@@ -6,7 +6,7 @@ export const fileTypes = {
     MARKDOWN: "markdown"
 }
 export default class VFile {
-    constructor({ id, parent, type = fileTypes.FILE, name, contents, created_at, editable }) {
+    constructor({ id, parent, type = fileTypes.FILE, name, contents, created_at, editable, stock }) {
         this.id = id || `${type}_${uuid()}`;
         this.parent = parent || 'root';
         this.name = name || '';
@@ -14,7 +14,7 @@ export default class VFile {
         this.created_at = created_at || Date.now();
         this.type = type
         this.editable = editable || false;
-        this.stock = {
+        this.stock = stock || {
             isStock: false,
             prices: [],
             dates: [], //TODO: Change dates to nationality

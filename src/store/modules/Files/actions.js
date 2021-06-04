@@ -87,14 +87,35 @@ export default {
 
   updateFileContents: async ({ state, commit, dispatch }, { id, contents }) => {
     if (!id) return;
-    commit(types.SET_FILES, {
-      ...state.files,
-      [id]: {
-        ...state.files[id],
-        contents,
-      },
-    });
-    fileStorage.update({ id, contents });
+    let stock = {
+      isStock: false
+    }
+    console.log(state.files[id].stock.isStock)
+    if (state.files[id].stock.isStock) {
+      stock["isStock"] = true
+      contents.split("\n").map(content => {
+        return content.trim()
+      }).filter(content => {
+        return content !== ""
+      })
+      commit(types.SET_FILES, {
+        ...state.files,
+        [id]: {
+          ...state.files[id],
+          contents,
+        },
+      });
+    } else {
+      commit(types.SET_FILES, {
+        ...state.files,
+        [id]: {
+          ...state.files[id],
+          contents,
+        },
+      });
+    }
+    console.log(stock)
+    fileStorage.update({ id, contents, stock });
   },
 
   renameFile: async ({ state, commit }, { id, name }) => {
