@@ -4,7 +4,7 @@
       v-if="getOpenFiles[EDITORS.primary].length > 0"
       id="primary-editor"
       class="codemirror-instances"
-      @click="setActiveEditor({ editor: EDITORS.primary })"
+      @click="switchActiveEditor(EDITORS.primary)"
     >
       <TopBar
         :editor="EDITORS.primary"
@@ -31,7 +31,7 @@
       "
       id="secodary-editor"
       class="codemirror-instances"
-      @click="setActiveEditor({ editor: EDITORS.secondary })"
+      @click="switchActiveEditor(EDITORS.secondary)"
     >
       <TopBar
         :editor="EDITORS.secondary"
@@ -67,10 +67,16 @@
 
       <h3 class="menu-title">Get Started</h3>
       <ul class="menu">
-        <li @click="setShowCreateFileModal({ flag: true, filename: 'untitled' })">
+        <li
+          @click="setShowCreateFileModal({ flag: true, filename: 'untitled' })"
+        >
           <FilePlusIcon class="icon" size="18" /> Create new empty file
         </li>
-        <li @click="setShowCreateFileModal({ flag: true, filename: 'untitled.doc' })">
+        <li
+          @click="
+            setShowCreateFileModal({ flag: true, filename: 'untitled.doc' })
+          "
+        >
           <FilePlusIcon class="icon" size="18" /> Create new document
         </li>
         <li @click="createDirectory({ editable: true })">
@@ -152,6 +158,14 @@ const TipTapEditor = () => ({
   error: LoadingScreen,
 });
 
+const RoughDrawEditor = () => ({
+  component: import(
+    /* webpackPrefetch: true */ "@/components/Editors/RoughDrawEditor/index.vue"
+  ),
+  loading: LoadingScreen,
+  error: LoadingScreen,
+});
+
 export default {
   components: {
     CodeEditor,
@@ -161,6 +175,7 @@ export default {
     GithubIcon,
     GitPullRequestIcon,
     TipTapEditor,
+    RoughDrawEditor,
   },
   data() {
     return {
@@ -193,10 +208,20 @@ export default {
       "createFile",
       "createDirectory",
     ]),
-    ...mapActions("Editor", ["setActiveEditor", "openFile", "setDraggingId", "setDraggingFileId"]),
+    ...mapActions("Editor", [
+      "setActiveEditor",
+      "openFile",
+      "setDraggingId",
+      "setDraggingFileId",
+    ]),
     ...mapActions("UI", ["setShowCreateFileModal"]),
     updateContents(id, contents) {
       this.debouncedFileUpdate({ id, contents });
+    },
+    switchActiveEditor(editor) {
+      if (this.getActiveEditor !== editor) {
+        this.setActiveEditor({ editor })
+      }
     },
     getEditorForFile(file) {
       let extension = null;
@@ -210,6 +235,8 @@ export default {
       switch (extension) {
         case "doc":
           return "TipTapEditor";
+        case "draw":
+          return "RoughDrawEditor";
         default:
           return "CodeEditor";
       }
@@ -230,7 +257,7 @@ export default {
       const editorTopBeDropped = this.targetDropEditor;
       const fileId = this.getDraggingFileId;
       this.setDraggingId({ id: null });
-      this.setDraggingFileId({ id: null })
+      this.setDraggingFileId({ id: null });
       const file = this.getFile(fileId);
       if (file && file.type !== fileTypes.DIRECTORY) {
         console.log({ id: fileId, editorTopBeDropped });

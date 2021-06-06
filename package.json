@@ -28,6 +28,7 @@
     "lodash": "^4.17.19",
     "marked": "^2.0.5",
     "register-service-worker": "^1.7.1",
+    "roughjs": "^4.4.1",
     "simplebar-vue": "^1.5.1",
     "turndown": "^7.0.0",
     "uuid": "^8.2.0",
