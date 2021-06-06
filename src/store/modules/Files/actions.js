@@ -97,7 +97,7 @@ export default {
         return content !== ""
       })
 
-      stock["company"] = stockContent[1]
+      stock["company"] = stockContent[1] || "";
 
       // Set buyHistory when //buy-start exist on stockContent
       const indexBuyHistoryStart = stockContent.indexOf("//buy-start")
