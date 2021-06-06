@@ -10,7 +10,10 @@
         :activeFile="getActiveFiles[getEditors.primary]"
         :openFiles="getOpenFiles[getEditors.primary]"
       />
-      <StockChart v-if="isStock"/>
+      <StockChart
+          v-if="isStock"
+          :activeFile="getActiveFiles[getEditors.primary]"
+      />
 
       <div class="scroll-wrapper">
         <component

@@ -11,25 +11,18 @@ Chart.register(...registerables);
 
 export default {
   name: "StockChart",
-  data() {
-    return {
-      companyName: null,
-      xAxisLabels: [],
-      prices: [],
-      buyHistory: [],
-      sellHistory: [],
-      stockChart: null,
-    }
+  props: {
+    activeFile: Object
   },
   mounted() {
-    this.stockChart = new Chart(document.getElementById("stockChart"), {
+    new Chart(document.getElementById("stockChart"), {
           data: {
-            labels: this.xAxisLabels,
+            labels: this.activeFile.stock.dates,
             datasets: [
               {
                 type: 'line',
-                label: this.companyName,
-                data: this.prices,
+                label: this.activeFile.stock.company,
+                data: this.activeFile.stock.prices,
                 pointRadius: 1,
                 pointHitRadius: 25,
                 pointHoverRadius: 6,
@@ -42,7 +35,7 @@ export default {
               {
                 type: 'bubble',
                 label: 'Buy(Date, Price, Quantity)',
-                data: this.buyHistory,
+                data: this.activeFile.stock.buyHistory,
                 pointRadius: 5,
                 pointHitRadius: 20,
                 pointHoverRadius: 6,
@@ -53,7 +46,7 @@ export default {
               {
                 type: 'bubble',
                 label: 'Sell(Date, Price, Quantity)',
-                data: this.sellHistory,
+                data: this.activeFile.stock.sellHistory,
                 pointRadius: 5,
                 pointHitRadius: 20,
                 pointHoverRadius: 6,
