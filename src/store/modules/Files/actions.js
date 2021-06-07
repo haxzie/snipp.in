@@ -100,7 +100,6 @@ export default {
       })
 
       // Fetch stock information from external api
-
       await Vue.axios.get(`http://127.0.0.1:5000/api/stock/${stockContent[1]}`).then(response => {
         stock["dates"] = response.data.dates
         stock["prices"] = response.data.closes
@@ -110,10 +109,20 @@ export default {
       })
       stock["company"] = stockContent[1] || "";
 
-      // Set buyHistory when //buy-start exist on stockContent
+      const historyTypes = ["buy", "sell"]
+      historyType.forEach(historyType => {
+
+      })
+      // Set History when //{historyType}-start exist on stockContent
       const indexBuyHistoryStart = stockContent.indexOf("//buy-start")
       const indexBuyHistoryEnd = stockContent.indexOf("//buy-end")
       if (indexBuyHistoryStart !== -1 && indexBuyHistoryEnd !== -1) {
+        let counts = stockContent
+            .slice(indexBuyHistoryStart + 1, indexBuyHistoryEnd)
+            .map(content => {
+              return Number.parseInt(content.split(",")[2])
+            })
+
         stock["buyHistory"] = stockContent
             .slice(indexBuyHistoryStart + 1, indexBuyHistoryEnd)
             .map(content => {
