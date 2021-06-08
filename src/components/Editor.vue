@@ -242,7 +242,6 @@ export default {
       }
     },
     enableDragAndDropMode() {
-      console.log(`dragenter`);
       this.dragAndDropMode = true;
     },
     disableDragAndDropMode() {
@@ -286,6 +285,7 @@ export default {
 
   &.multiple {
     grid-template-columns: 1fr 1fr;
+    column-gap: 3px;
   }
 
   .scroll-wrapper {

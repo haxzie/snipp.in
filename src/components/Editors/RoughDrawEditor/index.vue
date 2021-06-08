@@ -22,7 +22,11 @@
 import debounce from "lodash/debounce";
 import Toolbar from "./Toolbar.vue";
 import rough from "roughjs/bundled/rough.esm.js";
-const generator = rough.generator();
+import {
+  adjustElementCoordinates,
+  createElement,
+  isWithinElement,
+} from "./utils";
 
 export default {
   components: {
@@ -35,10 +39,12 @@ export default {
     return {
       version: 1,
       activeTool: "select",
-      activeAction: "move",
-      width: 5000,
-      height: 5000,
+      width: 2000,
+      height: 2000,
       drawing: false,
+      moving: false,
+      rendering: false,
+      selectedElement: null,
       elements: [],
       tools: {
         select: {
@@ -46,11 +52,11 @@ export default {
           icon: "MousePointerIcon",
           action: "move",
         },
-        move: {
-          name: "Move Tool",
-          icon: "MoveIcon",
-          action: "pan",
-        },
+        // move: {
+        //   name: "Move Tool",
+        //   icon: "MoveIcon",
+        //   action: "pan",
+        // },
         pencil: {
           name: "Pencil Tool",
           icon: "Edit2Icon",
@@ -87,84 +93,129 @@ export default {
   methods: {
     handleMouseDown($event) {
       const { layerX, layerY } = $event;
-      if (this.tools[this.activeTool].action === "draw") {
+      const activeAction = this.tools[this.activeTool].action;
+      if (activeAction === "draw") {
         this.drawing = true;
-        const element = this.createElement(layerX, layerY, layerX, layerY);
+        const element = createElement(
+          this.elements.length - 1,
+          this.activeTool,
+          layerX,
+          layerY,
+          layerX,
+          layerY
+        );
         this.elements = [...this.elements, element];
-      } else if ((this.tools[this.activeTool].action = "move")) {
+      } else if (activeAction === "move") {
         const element = this.getElementAtPosition(layerX, layerY);
+        if (element) {
+          const offsetX = layerX - element.x1;
+          const offsetY = layerY - element.y1;
+          this.selectedElement = { ...element, offsetX, offsetY };
+          this.moving = true;
+        }
       }
     },
     handleMouseMove($event) {
-      if (this.tools[this.activeTool].action === "draw") {
-        if (!this.drawing) return;
-        const { layerX, layerY } = $event;
-        const lastElementIndex = this.elements.length - 1;
-        const lastElement = this.elements[lastElementIndex];
+      const { layerX, layerY } = $event;
+
+      if (this.moving) {
+        $event.target.style.cursor = "move"
+      } else if (this.activeTool === "select") {
+        $event.target.style.cursor = this.getElementAtPosition(layerX, layerY)
+          ? "move"
+          : "default";
+      } else {
+        $event.target.style.cursor = "default"
+      }
+
+      if (this.drawing) {
+        const lastElement = this.elements.slice(-1)[0];
         if (lastElement) {
           const { x1, y1 } = lastElement;
-          const element = this.createElement(x1, y1, layerX, layerY);
-          const copyElements = [...this.elements];
-          copyElements[lastElementIndex] = element;
-          this.elements = copyElements;
-        } else {
+          this.updateElement(
+            this.elements.length - 1,
+            this.activeTool,
+            x1,
+            y1,
+            layerX,
+            layerY
+          );
+        } else if (this.moving) {
           console.log(`No last element`);
         }
-      } else if (this.tools[this.activeTool].action === "move") {
+      } else if (this.moving && this.selectedElement) {
+        const {
+          id,
+          type,
+          x1,
+          y1,
+          x2,
+          y2,
+          offsetX,
+          offsetY,
+        } = this.selectedElement;
+        const width = x2 - x1;
+        const height = y2 - y1;
+        const newX1 = layerX - offsetX;
+        const newY1 = layerY - offsetY;
+        this.updateElement(
+          id,
+          type,
+          newX1,
+          newY1,
+          newX1 + width,
+          newY1 + height
+        );
       }
     },
     handleMouseUp($event) {
+      if (this.drawing) {
+        const index = this.elements.length - 1;
+        const element = this.elements[index];
+        if (element) {
+          const { id, type } = element;
+          const { x1, y1, x2, y2 } = adjustElementCoordinates(element);
+          this.updateElement(id, type, x1, y1, x2, y2);
+        }
+      }
+
       this.drawing = false;
+      this.moving = false;
+      this.selectedElement = null;
       this.draw();
     },
-    createElement(x1, y1, x2, y2) {
-      switch (this.activeTool) {
-        case "line":
-          return {
-            x1,
-            y1,
-            x2,
-            y2,
-            type: "line",
-            element: generator.line(x1, y1, x2, y2),
-          };
-        case "rectangle":
-          return {
-            x1,
-            y1,
-            x2,
-            y2,
-            type: "rectangle",
-            element: generator.rectangle(x1, y1, x2 - x1, y2 - y1),
-          };
-        case "ellipse":
-          return {
-            x1,
-            y1,
-            x2,
-            y2,
-            type: "ellipse",
-            element: generator.ellipse(x1, y1, (x2 - x1) * 2, (y2 - y1) * 2),
-          };
-        default:
-          return {
-            x1,
-            y1,
-            x2,
-            y2,
-            type: "line",
-            element: generator.line(x1, y1, x2, y2),
-          };
-      }
-    },
     getElementAtPosition(x, y) {
-        return this.elements.find(element => isWithinElement(x, y, element));
+      return [...this.elements]
+        .reverse()
+        .find((element) => isWithinElement(x, y, element));
+    },
+    updateElement(id, type, x1, y1, x2, y2) {
+      const updatedElement = createElement(id, type, x1, y1, x2, y2);
+      const copyElements = [...this.elements];
+      copyElements[id] = updatedElement;
+      this.elements = copyElements;
     },
     draw() {
-      this.context.clearRect(0, 0, this.width, this.height);
-      if (this.elements && this.elements.length > 0) {
-        this.elements.map((item) => this.roughCanvas.draw(item.element));
+      if (!this.rendering) {
+        this.rough.ctx.clearRect(
+          0,
+          0,
+          this.rough.canvas.width,
+          this.rough.canvas.height
+        );
       }
+      this.rendering = true;
+
+      if (this.elements && this.elements.length > 0) {
+        for (let i = 0; i < this.elements.length; i++) {
+          const item = this.elements[i];
+          this.rough.draw(item.element);
+        }
+      }
+      this.$nextTick().then(() => {
+        this.rendering = false;
+      });
+      this.debouncedEmit();
     },
     dispatchAction(action) {
       switch (action) {
@@ -185,6 +236,7 @@ export default {
       this.draw();
       this.debouncedEmit();
     },
+
     file: {
       immediate: true,
       handler(current, previous) {
@@ -208,9 +260,9 @@ export default {
   mounted() {
     this.canvas = this.$refs.roughCanvas;
     this.context = this.canvas.getContext("2d");
-    this.roughCanvas = rough.canvas(this.canvas);
+    this.rough = rough.canvas(this.canvas, { seed: 0 });
+    this.$on("rerender", this.draw);
     // window.requestAnimationFrame(this.draw)
-    this.draw();
   },
   created() {
     this.debouncedEmit = debounce(this.emitChanges, 500);
