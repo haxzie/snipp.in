@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { Chart, registerables,  } from 'chart.js';
+import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
 
@@ -24,7 +24,7 @@ export default {
                 label: this.activeFile.stock.company,
                 data: this.activeFile.stock.prices,
                 pointRadius: 1,
-                pointHitRadius: 25,
+                pointHitRadius: 5,
                 pointHoverRadius: 6,
                 pointBackgroundColor: 'rgb(100,241,241)',
                 borderColor: 'rgb(100,241,241)',
@@ -36,8 +36,8 @@ export default {
                 type: 'bubble',
                 label: 'Buy(Date, Price, Quantity)',
                 data: this.activeFile.stock.buyHistory,
-                pointRadius: 5,
-                pointHitRadius: 20,
+                pointRadius: 10,
+                pointHitRadius: 30,
                 pointHoverRadius: 6,
                 pointBackgroundColor: 'rgb(186,56,56)',
                 borderColor: 'rgb(158,25,25)',
@@ -47,8 +47,8 @@ export default {
                 type: 'bubble',
                 label: 'Sell(Date, Price, Quantity)',
                 data: this.activeFile.stock.sellHistory,
-                pointRadius: 5,
-                pointHitRadius: 20,
+                pointRadius: 10,
+                pointHitRadius: 30,
                 pointHoverRadius: 6,
                 pointBackgroundColor: 'rgb(63,112,199)',
                 borderColor: 'rgb(17,89,227)',

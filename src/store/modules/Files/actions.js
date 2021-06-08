@@ -4,7 +4,7 @@ import omit from "lodash/omit";
 import Fuse from "fuse.js";
 import fileStorage from "@/utils/StorageDrivers/IndexedDB";
 import Vue from "vue"; // Switch storage drivers if needed
-
+import {setCalculatedRadius, setDetailFromContents} from "@/utils/stock"
 export default {
   /**
    * Loads all the files available in the localstorage into the store
@@ -88,66 +88,30 @@ export default {
 
   updateFileContents: async ({ state, commit, dispatch }, { id, contents }) => {
     if (!id) return;
-    let stock = {};
-    Object.assign(stock, state.files[id].stock)
-    if (stock.isStock) {
+
+    let stockFromDB = {}
+    let stock = {
+      "prices": [],
+      "dates": [],
+    }
+    Object.assign(stockFromDB, state.files[id].stock)
+    if(stockFromDB.isStock) {
+      // Set histories, company name
       stock["isStock"] = true
-      // Remove unnecessary space, empty element
-      const stockContent = contents.split("\n").map(content => {
-        return content.trim()
-      }).filter(content => {
-        return content !== ""
-      })
-
-      // Fetch stock information from external api
-      await Vue.axios.get(`http://127.0.0.1:5000/api/stock/${stockContent[1]}`).then(response => {
-        stock["dates"] = response.data.dates
-        stock["prices"] = response.data.closes
-      }).catch(error => {
-        stock["dates"] = []
-        stock["prices"] = []
-      })
-      stock["company"] = stockContent[1] || "";
-
-      const historyTypes = ["buy", "sell"]
-      historyType.forEach(historyType => {
-
-      })
-      // Set History when //{historyType}-start exist on stockContent
-      const indexBuyHistoryStart = stockContent.indexOf("//buy-start")
-      const indexBuyHistoryEnd = stockContent.indexOf("//buy-end")
-      if (indexBuyHistoryStart !== -1 && indexBuyHistoryEnd !== -1) {
-        let counts = stockContent
-            .slice(indexBuyHistoryStart + 1, indexBuyHistoryEnd)
-            .map(content => {
-              return Number.parseInt(content.split(",")[2])
-            })
-
-        stock["buyHistory"] = stockContent
-            .slice(indexBuyHistoryStart + 1, indexBuyHistoryEnd)
-            .map(content => {
-              const buyHistory = content.split(",")
-              return {
-                'x': buyHistory[0],
-                'y': buyHistory[1],
-                'r': buyHistory[2],
-              }
-            })
-      }
-
-      // Set sellHistory when //sell-start exist on stockContent
-      const indexSellHistoryStart = stockContent.indexOf("//sell-start")
-      const indexSellHistoryEnd = stockContent.indexOf("//sell-end")
-      if (indexSellHistoryStart !== -1 && indexSellHistoryEnd !== -1) {
-        stock["sellHistory"] = stockContent
-            .slice(indexSellHistoryStart + 1, indexSellHistoryEnd)
-            .map(content =>{
-              const sellHistory = content.split(",")
-              return {
-                'x': sellHistory[0],
-                'y': sellHistory[1],
-                'r': sellHistory[2],
-              }
+      setDetailFromContents(stock, contents)
+      // If stockSymbol from DB and Content are same, don't need to call api
+      // If last element of dates is same today, don't need to call api
+      if (stock.company !== stockFromDB.company || stockFromDB.dates[stockFromDB.dates.length - 1] !== new Date().toISOString().slice(0, 10)) {
+        // Fetch stock information from external api
+        await Vue.axios.get(`http://127.0.0.1:5000/api/stock/${stock.company}`)
+            .then(response => {
+              stock["dates"] = response.data.dates
+              stock["prices"] = response.data.prices
+            }).catch(error => {
+              console.log("error on get stock data from api : ", error)
+              stock["dates"] = []
+              stock["prices"] = []
+              stock["company"] = ""
             })
       }
       commit(types.SET_FILES, {
@@ -155,8 +119,8 @@ export default {
         [id]: {
           ...state.files[id],
           contents,
-          stock,
-        },
+          stock
+        }
       });
     } else {
       commit(types.SET_FILES, {
@@ -164,7 +128,7 @@ export default {
         [id]: {
           ...state.files[id],
           contents,
-        },
+        }
       });
     }
     fileStorage.update({ id, contents, stock });
