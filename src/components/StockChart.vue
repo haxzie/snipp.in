@@ -14,8 +14,21 @@ export default {
   props: {
     activeFile: Object
   },
+  data() {
+    return {
+      chart: undefined
+    }
+  },
+  watch: {
+    activeFile: function (val) {
+      this.chart.data.datasets[0].data = val.stock.prices
+      this.chart.data.datasets[1].data = val.stock.buyHistory
+      this.chart.data.datasets[2].data = val.stock.sellHistory
+      this.chart.update()
+    }
+  },
   mounted() {
-    new Chart(document.getElementById("stockChart"), {
+    this.chart = new Chart(document.getElementById("stockChart"), {
           data: {
             labels: this.activeFile.stock.dates,
             datasets: [
