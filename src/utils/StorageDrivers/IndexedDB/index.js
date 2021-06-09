@@ -14,11 +14,11 @@ export default {
   move: async ({ id, parent_id }) => {
     await driver.moveFile({ id, parent_id });
   },
-  update: async ({ id, contents }) => {
-    await driver.updateFile({ id, contents });
+  update: async ({ id, contents, stock }) => {
+    await driver.updateFile({ id, contents, stock });
   },
-  rename: async ({ id, name }) => {
-    await driver.renameFile({ id, name });
+  rename: async ({ id, name, stock }) => {
+    await driver.renameFile({ id, name, stock });
   },
   delete: async ({ id }) => {
     await driver.deleteFile({ id });

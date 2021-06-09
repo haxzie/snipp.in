@@ -130,6 +130,10 @@ export const validateFile = (file) => {
         type: "string",
         required: true,
       },
+      stock: {
+        type: "object",
+        required: true
+      },
     },
     additionalProperties: true,
   });

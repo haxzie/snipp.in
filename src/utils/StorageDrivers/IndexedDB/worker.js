@@ -72,14 +72,14 @@ const Driver = {
    * @param {String} param.id Id of the file
    * @param {String} param.name New name of the file
    */
-  async renameFile({ id, name }) {
+  async renameFile({ id, name, stock }) {
     try {
       const renamedFile = await db.transaction("rw", db.files, async () => {
         // Mark bigfoots:
         const file = await db.files
           .where("id")
           .equals(id)
-          .modify({ name });
+          .modify({ name, stock });
         // console.log(`file ${id} renamed!`);
         return file;
       });
@@ -96,14 +96,14 @@ const Driver = {
    * @param {String} param.id Id of the file
    * @param {String} param.contents Updated contents of the file
    */
-  async updateFile({ id, contents }) {
+  async updateFile({ id, contents, stock }) {
     try {
       const updatedFile = db.transaction("rw", db.files, async () => {
         // Mark bigfoots:
         const file = await db.files
           .where("id")
           .equals(id)
-          .modify({ contents });
+          .modify({ contents, stock });
         // console.log(`file ${id} updated!`);
         return file;
       });
@@ -174,7 +174,7 @@ const Driver = {
   },
   /**
    * Creates a footprint of an active file
-   * 
+   *
    */
   async addActiveFile({fileFootPrint}) {
     try {
