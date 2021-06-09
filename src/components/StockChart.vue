@@ -1,5 +1,8 @@
 <template>
   <div class="stock-wrapper">
+    <div class="stock-summary">
+      Earning : {{earning}}won
+    </div>
     <canvas height="80" width="350" id="stockChart"></canvas>
   </div>
 </template>
@@ -17,6 +20,25 @@ export default {
   data() {
     return {
       chart: undefined
+    }
+  },
+  computed: {
+    earning() {
+      const buys = this.activeFile.stock.buyHistory.map(order => {
+        return Number.parseInt(order.y) * Number.parseInt(order.q)
+      })
+      const sells = this.activeFile.stock.sellHistory.map(order => {
+        return Number.parseInt(order.y) * Number.parseInt(order.q)
+      })
+      let buyingSum = 0;
+      let sellingSum = 0;
+      if(buys.length > 0) {
+        buyingSum = buys.reduce((accumulate, currentValue) => {return accumulate + currentValue})
+      }
+      if(sells.length > 0) {
+        sellingSum = sells.reduce((accumulate, currentValue) => {return accumulate + currentValue})
+      }
+      return sellingSum - buyingSum
     }
   },
   watch: {
@@ -78,5 +100,15 @@ export default {
 <style scoped>
 .stock-wrapper {
   padding-bottom: 15px;
+}
+.stock-summary {
+  top: 70px;
+  left: 385px;
+  width: 200px;
+  height: 100px;
+  position: fixed;
+  background-color: #0c0c0c;
+  border: 1px solid #64F1F1FF;
+  padding: 3px 7px;
 }
 </style>
