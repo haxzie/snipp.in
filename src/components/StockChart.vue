@@ -1,7 +1,7 @@
 <template>
   <div class="stock-wrapper">
     <div class="stock-chart">
-      <canvas height="80" width="350" id="stockChart"></canvas>
+      <canvas height="360" id="stockChart"></canvas>
     </div>
     <div v-if="havingPosition" class="stock-summary">
       현재가 : {{earning[0]}} |
@@ -101,6 +101,9 @@ export default {
   },
   mounted() {
     this.chart = new Chart(document.getElementById("stockChart"), {
+          options: {
+            maintainAspectRatio: false
+          },
           data: {
             labels: this.activeFile.stock.dates,
             datasets: [
@@ -139,8 +142,8 @@ export default {
                 borderColor: 'rgb(17,89,227)',
                 borderWidth: 1,
               },
-            ]
-          }
+            ],
+          },
         }
     )
   },
