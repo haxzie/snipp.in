@@ -139,7 +139,19 @@ export default {
     let stock = {}
     Object.assign(stock, state.files[id].stock)
     stock.isStock = name.endsWith("_stock")
-
+    let contents = state.files[id].contents
+    if (stock.isStock && state.files[id].contents === "") {
+      const defaultGuidance = "//stock\n" +
+          "{{Company Stock Symbol}}\n\n" +
+          "//buy-start\n" +
+          "format: YYYY-MM-DD,{{price}},{{quantity}}\n" +
+          "ex) 2020-10-01,40300,100\n" +
+          "//buy-end\n\n" +
+          "//sell-start\n" +
+          "ex) YYYY-MM-DD,{{price}},{{quantity}}\n" +
+          "//sell-end\n"
+      contents = defaultGuidance
+    }
     commit(types.SET_FILES, {
       ...state.files,
       [id]: {
@@ -147,9 +159,10 @@ export default {
         name,
         editable: false,
         stock: stock,
+        contents: contents
       },
     });
-    fileStorage.rename({ id, name, stock });
+    fileStorage.rename({ id, name, contents, stock });
   },
 
   openRenameMode: async ({ state, commit }, { id }) => {
