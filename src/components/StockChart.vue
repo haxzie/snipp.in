@@ -4,18 +4,18 @@
       <canvas height="360" id="stockChart"></canvas>
     </div>
     <div v-if="havingPosition" class="stock-summary">
-      현재가 : {{earning[0]}} |
-      평가금액 : {{earning[1]}} |
-      보유수량 : {{earning[2]}}주 |
-      평가손익 : 2,225,684 |
-      매수금액 : {{earning[4]}} |
-      수익률 : 14.66% |
-      매입단가 : 28,834 |
+      평가손익 : {{Number(earning[0]).toLocaleString()}} |
+      수익률 : {{Number(earning[1]).toLocaleString()}}% |
+      평가금액 : {{Number(earning[2]).toLocaleString()}} |
+      보유수량 : {{Number(earning[3]).toLocaleString()}}주 |
+      매수금액 : {{Number(earning[4]).toLocaleString()}} |
+      매입단가 : {{Number(earning[5]).toLocaleString()}} |
+      현재가 : {{Number(earning[6]).toLocaleString()}} |
     </div>
     <div v-else class="stock-summary">
-      실현손익 : {{Number(earning[3]).toLocaleString()}} |
-      수익률 : {{earning[5]}}% |
-      현재가 : {{Number(earning[0]).toLocaleString()}} |
+      평가손익 : {{Number(earning[0]).toLocaleString()}} |
+      수익률 : {{Number(earning[1]).toLocaleString()}}% |
+      현재가 : {{Number(earning[6]).toLocaleString()}} |
     </div>
   </div>
 </template>
@@ -75,19 +75,23 @@ export default {
         sellingQuantity += history[1]
       })
 
-      // 평가손익 (평가금액 - 매수금액)
-      // 수익률
-      // 현재가
-      // 평가금액 (매수량 합 * 현재가)
-      // 보유수량 (매수량 합 - 매도량 합)
-      // 매수금액 (매수 * 양 + 매수 * 양 + ...)
-      // 매입단가 (
+      // 보유수량
       const currentQuantity = buyingQuantity - sellingQuantity
+      // 현재가
       const currentPrice = this.activeFile.stock.prices[this.activeFile.stock.prices.length - 1]
-      const earning = sellingSum - buyingSum
-      const currentValue = currentPrice * currentQuantity
-      const earningRate = ((buyingSum + earning) / buyingSum * 100 - 100).toFixed(2)
-      return [currentPrice, currentValue, currentQuantity, earning, buyingSum, earningRate]
+      // 매수금액
+      const purchaseAmount = buyingSum - sellingSum
+      // 평가금액
+      const estimatedValue = currentPrice * currentQuantity;
+      // 평가손익 = 평가금액 - 매수금액
+      const estimatedEarning = estimatedValue - purchaseAmount
+      // 수익률 = 평가손익 / 매수금액 * 100
+      const earningRate = (estimatedEarning / buyingSum * 100).toFixed(2)
+      // 매입단가 = 매수금액 / 보유수
+      const averagePurchasePrice = Number.parseInt(purchaseAmount / currentQuantity)
+
+      // 평가손익, 수익률, 평가금액, 보유수량, 매수금액, 매입단가, 현재가
+      return [estimatedEarning, earningRate, estimatedValue, currentQuantity, purchaseAmount, averagePurchasePrice, currentPrice]
     }
   },
   watch: {
