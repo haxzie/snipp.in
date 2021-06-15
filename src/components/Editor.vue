@@ -140,7 +140,7 @@ export default {
       "getActiveFiles",
     ]),
     isStock() {
-      return this.getActiveFiles.PRIMARY.stock.isStock
+      return this.getActiveFiles.PRIMARY?.stock.isStock
     },
     getEditors() {
       return EDITORS;
