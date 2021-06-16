@@ -103,7 +103,7 @@ export default {
       // If last element of dates is same today, don't need to call api
       if (stock.company !== stockFromDB.company || stockFromDB.dates[stockFromDB.dates.length - 1] !== new Date().toISOString().slice(0, 10)) {
         // Fetch stock information from external api
-        await Vue.axios.get(`http://127.0.0.1:5000/api/stock/${stock.company}`)
+        await Vue.axios.get(`http://asia-northeast3-vibrant-crawler-315212.cloudfunctions.net/stock?symbol=${stock.company}`)
             .then(response => {
               stock["dates"] = response.data.dates
               stock["prices"] = response.data.prices
