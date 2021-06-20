@@ -12,7 +12,7 @@
     <Toolbar
       :activeTool="activeTool"
       :tools="tools"
-      @select-tool="(tool) => (activeTool = tool)"
+      @select-tool="(tool) => setActiveTool(tool)"
       @select-action="(action) => dispatchAction(action)"
     />
   </div>
@@ -25,7 +25,9 @@ import rough from "roughjs/bundled/rough.esm.js";
 import {
   adjustElementCoordinates,
   createElement,
+  ELEMENTS,
   isWithinElement,
+  generateSelectionBoundary,
 } from "./utils";
 
 export default {
@@ -43,9 +45,12 @@ export default {
       height: 2000,
       drawing: false,
       moving: false,
+      selecting: false,
       rendering: false,
-      selectedElement: null,
+      selectionRect: null,
+      temporaryElement: null,
       elements: [],
+      selectedElements: [],
       tools: {
         select: {
           name: "Select Tool",
@@ -97,103 +102,169 @@ export default {
       if (activeAction === "draw") {
         this.drawing = true;
         const element = createElement(
-          this.elements.length - 1,
+          null,
           this.activeTool,
           layerX,
           layerY,
           layerX,
           layerY
         );
-        this.elements = [...this.elements, element];
+        this.temporaryElement = element;
       } else if (activeAction === "move") {
         const element = this.getElementAtPosition(layerX, layerY);
         if (element) {
           const offsetX = layerX - element.x1;
           const offsetY = layerY - element.y1;
-          this.selectedElement = { ...element, offsetX, offsetY };
+          const selectionBoundary = generateSelectionBoundary(
+            element.id,
+            element.x1,
+            element.y1,
+            element.x2,
+            element.y2
+          );
+          this.selectedElements = [
+            {
+              ...element,
+              offsetX,
+              offsetY,
+              selectionBoundary,
+            },
+          ];
           this.moving = true;
+        } else {
+          const selectionRect = createElement(
+            -1,
+            ELEMENTS.selection,
+            layerX,
+            layerY,
+            layerX,
+            layerY
+          );
+          this.selectionRect = selectionRect;
+          this.selecting = true;
+          if (this.selectedElements && this.selectedElements.length > 0) {
+            this.selectedElements = [];
+          }
         }
       }
     },
     handleMouseMove($event) {
+      // console.log(`mouse move`);
+
       const { layerX, layerY } = $event;
 
       if (this.moving) {
-        $event.target.style.cursor = "move"
+        $event.target.style.cursor = "move";
       } else if (this.activeTool === "select") {
         $event.target.style.cursor = this.getElementAtPosition(layerX, layerY)
           ? "move"
           : "default";
       } else {
-        $event.target.style.cursor = "default"
+        $event.target.style.cursor = "default";
       }
 
       if (this.drawing) {
-        const lastElement = this.elements.slice(-1)[0];
-        if (lastElement) {
-          const { x1, y1 } = lastElement;
-          this.updateElement(
-            this.elements.length - 1,
-            this.activeTool,
-            x1,
-            y1,
-            layerX,
-            layerY
-          );
+        if (this.temporaryElement) {
+          const { x1, y1 } = this.temporaryElement;
+          this.updateTemporaryElement(x1, y1, layerX, layerY);
         } else if (this.moving) {
           console.log(`No last element`);
         }
-      } else if (this.moving && this.selectedElement) {
-        const {
-          id,
-          type,
-          x1,
-          y1,
-          x2,
-          y2,
-          offsetX,
-          offsetY,
-        } = this.selectedElement;
-        const width = x2 - x1;
-        const height = y2 - y1;
-        const newX1 = layerX - offsetX;
-        const newY1 = layerY - offsetY;
-        this.updateElement(
-          id,
-          type,
-          newX1,
-          newY1,
-          newX1 + width,
-          newY1 + height
-        );
+      } else if (
+        this.moving &&
+        this.selectedElements &&
+        this.selectedElements.length > 0
+      ) {
+        this.selectedElements = this.selectedElements.map((selectedElement) => {
+          const {
+            id,
+            type,
+            x1,
+            y1,
+            x2,
+            y2,
+            offsetX,
+            offsetY,
+          } = selectedElement;
+          const width = x2 - x1;
+          const height = y2 - y1;
+          const newX1 = layerX - offsetX;
+          const newY1 = layerY - offsetY;
+          const element = this.updateElement(
+            id,
+            type,
+            newX1,
+            newY1,
+            newX1 + width,
+            newY1 + height
+          );
+          // update selection boundary for the element
+          const selectionBoundary = generateSelectionBoundary(
+            element.id,
+            newX1,
+            newY1,
+            newX1 + width,
+            newY1 + height
+          );
+          return {
+            ...element,
+            offsetX,
+            offsetY,
+            selectionBoundary,
+          };
+        });
+      } else if (this.selecting && this.selectionRect) {
+        const { id, type, x1, y1 } = this.selectionRect;
+        this.updateSelectionRect(id, type, x1, y1, layerX, layerY);
       }
     },
     handleMouseUp($event) {
-      if (this.drawing) {
-        const index = this.elements.length - 1;
-        const element = this.elements[index];
+      if (this.drawing && this.temporaryElement) {
+        const index = this.elements.length;
+        const element = this.temporaryElement;
         if (element) {
-          const { id, type } = element;
           const { x1, y1, x2, y2 } = adjustElementCoordinates(element);
-          this.updateElement(id, type, x1, y1, x2, y2);
+          if (x2 - x1 > 1 || y2 - y1 > 1) {
+            this.elements = [
+              ...this.elements,
+              { ...element, x1, y1, x2, y2, id: index },
+            ];
+          }
         }
       }
 
       this.drawing = false;
       this.moving = false;
-      this.selectedElement = null;
-      this.draw();
+      this.selecting = false;
+      this.temporaryElement = null;
+      // this.selectedElement = null;
+      this.selectionRect = null;
     },
     getElementAtPosition(x, y) {
       return [...this.elements]
         .reverse()
         .find((element) => isWithinElement(x, y, element));
     },
+    updateTemporaryElement(x1, y1, x2, y2) {
+      this.temporaryElement = createElement(
+        null,
+        this.temporaryElement.type,
+        x1,
+        y1,
+        x2,
+        y2
+      );
+    },
     updateElement(id, type, x1, y1, x2, y2) {
       const updatedElement = createElement(id, type, x1, y1, x2, y2);
       const copyElements = [...this.elements];
       copyElements[id] = updatedElement;
       this.elements = copyElements;
+      return updatedElement;
+    },
+    updateSelectionRect(id, type, x1, y1, x2, y2) {
+      const updatedElement = createElement(id, type, x1, y1, x2, y2);
+      this.selectionRect = updatedElement;
     },
     draw() {
       if (!this.rendering) {
@@ -203,6 +274,9 @@ export default {
           this.rough.canvas.width,
           this.rough.canvas.height
         );
+      } else {
+        // return if there is a rendering in progress
+        return;
       }
       this.rendering = true;
 
@@ -212,17 +286,51 @@ export default {
           this.rough.draw(item.element);
         }
       }
+      // draw the selection rectangle
+      if (this.temporaryElement) {
+        this.rough.draw(this.temporaryElement.element);
+      }
+
+      // draw element selection boundaries
+      if (this.selectedElements && this.selectedElements.length > 0) {
+        this.selectedElements.forEach(
+          ({ selectionBoundary: { boundingRect, edges } }) => {
+            this.rough.draw(boundingRect.element);
+            edges.forEach((edge) => this.rough.draw(edge.element));
+          }
+        );
+      }
+
+      // draw the selection rectangle
+      if (this.selectionRect) {
+        this.rough.draw(this.selectionRect.element);
+      }
+
       this.$nextTick().then(() => {
         this.rendering = false;
       });
-      this.debouncedEmit();
+      // this.debouncedEmit();
+    },
+    reset() {
+      this.drawing = false;
+      this.moving = false;
+      this.selecting = false;
+      this.rendering = false;
+      this.selectionRect = null;
+      this.temporaryElement = null;
+      this.elements = [];
+      this.selectedElements = [];
     },
     dispatchAction(action) {
       switch (action) {
         case "clear":
-          this.elements = [];
+          this.reset();
           return;
       }
+    },
+    setActiveTool(tool) {
+      this.activeTool = tool;
+      this.selectedElements = [];
     },
     emitChanges() {
       this.$emit("contentChanged", {
@@ -236,7 +344,17 @@ export default {
       this.draw();
       this.debouncedEmit();
     },
-
+    selectionRect(selection) {
+      this.draw();
+    },
+    selectedElements() {
+      this.draw();
+    },
+    temporaryElement(element) {
+      if (element) {
+        this.draw();
+      }
+    },
     file: {
       immediate: true,
       handler(current, previous) {
@@ -261,7 +379,7 @@ export default {
     this.canvas = this.$refs.roughCanvas;
     this.context = this.canvas.getContext("2d");
     this.rough = rough.canvas(this.canvas, { seed: 0 });
-    this.$on("rerender", this.draw);
+    // this.$on("rerender", this.draw);
     // window.requestAnimationFrame(this.draw)
   },
   created() {
