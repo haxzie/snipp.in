@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "node --max_old_space_size=800 ./node_modules/@vue/cli-service/bin/vue-cli-service.js build",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -18,8 +18,8 @@
     "@tiptap/extension-task-list": "^2.0.0-beta.15",
     "@tiptap/extension-text": "^2.0.0-beta.12",
     "@tiptap/extension-typography": "^2.0.0-beta.12",
-    "@tiptap/starter-kit": "*",
-    "@tiptap/vue-2": "*",
+    "@tiptap/starter-kit": "2.0.0-beta.80",
+    "@tiptap/vue-2": "2.0.0-beta.38",
     "axios": "^0.21.1",
     "chart.js": "^3.3.2",
     "comlink": "^4.3.0",
