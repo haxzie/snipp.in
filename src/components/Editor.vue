@@ -64,32 +64,11 @@
         <li @click="createFile({ editable: true })">
           <FilePlusIcon class="icon" size="18" /> Create new empty file
         </li>
-        <li @click="createFile({ editable: true, name: 'untitled.doc' })">
-          <FilePlusIcon class="icon" size="18" /> Create new document
+        <li @click="createFile({ editable: true, name: 'untitled.stock' })">
+          <FilePlusIcon class="icon" size="18" /> Create new stock
         </li>
         <li @click="createDirectory({ editable: true })">
           <FolderPlusIcon class="icon" size="18" /> Create new Folder
-        </li>
-      </ul>
-
-      <h3 class="menu-title">Get Involved</h3>
-      <ul class="menu">
-        <li>
-          <a
-            href="https://github.com/haxzie/snipp.in"
-            target="_blank"
-            ref="noopener noreferrer"
-            ><GithubIcon class="icon" size="18" /> GitHub</a
-          >
-        </li>
-        <li>
-          <a
-            href="https://github.com/haxzie/snipp.in/issues"
-            target="_blank"
-            ref="noopener noreferrer"
-            ><GitPullRequestIcon class="icon" size="18" /> Report a bug or an
-            issue</a
-          >
         </li>
       </ul>
     </div>
