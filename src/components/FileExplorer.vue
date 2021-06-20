@@ -8,7 +8,7 @@
     @contextmenu.prevent="openContextMenu"
   >
     <header>
-      <h4>File Explorer</h4>
+      <h4>Stock Explorer</h4>
       <div class="menu">
         <div
           v-tooltip="'Create new file (Alt+N)'"
