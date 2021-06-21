@@ -1,5 +1,6 @@
 import rough from "roughjs/bundled/rough.esm.js";
 const generator = rough.generator();
+const padding = 3; // added padding to the edges of the selection boundary
 
 // root of [(x1-x2)^2 + (y1, y2)^2]
 const distance = (a, b) =>
@@ -103,116 +104,178 @@ export function createElement(id, element, x1, y1, x2, y2) {
         element: generator.line(x1, y1, x2, y2, {
           roughness: 1,
           preserveVertices: true,
-          seed: 2
+          seed: 2,
         }),
       };
   }
 }
 
-export function generateSelectionBoundary(id, x1, y1, x2, y2) {
-  const padding = 3;
-  const edges = {
-    x1: Math.min(x1, x2) - padding,
-    y1: Math.min(y1, y2) - padding,
-    x2: Math.max(x2, x1) + padding,
-    y2: Math.max(y2, y1) + padding,
-  };
-  const boundingRect = {
-    id,
-    type: ELEMENTS.rectangle,
-    x1: edges.x1,
-    y1: edges.y1,
-    x2: edges.x2,
-    y2: edges.y2,
-    element: generator.rectangle(
-      edges.x1,
-      edges.y1,
-      edges.x2 - edges.x1,
-      edges.y2 - edges.y1,
-      {
-        roughness: 0,
-        preserveVertices: true,
-        stroke: `rgb(23, 158, 248)`,
-        strokeWidth: 2,
-      }
-    ),
-  };
+export function generateSelectionBoundary(id, type, x1, y1, x2, y2) {
+  switch (type) {
+    case ELEMENTS.line: {
 
-  const topLeftBox = {
-    id,
-    edge: "tl",
-    type: ELEMENTS.rectangle,
-    x1: edges.x1 - 4,
-    y1: edges.y1 - 4,
-    x2: edges.x1 + 4,
-    y2: edges.y1 + 4,
-    element: generator.rectangle(edges.x1 - 4, edges.y1 - 4, 8, 8, {
-      roughness: 0,
-      preserveVertices: true,
-      fill: `rgb(23, 158, 248)`,
-      fillStyle: "solid",
-      stroke: `rgb(255, 255, 255)`,
-      strokeWidth: 2,
-    }),
-  };
-  const topRightBox = {
-    id,
-    edge: "tr",
-    type: ELEMENTS.rectangle,
-    x1: edges.x2 - 4,
-    y1: edges.y1 - 4,
-    x2: edges.x2 + 4,
-    y2: edges.y1 + 4,
-    element: generator.rectangle(edges.x2 - 4, edges.y1 - 4, 8, 8, {
-      roughness: 0,
-      preserveVertices: true,
-      fill: `rgb(23, 158, 248)`,
-      fillStyle: "solid",
-      stroke: `rgb(255, 255, 255)`,
-      strokeWidth: 2,
-    }),
-  };
+      const edges = {
+        x1: x1,
+        y1: y1,
+        x2: x2,
+        y2: y2,
+      };
 
-  const bottomLeftBox = {
-    id,
-    edge: "bl",
-    type: ELEMENTS.rectangle,
-    x1: edges.x1 - 4,
-    y1: edges.y2 - 4,
-    x2: edges.x1 + 4,
-    y2: edges.y2 + 4,
-    element: generator.rectangle(edges.x1 - 4, edges.y2 - 4, 8, 8, {
-      roughness: 0,
-      preserveVertices: true,
-      fill: `rgb(23, 158, 248)`,
-      fillStyle: "solid",
-      stroke: `rgb(255, 255, 255)`,
-      strokeWidth: 2,
-    }),
-  };
+      const skeletonLine = {
+        id,
+        type: ELEMENTS.line,
+        ...edges,
+        element: generator.line(edges.x1, edges.y1, edges.x2, edges.y2, {
+          roughness: 0,
+          preserveVertices: true,
+          stroke: `rgba(23, 158, 248, 0)`,
+          strokeWidth: 2,
+        }),
+      };
+      const startEdge = {
+        id,
+        position: "start",
+        type: ELEMENTS.rectangle,
+        x1: edges.x1+4,
+        y1: edges.y1+4,
+        x2: edges.x1-4,
+        y2: edges.y1-4,
+        element: generator.rectangle(edges.x1-4, edges.y1-4, 8, 8, {
+          roughness: 0,
+          preserveVertices: true,
+          fill: `rgb(23, 158, 248)`,
+          fillStyle: "solid",
+          stroke: `rgb(255, 255, 255)`,
+          strokeWidth: 2,
+        }),
+      };
 
-  const bottomRightBox = {
-    id,
-    edge: "br",
-    type: ELEMENTS.rectangle,
-    x1: edges.x2 - 4,
-    y1: edges.y2 - 4,
-    x2: edges.x2 + 4,
-    y2: edges.y2 + 4,
-    element: generator.rectangle(edges.x2 - 4, edges.y2 - 4, 8, 8, {
-      roughness: 0,
-      preserveVertices: true,
-      fill: `rgb(23, 158, 248)`,
-      fillStyle: "solid",
-      stroke: `rgb(255, 255, 255)`,
-      strokeWidth: 2,
-    }),
-  };
+      const endEdge = {
+        id,
+        position: "end",
+        type: ELEMENTS.rectangle,
+        x1: edges.x2+4,
+        y1: edges.y2+4,
+        x2: edges.x2-4,
+        y2: edges.y2-4,
+        element: generator.rectangle(edges.x2-4, edges.y2-4, 8, 8, {
+          roughness: 0,
+          preserveVertices: true,
+          fill: `rgb(23, 158, 248)`,
+          fillStyle: "solid",
+          stroke: `rgb(255, 255, 255)`,
+          strokeWidth: 2,
+        }),
+      };
 
-  return {
-    boundingRect,
-    edges: [topLeftBox, topRightBox, bottomLeftBox, bottomRightBox]
-  };
+      return {
+        skeleton: skeletonLine,
+        edges: [startEdge, endEdge],
+      };
+    }
+    default: {
+      const edges = {
+        x1: x1 - padding,
+        y1: y1 - padding,
+        x2: x2 + padding,
+        y2: y2 + padding,
+      };
+
+      const boundingRect = {
+        id,
+        type: ELEMENTS.rectangle,
+        ...edges,
+        element: generator.rectangle(
+          edges.x1,
+          edges.y1,
+          edges.x2 - edges.x1,
+          edges.y2 - edges.y1,
+          {
+            roughness: 0,
+            preserveVertices: true,
+            stroke: `rgb(23, 158, 248)`,
+            strokeWidth: 2,
+          }
+        ),
+      };
+
+      const topLeftBox = {
+        id,
+        position: "tl",
+        type: ELEMENTS.rectangle,
+        x1: edges.x1 - 4,
+        y1: edges.y1 - 4,
+        x2: edges.x1 + 4,
+        y2: edges.y1 + 4,
+        element: generator.rectangle(edges.x1 - 4, edges.y1 - 4, 8, 8, {
+          roughness: 0,
+          preserveVertices: true,
+          fill: `rgb(23, 158, 248)`,
+          fillStyle: "solid",
+          stroke: `rgb(255, 255, 255)`,
+          strokeWidth: 2,
+        }),
+      };
+      const topRightBox = {
+        id,
+        position: "tr",
+        type: ELEMENTS.rectangle,
+        x1: edges.x2 - 4,
+        y1: edges.y1 - 4,
+        x2: edges.x2 + 4,
+        y2: edges.y1 + 4,
+        element: generator.rectangle(edges.x2 - 4, edges.y1 - 4, 8, 8, {
+          roughness: 0,
+          preserveVertices: true,
+          fill: `rgb(23, 158, 248)`,
+          fillStyle: "solid",
+          stroke: `rgb(255, 255, 255)`,
+          strokeWidth: 2,
+        }),
+      };
+
+      const bottomLeftBox = {
+        id,
+        position: "bl",
+        type: ELEMENTS.rectangle,
+        x1: edges.x1 - 4,
+        y1: edges.y2 - 4,
+        x2: edges.x1 + 4,
+        y2: edges.y2 + 4,
+        element: generator.rectangle(edges.x1 - 4, edges.y2 - 4, 8, 8, {
+          roughness: 0,
+          preserveVertices: true,
+          fill: `rgb(23, 158, 248)`,
+          fillStyle: "solid",
+          stroke: `rgb(255, 255, 255)`,
+          strokeWidth: 2,
+        }),
+      };
+
+      const bottomRightBox = {
+        id,
+        position: "br",
+        type: ELEMENTS.rectangle,
+        x1: edges.x2 - 4,
+        y1: edges.y2 - 4,
+        x2: edges.x2 + 4,
+        y2: edges.y2 + 4,
+        element: generator.rectangle(edges.x2 - 4, edges.y2 - 4, 8, 8, {
+          roughness: 0,
+          preserveVertices: true,
+          fill: `rgb(23, 158, 248)`,
+          fillStyle: "solid",
+          stroke: `rgb(255, 255, 255)`,
+          strokeWidth: 2,
+        }),
+      };
+
+      return {
+        skeleton: boundingRect,
+        edges: [topLeftBox, topRightBox, bottomLeftBox, bottomRightBox],
+      };
+    }
+  }
 }
 
 export function isWithinElement(x, y, element) {
@@ -273,5 +336,38 @@ export function adjustElementCoordinates(element) {
       const maxY = Math.max(y1, y2);
       return { x1: minX, y1: minY, x2: maxX, y2: maxY };
     }
+  }
+}
+
+export function resizeElement(x, y, position, element) {
+  const { x1, y1, x2, y2 } = element;
+  switch (position) {
+    case "tl":
+    case "start":
+      return { x1: x, y1: y, x2, y2 };
+    case "tr":
+      return { x1, y1: y, x2: x, y2 };
+    case "bl":
+      return { x1: x, y1, x2, y2: y };
+    case "br":
+    case "end":
+      return { x1, y1, x2: x, y2: y };
+    default:
+      return null; //should not really get here...
+  }
+}
+
+export function getCursorForPosition(position) {
+  switch (position) {
+    case "tl":
+    case "br":
+    case "start":
+    case "end":
+      return "nwse-resize";
+    case "tr":
+    case "bl":
+      return "nesw-resize";
+    default:
+      return "move";
   }
 }

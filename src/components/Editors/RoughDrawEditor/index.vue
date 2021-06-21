@@ -28,6 +28,8 @@ import {
   ELEMENTS,
   isWithinElement,
   generateSelectionBoundary,
+  getCursorForPosition,
+  resizeElement,
 } from "./utils";
 
 export default {
@@ -45,10 +47,12 @@ export default {
       height: 2000,
       drawing: false,
       moving: false,
+      resizing: false,
       selecting: false,
       rendering: false,
       selectionRect: null,
       temporaryElement: null,
+      selectedEdge: null,
       elements: [],
       selectedElements: [],
       tools: {
@@ -111,39 +115,46 @@ export default {
         );
         this.temporaryElement = element;
       } else if (activeAction === "move") {
-        const element = this.getElementAtPosition(layerX, layerY);
-        if (element) {
-          const offsetX = layerX - element.x1;
-          const offsetY = layerY - element.y1;
-          const selectionBoundary = generateSelectionBoundary(
-            element.id,
-            element.x1,
-            element.y1,
-            element.x2,
-            element.y2
-          );
-          this.selectedElements = [
-            {
-              ...element,
-              offsetX,
-              offsetY,
-              selectionBoundary,
-            },
-          ];
-          this.moving = true;
+        const edgeElement = this.getEdgeAtPosition(layerX, layerY);
+        if (edgeElement) {
+          this.resizing = true;
+          this.selectedEdge = edgeElement;
         } else {
-          const selectionRect = createElement(
-            -1,
-            ELEMENTS.selection,
-            layerX,
-            layerY,
-            layerX,
-            layerY
-          );
-          this.selectionRect = selectionRect;
-          this.selecting = true;
-          if (this.selectedElements && this.selectedElements.length > 0) {
-            this.selectedElements = [];
+          const element = this.getElementAtPosition(layerX, layerY);
+          if (element) {
+            const offsetX = layerX - element.x1;
+            const offsetY = layerY - element.y1;
+            const selectionBoundary = generateSelectionBoundary(
+              element.id,
+              element.type,
+              element.x1,
+              element.y1,
+              element.x2,
+              element.y2
+            );
+            this.selectedElements = [
+              {
+                ...element,
+                offsetX,
+                offsetY,
+                selectionBoundary,
+              },
+            ];
+            this.moving = true;
+          } else {
+            const selectionRect = createElement(
+              -1,
+              ELEMENTS.selection,
+              layerX,
+              layerY,
+              layerX,
+              layerY
+            );
+            this.selectionRect = selectionRect;
+            this.selecting = true;
+            if (this.selectedElements && this.selectedElements.length > 0) {
+              this.selectedElements = [];
+            }
           }
         }
       }
@@ -155,10 +166,18 @@ export default {
 
       if (this.moving) {
         $event.target.style.cursor = "move";
+      } else if (this.resizing) {
       } else if (this.activeTool === "select") {
-        $event.target.style.cursor = this.getElementAtPosition(layerX, layerY)
-          ? "move"
-          : "default";
+        const edgeElement = this.getEdgeAtPosition(layerX, layerY);
+        if (edgeElement) {
+          $event.target.style.cursor = getCursorForPosition(
+            edgeElement.position
+          );
+        } else {
+          $event.target.style.cursor = this.getElementAtPosition(layerX, layerY)
+            ? "move"
+            : "default";
+        }
       } else {
         $event.target.style.cursor = "default";
       }
@@ -170,6 +189,42 @@ export default {
         } else if (this.moving) {
           console.log(`No last element`);
         }
+      } else if (
+        this.resizing &&
+        this.selectedEdge &&
+        this.selectedElements &&
+        this.selectedElements.length > 0
+      ) {
+        const { id, position } = this.selectedEdge;
+        const selectedElement = this.selectedElements.find(item => item.id === id); 
+        const { x1, y1, x2, y2 } = resizeElement(
+          layerX,
+          layerY,
+          position,
+          selectedElement
+        );
+        const updatedElement = this.updateElement(
+          selectedElement.id,
+          selectedElement.type,
+          x1,
+          y1,
+          x2,
+          y2
+        );
+        const selectionBoundary = generateSelectionBoundary(
+          updatedElement.id,
+          updatedElement.type,
+          x1,
+          y1,
+          x2,
+          y2
+        );
+        this.selectedElements = [{
+          ...selectedElement,
+          ...updatedElement,
+          // ...adjustElementCoordinates(updatedElement),
+          selectionBoundary
+        }]
       } else if (
         this.moving &&
         this.selectedElements &&
@@ -201,6 +256,7 @@ export default {
           // update selection boundary for the element
           const selectionBoundary = generateSelectionBoundary(
             element.id,
+            element.type,
             newX1,
             newY1,
             newX1 + width,
@@ -225,10 +281,9 @@ export default {
         if (element) {
           const { x1, y1, x2, y2 } = adjustElementCoordinates(element);
           if (x2 - x1 > 1 || y2 - y1 > 1) {
-            this.elements = [
-              ...this.elements,
-              { ...element, x1, y1, x2, y2, id: index },
-            ];
+            this.updateElement(index, element.type, x1, y1, x2, y2);
+            // console.log({ element })
+            // this.elements = [ ...this.elements, element]
           }
         }
       }
@@ -236,14 +291,23 @@ export default {
       this.drawing = false;
       this.moving = false;
       this.selecting = false;
+      this.resizing = false;
       this.temporaryElement = null;
-      // this.selectedElement = null;
+      this.selectedEdge = null;
       this.selectionRect = null;
     },
     getElementAtPosition(x, y) {
       return [...this.elements]
         .reverse()
         .find((element) => isWithinElement(x, y, element));
+    },
+    getEdgeAtPosition(x, y) {
+      if (this.selectedElements && this.selectedElements.length > 0) {
+        const edgeElements = this.selectedElements[0].selectionBoundary.edges;
+        return edgeElements.find((edge) => isWithinElement(x, y, edge));
+      } else {
+        return false;
+      }
     },
     updateTemporaryElement(x1, y1, x2, y2) {
       this.temporaryElement = createElement(
@@ -294,8 +358,8 @@ export default {
       // draw element selection boundaries
       if (this.selectedElements && this.selectedElements.length > 0) {
         this.selectedElements.forEach(
-          ({ selectionBoundary: { boundingRect, edges } }) => {
-            this.rough.draw(boundingRect.element);
+          ({ selectionBoundary: { skeleton, edges } }) => {
+            this.rough.draw(skeleton.element);
             edges.forEach((edge) => this.rough.draw(edge.element));
           }
         );
