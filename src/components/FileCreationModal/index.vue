@@ -86,11 +86,11 @@ export default {
           name: "Document",
           icon: "FileTextIcon",
         },
-        // draw: {
-        //   ext: "draw",
-        //   name: "Drawing",
-        //   icon: "PenToolIcon",
-        // },
+        draw: {
+          ext: "draw",
+          name: "Drawing",
+          icon: "PenToolIcon",
+        },
       },
     };
   },
