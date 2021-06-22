@@ -17,6 +17,7 @@
           v-if="getActiveFiles[EDITORS.primary]"
           :file="getActiveFiles[EDITORS.primary]"
           :is="getEditorForFile(getActiveFiles[EDITORS.primary])"
+          :isActive="getActiveEditor === EDITORS.primary"
           @contentChanged="
             (contents) =>
               updateContents(getActiveFiles[EDITORS.primary].id, contents)
@@ -44,6 +45,7 @@
           v-if="getActiveFiles[EDITORS.secondary]"
           :file="getActiveFiles[EDITORS.secondary]"
           :is="getEditorForFile(getActiveFiles[EDITORS.secondary])"
+          :isActive="getActiveEditor === EDITORS.primary"
           @contentChanged="
             (contents) =>
               updateContents(getActiveFiles[EDITORS.secondary].id, contents)
@@ -220,7 +222,7 @@ export default {
     },
     switchActiveEditor(editor) {
       if (this.getActiveEditor !== editor) {
-        this.setActiveEditor({ editor })
+        this.setActiveEditor({ editor });
       }
     },
     getEditorForFile(file) {

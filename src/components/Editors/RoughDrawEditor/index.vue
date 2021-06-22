@@ -22,6 +22,8 @@
 import debounce from "lodash/debounce";
 import Toolbar from "./Toolbar.vue";
 import rough from "roughjs/bundled/rough.esm.js";
+import Mousetrap from "mousetrap";
+
 import {
   adjustElementCoordinates,
   createElement,
@@ -38,6 +40,10 @@ export default {
   },
   props: {
     file: Object,
+    isActive: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -97,6 +103,9 @@ export default {
           action: "draw",
         },
       },
+      shortcuts: {
+        
+      }
     };
   },
   methods: {
@@ -196,13 +205,14 @@ export default {
         this.selectedElements.length > 0
       ) {
         const { id, position } = this.selectedEdge;
-        const selectedElement = this.selectedElements.find(item => item.id === id); 
+        const selectedElement = this.elements.find((item) => item.id === id);
         const { x1, y1, x2, y2 } = resizeElement(
           layerX,
           layerY,
           position,
           selectedElement
         );
+
         const updatedElement = this.updateElement(
           selectedElement.id,
           selectedElement.type,
@@ -219,12 +229,14 @@ export default {
           x2,
           y2
         );
-        this.selectedElements = [{
-          ...selectedElement,
-          ...updatedElement,
-          // ...adjustElementCoordinates(updatedElement),
-          selectionBoundary
-        }]
+        this.selectedElements = [
+          {
+            ...selectedElement,
+            ...updatedElement,
+            // ...adjustElementCoordinates(updatedElement),
+            selectionBoundary,
+          },
+        ];
       } else if (
         this.moving &&
         this.selectedElements &&
@@ -282,9 +294,34 @@ export default {
           const { x1, y1, x2, y2 } = adjustElementCoordinates(element);
           if (x2 - x1 > 1 || y2 - y1 > 1) {
             this.updateElement(index, element.type, x1, y1, x2, y2);
-            // console.log({ element })
-            // this.elements = [ ...this.elements, element]
           }
+        }
+      } else if (this.resizing && this.selectedEdge) {
+        const element = { ...this.elements[this.selectedEdge.id] };
+        if (element) {
+          const { x1, y1, x2, y2 } = adjustElementCoordinates(element);
+          const updatedElement = this.updateElement(
+            element.id,
+            element.type,
+            x1,
+            y1,
+            x2,
+            y2
+          );
+          const selectionBoundary = generateSelectionBoundary(
+            updatedElement.id,
+            updatedElement.type,
+            x1,
+            y1,
+            x2,
+            y2
+          );
+          this.selectedElements = [
+            {
+              ...updatedElement,
+              selectionBoundary,
+            },
+          ];
         }
       }
 
@@ -402,6 +439,12 @@ export default {
         elements: this.elements,
       });
     },
+    bindShortcuts() {
+
+    },
+    unbindShortcuts() {
+
+    }
   },
   watch: {
     elements() {
@@ -438,6 +481,13 @@ export default {
         }
       },
     },
+    isActive(value) {
+      if (value) {
+
+      } else {
+
+      }
+    }
   },
   mounted() {
     this.canvas = this.$refs.roughCanvas;
