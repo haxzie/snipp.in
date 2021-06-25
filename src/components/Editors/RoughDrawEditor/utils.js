@@ -175,10 +175,10 @@ export function generateSelectionBoundary(id, type, x1, y1, x2, y2) {
     }
     default: {
       const edges = {
-        x1: Math.min(x1, x2) - padding,
-        y1: Math.min(y1, y2) - padding,
-        x2: Math.max(x1, x2) + padding,
-        y2: Math.max(y1, y2) + padding,
+        x1: Math.min(x1, x2),
+        y1: Math.min(y1, y2),
+        x2: Math.max(x1, x2),
+        y2: Math.max(y1, y2),
       };
 
       const boundingRect = {
