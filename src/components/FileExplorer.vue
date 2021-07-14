@@ -13,10 +13,8 @@
         <div
           v-tooltip="'Create new file (Alt+N)'"
           class="icon-wrapper"
-          v-shortkey="['alt', 'n']"
-          @shortkey="createNewFile"
         >
-          <FilePlusIcon size="18" class="icon" @click="createNewFile" />
+          <FilePlusIcon size="18" class="icon" @click="setShowCreateFileModal({ flag: true })" />
         </div>
         <div
           v-tooltip="'Create new folder (Ctrl+Alt+N)'"
@@ -94,6 +92,7 @@ export default {
   methods: {
     ...mapMutations("Editor", { setDraggingId: "SET_DRAGGING_ID" }),
     ...mapActions("Files", ["createFile", "createDirectory", "moveFile"]),
+    ...mapActions("UI", ["setShowCreateFileModal"]),
     createNewFile() {
       this.closeContextMenu();
       this.createFile({ editable: true });

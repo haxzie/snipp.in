@@ -178,7 +178,7 @@ const Driver = {
    */
   async addActiveFile({fileFootPrint}) {
     try {
-      const fp = await db.activeFiles.put(fileFootPrint, ["id"]);
+      const fp = await db.activeFiles.put(fileFootPrint, ["editor"]);
       return fp;
     } catch (error) {
       console.error(error);
