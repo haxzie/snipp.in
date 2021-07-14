@@ -30,6 +30,8 @@ export default function initialState() {
     activePanelId: PANELS.explorer.id,
     panelsById: ['explorer', 'search'],
     showCommandCenter: false,
-    activeTheme: getActiveTheme()
+    activeTheme: getActiveTheme(),
+    showCreateFileModal: false,
+    bootstrappedFileName: "" // used to pass a filename to the create file modal
   };
 }
