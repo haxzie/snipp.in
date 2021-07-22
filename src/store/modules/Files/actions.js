@@ -106,21 +106,19 @@ export default {
       // Set histories, company name
       stock["isStock"] = true
       setDetailFromContents(stock, contents)
-      // If stockSymbol from DB and Content are same, don't need to call api
-      // If last element of dates is same today, don't need to call api
-      if (stock.company !== stockFromDB.company || stockFromDB.dates[stockFromDB.dates.length - 1] !== new Date().toISOString().slice(0, 10)) {
-        // Fetch stock information from external api
-        await Vue.axios.get(`https://asia-northeast3-vibrant-crawler-315212.cloudfunctions.net/stock?symbol=${stock.company}`)
-            .then(response => {
-              stock["dates"] = response.data.dates
-              stock["prices"] = response.data.prices
-            }).catch(error => {
-              console.log("error on get stock data from api : ", error)
-              stock["dates"] = []
-              stock["prices"] = []
-              stock["company"] = ""
-            })
-      }
+
+      // Fetch stock information from external api
+      await Vue.axios.get(`https://asia-northeast3-vibrant-crawler-315212.cloudfunctions.net/stock?symbol=${stock.company}`)
+          .then(response => {
+            stock["dates"] = response.data.dates
+            stock["prices"] = response.data.prices
+          }).catch(error => {
+            console.log("error on get stock data from api : ", error)
+            stock["dates"] = []
+            stock["prices"] = []
+            stock["company"] = ""
+          })
+
       commit(types.SET_FILES, {
         ...state.files,
         [id]: {
