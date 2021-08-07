@@ -1,5 +1,5 @@
 <template>
-  <div ref="drawArea" class="draw-area">
+  <div ref="drawArea" class="draw-area" @mouseenter="activateShortcuts" @mouseleave="deactivateShortcuts">
     <canvas
       id="drawCanvas"
       ref="roughCanvas"
@@ -42,8 +42,8 @@ export default {
     file: Object,
     isActive: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
@@ -61,6 +61,7 @@ export default {
       selectedEdge: null,
       elements: [],
       selectedElements: [],
+      selectionBoundary: null,
       tools: {
         select: {
           name: "Select Tool",
@@ -97,15 +98,13 @@ export default {
           icon: "Edit3Icon",
           action: "draw",
         },
-        arrow: {
-          name: "Arrow Tool",
-          icon: "CornerUpRightIcon",
-          action: "draw",
-        },
+        // arrow: {
+        //   name: "Arrow Tool",
+        //   icon: "CornerUpRightIcon",
+        //   action: "draw",
+        // },
       },
-      shortcuts: {
-        
-      }
+      shortcuts: {},
     };
   },
   methods: {
@@ -439,12 +438,56 @@ export default {
         elements: this.elements,
       });
     },
-    bindShortcuts() {
-
+    deleteActiveShapes() {
+      if (this.selectedElements && this.selectedElements.length > 0) {
+        const activeElements = this.selectedElements.map(element => element.id)
+        const elementsCopy = [...this.elements];
+        activeElements.forEach(id => {
+          elementsCopy.splice(id, 1);
+        });
+        this.selectedElements = [];
+        this.elements = elementsCopy;
+      }
+    },
+    activateShortcuts() {
+      if (this.isActive) {
+        this.unbindShortcuts();
+        window.addEventListener("keydown", this.bindShortcuts);
+      }
+    },
+    deactivateShortcuts() {
+      if (this.isActive) {
+        this.unbindShortcuts();
+      }
+    },
+    bindShortcuts(e) {
+      switch(e.key) {
+        case "Delete":
+          this.deleteActiveShapes();
+          break;
+        case "v":
+          this.setActiveTool("select");
+          break;
+        case "r":
+          this.setActiveTool("rectangle");
+          break;
+        case "e":
+          this.setActiveTool("ellipse");
+          break;
+        case "l":
+          this.setActiveTool("line");
+          break;
+        case "t":
+          this.setActiveTool("text");
+          break;
+        case "p":
+          this.setActiveTool("pencil");
+          break;
+      }
     },
     unbindShortcuts() {
-
-    }
+      window.removeEventListener("keydown", this.bindShortcuts);
+    },
   },
   watch: {
     elements() {
@@ -481,13 +524,16 @@ export default {
         }
       },
     },
-    isActive(value) {
-      if (value) {
-
-      } else {
-
-      }
-    }
+    isActive: {
+      immediate: true,
+      handler(isActive) {
+        if (isActive) {
+          window.addEventListener("keydown", this.bindShortcuts);
+        } else {
+          this.unbindShortcuts();
+        }
+      },
+    },
   },
   mounted() {
     this.canvas = this.$refs.roughCanvas;

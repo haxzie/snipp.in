@@ -13,6 +13,7 @@
         @click="selectTool(tool)"
       >
         <component :is="tools[tool].icon" class="icon" size="18" />
+        <span class="tool-label">{{ tools[tool].name }}</span>
       </div>
     </div>
     <div
@@ -28,6 +29,7 @@
         @click="selectAction(tool)"
       >
         <component :is="actions[tool].icon" class="icon" size="18" />
+        <span class="tool-label">{{ actions[tool].name }}</span>
       </div>
     </div>
   </div>
@@ -72,7 +74,7 @@ export default {
     return {
       actions: {
         clear: {
-          name: "Clear",
+          name: "Clear Screen",
           icon: "Trash2Icon",
         },
       },
@@ -121,11 +123,30 @@ export default {
       justify-content: center;
       border-radius: 5px;
       opacity: 0.7;
+      position: relative;
+
+      .tool-label {
+        background: var(--color-secondary);
+        word-wrap: none;
+        white-space: nowrap;
+        position: absolute;
+        left: 50px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transform: translateX(-20px);
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.3s all ease-in-out;
+      }
 
       &:hover {
         cursor: pointer;
         background: var(--color-secondary-light);
         opacity: 1;
+        .tool-label {
+          opacity: 1;
+          transform: translateX(0);
+        }
       }
 
       &.active {
