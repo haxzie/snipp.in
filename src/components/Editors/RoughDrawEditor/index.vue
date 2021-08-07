@@ -440,13 +440,13 @@ export default {
     },
     deleteActiveShapes() {
       if (this.selectedElements && this.selectedElements.length > 0) {
-        const activeElements = this.selectedElements.map(element => element.id)
+        const activeElements = this.selectedElements.map(element => element.id).sort((a,b) => a-b)
         const elementsCopy = [...this.elements];
         activeElements.forEach(id => {
-          elementsCopy.splice(id, 1);
+          elementsCopy[id] = null;
         });
         this.selectedElements = [];
-        this.elements = elementsCopy;
+        this.elements = elementsCopy.filter(item => item !== null).map((item, index) => ({...item, id: index}));
       }
     },
     activateShortcuts() {
