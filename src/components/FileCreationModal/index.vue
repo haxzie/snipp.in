@@ -88,7 +88,7 @@ export default {
         },
         draw: {
           ext: "draw",
-          name: "Drawing",
+          name: "[Beta] Drawing",
           icon: "PenToolIcon",
         },
       },
