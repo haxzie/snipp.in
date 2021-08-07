@@ -73,28 +73,28 @@ export default {
         //   icon: "MoveIcon",
         //   action: "pan",
         // },
-        pencil: {
-          name: "Pencil Tool",
-          icon: "Edit2Icon",
-          action: "draw",
-        },
+        // pencil: {
+        //   name: "Pencil Tool [V]",
+        //   icon: "Edit2Icon",
+        //   action: "draw",
+        // },
         rectangle: {
-          name: "Rectangle Tool",
+          name: "Rectangle Tool [R]",
           icon: "SquareIcon",
           action: "draw",
         },
         ellipse: {
-          name: "Circle Tool",
+          name: "Ellipse Tool [E]",
           icon: "CircleIcon",
           action: "draw",
         },
-        text: {
-          name: "Text Tool",
-          icon: "TypeIcon",
-          action: "draw",
-        },
+        // text: {
+        //   name: "Text Tool [T]",
+        //   icon: "TypeIcon",
+        //   action: "draw",
+        // },
         line: {
-          name: "Line Tool",
+          name: "Line Tool [L]",
           icon: "Edit3Icon",
           action: "draw",
         },
@@ -187,7 +187,7 @@ export default {
             : "default";
         }
       } else {
-        $event.target.style.cursor = "default";
+        $event.target.style.cursor = "crosshair";
       }
 
       if (this.drawing) {
@@ -477,12 +477,12 @@ export default {
         case "l":
           this.setActiveTool("line");
           break;
-        case "t":
-          this.setActiveTool("text");
-          break;
-        case "p":
-          this.setActiveTool("pencil");
-          break;
+        // case "t":
+        //   this.setActiveTool("text");
+        //   break;
+        // case "p":
+        //   this.setActiveTool("pencil");
+        //   break;
       }
     },
     unbindShortcuts() {
@@ -494,7 +494,7 @@ export default {
       this.draw();
       this.debouncedEmit();
     },
-    selectionRect(selection) {
+    selectionRect() {
       this.draw();
     },
     selectedElements() {
