@@ -1,4 +1,5 @@
 import rough from "roughjs/bundled/rough.esm.js";
+import getStroke from "perfect-freehand";
 const generator = rough.generator();
 const padding = 3; // added padding to the edges of the selection boundary
 
@@ -12,10 +13,11 @@ export const ELEMENTS = {
   line: "line",
   selection: "selection",
   selected: "selected",
+  freehand: "freehand",
 };
 
-export function createElement(id, element, x1, y1, x2, y2) {
-  switch (element) {
+export function createElement({ id, type, x1, y1, x2, y2, points }) {
+  switch (type) {
     case ELEMENTS.line:
       return {
         id,
@@ -93,6 +95,38 @@ export function createElement(id, element, x1, y1, x2, y2) {
           seed: 2,
         }),
       };
+    case ELEMENTS.freehand:
+      if (!(points && points.length > 0)) {
+        console.log({ id, x1, y1, points });
+      }
+      return {
+        id,
+        x1,
+        y1,
+        x2,
+        y2,
+        points,
+        type: ELEMENTS.freehand,
+        element: getSvgPathFromStroke(
+          getStroke(points, {
+            size: 4,
+            thinning: -0.5,
+            smoothing: 0.5,
+            streamline: 0.5,
+            easing: (t) => t * t * t,
+            simulatePressure: true,
+            last: true,
+            start: {
+              taper: 3,
+              easing: (t) => t * t * t,
+            },
+            end: {
+              taper: 3,
+              easing: (t) => t * t * t,
+            },
+          })
+        ),
+      };
     default:
       return {
         id,
@@ -113,7 +147,6 @@ export function createElement(id, element, x1, y1, x2, y2) {
 export function generateSelectionBoundary(id, type, x1, y1, x2, y2) {
   switch (type) {
     case ELEMENTS.line: {
-
       const edges = {
         x1: x1,
         y1: y1,
@@ -136,11 +169,11 @@ export function generateSelectionBoundary(id, type, x1, y1, x2, y2) {
         id,
         position: "start",
         type: ELEMENTS.rectangle,
-        x1: edges.x1+4,
-        y1: edges.y1+4,
-        x2: edges.x1-4,
-        y2: edges.y1-4,
-        element: generator.rectangle(edges.x1-4, edges.y1-4, 8, 8, {
+        x1: edges.x1 + 4,
+        y1: edges.y1 + 4,
+        x2: edges.x1 - 4,
+        y2: edges.y1 - 4,
+        element: generator.rectangle(edges.x1 - 4, edges.y1 - 4, 8, 8, {
           roughness: 0,
           preserveVertices: true,
           fill: `rgb(23, 158, 248)`,
@@ -154,11 +187,11 @@ export function generateSelectionBoundary(id, type, x1, y1, x2, y2) {
         id,
         position: "end",
         type: ELEMENTS.rectangle,
-        x1: edges.x2+4,
-        y1: edges.y2+4,
-        x2: edges.x2-4,
-        y2: edges.y2-4,
-        element: generator.rectangle(edges.x2-4, edges.y2-4, 8, 8, {
+        x1: edges.x2 + 4,
+        y1: edges.y2 + 4,
+        x2: edges.x2 - 4,
+        y2: edges.y2 - 4,
+        element: generator.rectangle(edges.x2 - 4, edges.y2 - 4, 8, 8, {
           roughness: 0,
           preserveVertices: true,
           fill: `rgb(23, 158, 248)`,
@@ -370,4 +403,23 @@ export function getCursorForPosition(position) {
     default:
       return "move";
   }
+}
+
+export function getSvgPathFromStroke(stroke) {
+  if (!stroke.length) {
+    console.error(`No stroke`);
+    return "";
+  }
+
+  const d = stroke.reduce(
+    (acc, [x0, y0], i, arr) => {
+      const [x1, y1] = arr[(i + 1) % arr.length];
+      acc.push(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2);
+      return acc;
+    },
+    ["M", ...stroke[0], "Q"]
+  );
+
+  d.push("Z");
+  return d.join(" ");
 }

@@ -17,12 +17,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
-import marked from "marked";
 import debounce from "lodash/debounce";
-import TurndownService from "turndown";
-const TURNDOWN_SERVICE = new TurndownService({
-  headingStyle: "atx",
-});
 
 export default {
   components: {

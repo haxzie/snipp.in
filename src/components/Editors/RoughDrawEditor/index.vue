@@ -1,5 +1,10 @@
 <template>
-  <div ref="drawArea" class="draw-area" @mouseenter="activateShortcuts" @mouseleave="deactivateShortcuts">
+  <div
+    ref="drawArea"
+    class="draw-area"
+    @mouseenter="activateShortcuts"
+    @mouseleave="deactivateShortcuts"
+  >
     <canvas
       id="drawCanvas"
       ref="roughCanvas"
@@ -93,9 +98,14 @@ export default {
         //   icon: "TypeIcon",
         //   action: "draw",
         // },
+        freehand: {
+          name: "Freehand Tool [F]",
+          icon: "FreehandIcon",
+          action: "draw",
+        },
         line: {
           name: "Line Tool [L]",
-          icon: "Edit3Icon",
+          icon: "LineIcon",
           action: "draw",
         },
         // arrow: {
@@ -113,14 +123,15 @@ export default {
       const activeAction = this.tools[this.activeTool].action;
       if (activeAction === "draw") {
         this.drawing = true;
-        const element = createElement(
-          null,
-          this.activeTool,
-          layerX,
-          layerY,
-          layerX,
-          layerY
-        );
+        const element = createElement({
+          id: null,
+          type: this.activeTool,
+          x1: layerX,
+          y1: layerY,
+          x2: layerX,
+          y2: layerY,
+          points: [{ x: layerX, y: layerY }],
+        });
         this.temporaryElement = element;
       } else if (activeAction === "move") {
         const edgeElement = this.getEdgeAtPosition(layerX, layerY);
@@ -150,14 +161,14 @@ export default {
             ];
             this.moving = true;
           } else {
-            const selectionRect = createElement(
-              -1,
-              ELEMENTS.selection,
-              layerX,
-              layerY,
-              layerX,
-              layerY
-            );
+            const selectionRect = createElement({
+              id: -1,
+              type: ELEMENTS.selection,
+              x1: layerX,
+              y1: layerY,
+              x2: layerX,
+              y2: layerY,
+            });
             this.selectionRect = selectionRect;
             this.selecting = true;
             if (this.selectedElements && this.selectedElements.length > 0) {
@@ -193,7 +204,7 @@ export default {
       if (this.drawing) {
         if (this.temporaryElement) {
           const { x1, y1 } = this.temporaryElement;
-          this.updateTemporaryElement(x1, y1, layerX, layerY);
+          this.updateTemporaryElement({ x1, y1, x2: layerX, y2: layerY });
         } else if (this.moving) {
           console.log(`No last element`);
         }
@@ -212,14 +223,14 @@ export default {
           selectedElement
         );
 
-        const updatedElement = this.updateElement(
-          selectedElement.id,
-          selectedElement.type,
+        const updatedElement = this.updateElement({
+          id: selectedElement.id,
+          type: selectedElement.type,
           x1,
           y1,
           x2,
-          y2
-        );
+          y2,
+        });
         const selectionBoundary = generateSelectionBoundary(
           updatedElement.id,
           updatedElement.type,
@@ -256,14 +267,14 @@ export default {
           const height = y2 - y1;
           const newX1 = layerX - offsetX;
           const newY1 = layerY - offsetY;
-          const element = this.updateElement(
+          const element = this.updateElement({
             id,
             type,
-            newX1,
-            newY1,
-            newX1 + width,
-            newY1 + height
-          );
+            x1: newX1,
+            y1: newY1,
+            x2: newX1 + width,
+            y2: newY1 + height,
+          });
           // update selection boundary for the element
           const selectionBoundary = generateSelectionBoundary(
             element.id,
@@ -290,23 +301,47 @@ export default {
         const index = this.elements.length;
         const element = this.temporaryElement;
         if (element) {
-          const { x1, y1, x2, y2 } = adjustElementCoordinates(element);
-          if (x2 - x1 > 1 || y2 - y1 > 1) {
-            this.updateElement(index, element.type, x1, y1, x2, y2);
+          switch (element.type) {
+            case ELEMENTS.freehand: {
+              const { x1, y1, x2, y2, points } = element;
+              this.updateElement({
+                id: index,
+                type: element.type,
+                x1,
+                y1,
+                x2,
+                y2,
+                points,
+              });
+              break;
+            }
+            default: {
+              const { x1, y1, x2, y2 } = adjustElementCoordinates(element);
+              if (x2 - x1 > 1 || y2 - y1 > 1) {
+                this.updateElement({
+                  id: index,
+                  type: element.type,
+                  x1,
+                  y1,
+                  x2,
+                  y2,
+                });
+              }
+            }
           }
         }
       } else if (this.resizing && this.selectedEdge) {
         const element = { ...this.elements[this.selectedEdge.id] };
         if (element) {
           const { x1, y1, x2, y2 } = adjustElementCoordinates(element);
-          const updatedElement = this.updateElement(
-            element.id,
-            element.type,
+          const updatedElement = this.updateElement({
+            id: element.id,
+            type: element.type,
             x1,
             y1,
             x2,
-            y2
-          );
+            y2,
+          });
           const selectionBoundary = generateSelectionBoundary(
             updatedElement.id,
             updatedElement.type,
@@ -345,25 +380,47 @@ export default {
         return false;
       }
     },
-    updateTemporaryElement(x1, y1, x2, y2) {
-      this.temporaryElement = createElement(
-        null,
-        this.temporaryElement.type,
+    updateTemporaryElement({ x1, y1, x2, y2 }) {
+      switch (this.temporaryElement.type) {
+        case ELEMENTS.freehand:
+          this.temporaryElement = createElement({
+            id: null,
+            type: this.temporaryElement.type,
+            x1,
+            y1,
+            x2,
+            y2,
+            points: [...this.temporaryElement.points, { x: x2, y: y2 }],
+          });
+          break;
+        default:
+          this.temporaryElement = createElement({
+            id: null,
+            type: this.temporaryElement.type,
+            x1,
+            y1,
+            x2,
+            y2,
+          });
+      }
+    },
+    updateElement({ id, type, x1, y1, x2, y2, points }) {
+      const updatedElement = createElement({
+        id,
+        type,
         x1,
         y1,
         x2,
-        y2
-      );
-    },
-    updateElement(id, type, x1, y1, x2, y2) {
-      const updatedElement = createElement(id, type, x1, y1, x2, y2);
+        y2,
+        points,
+      });
       const copyElements = [...this.elements];
       copyElements[id] = updatedElement;
       this.elements = copyElements;
       return updatedElement;
     },
     updateSelectionRect(id, type, x1, y1, x2, y2) {
-      const updatedElement = createElement(id, type, x1, y1, x2, y2);
+      const updatedElement = createElement({ id, type, x1, y1, x2, y2 });
       this.selectionRect = updatedElement;
     },
     draw() {
@@ -383,33 +440,43 @@ export default {
       if (this.elements && this.elements.length > 0) {
         for (let i = 0; i < this.elements.length; i++) {
           const item = this.elements[i];
-          this.rough.draw(item.element);
+          this.renderElement(item);
         }
       }
       // draw the selection rectangle
       if (this.temporaryElement) {
-        this.rough.draw(this.temporaryElement.element);
+        this.renderElement(this.temporaryElement);
       }
 
       // draw element selection boundaries
       if (this.selectedElements && this.selectedElements.length > 0) {
         this.selectedElements.forEach(
           ({ selectionBoundary: { skeleton, edges } }) => {
-            this.rough.draw(skeleton.element);
-            edges.forEach((edge) => this.rough.draw(edge.element));
+            this.renderElement(skeleton);
+            edges.forEach((edge) => this.renderElement(edge));
           }
         );
       }
 
       // draw the selection rectangle
       if (this.selectionRect) {
-        this.rough.draw(this.selectionRect.element);
+        this.renderElement(this.selectionRect);
       }
 
       this.$nextTick().then(() => {
         this.rendering = false;
       });
       // this.debouncedEmit();
+    },
+    renderElement(element) {
+      switch (element.type) {
+        case ELEMENTS.freehand:
+          const path = new Path2D(element.element);
+          this.context.fill(path);
+          break;
+        default:
+          this.rough.draw(element.element);
+      }
     },
     reset() {
       this.drawing = false;
@@ -440,13 +507,17 @@ export default {
     },
     deleteActiveShapes() {
       if (this.selectedElements && this.selectedElements.length > 0) {
-        const activeElements = this.selectedElements.map(element => element.id).sort((a,b) => a-b)
+        const activeElements = this.selectedElements
+          .map((element) => element.id)
+          .sort((a, b) => a - b);
         const elementsCopy = [...this.elements];
-        activeElements.forEach(id => {
+        activeElements.forEach((id) => {
           elementsCopy[id] = null;
         });
         this.selectedElements = [];
-        this.elements = elementsCopy.filter(item => item !== null).map((item, index) => ({...item, id: index}));
+        this.elements = elementsCopy
+          .filter((item) => item !== null)
+          .map((item, index) => ({ ...item, id: index }));
       }
     },
     activateShortcuts() {
@@ -461,7 +532,7 @@ export default {
       }
     },
     bindShortcuts(e) {
-      switch(e.key) {
+      switch (e.key) {
         case "Delete":
           this.deleteActiveShapes();
           break;
@@ -476,6 +547,9 @@ export default {
           break;
         case "l":
           this.setActiveTool("line");
+          break;
+        case "f":
+          this.setActiveTool("freehand");
           break;
         // case "t":
         //   this.setActiveTool("text");
