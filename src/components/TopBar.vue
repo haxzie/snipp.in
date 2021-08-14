@@ -3,8 +3,6 @@
     <simplebar class="topbar">
       <ul
           class="file-tabs"
-          v-shortkey="['alt', 'w']"
-          @shortkey="closeFile({ editor, id: activeFile.id })"
       >
         <li
             v-for="file in openFiles"
@@ -29,17 +27,6 @@
               @click.stop="closeFile({ editor, id: file.id })"
           />
         </li>
-        <!-- Short cuts -->
-        <div
-            v-show="false"
-            v-shortkey="['alt', 'd']"
-            @shortkey="deleteFile({ id: activeFile ? activeFile.id : null })"
-        ></div>
-        <div
-            v-show="false"
-            v-shortkey="['alt', 'r']"
-            @shortkey="openRenameMode({ id: activeFile ? activeFile.id : null })"
-        ></div>
       </ul>
     </simplebar>
     <SlideYUpTransition>
@@ -84,7 +71,6 @@ export default {
   },
   methods: {
     ...mapActions("Editor", ["closeFile", "setActiveFile"]),
-    ...mapActions("Files", ["deleteFile", "openRenameMode"]),
     closeContextMenu() {
       this.isContextMenuToggled = false;
     },
