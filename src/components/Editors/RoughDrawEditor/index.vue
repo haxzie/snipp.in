@@ -27,7 +27,8 @@
 import debounce from "lodash/debounce";
 import Toolbar from "./Toolbar.vue";
 import rough from "roughjs/bundled/rough.esm.js";
-import Mousetrap from "mousetrap";
+// import Mousetrap from "mousetrap";
+import { distance } from "./utils";
 
 import {
   adjustElementCoordinates,
@@ -143,19 +144,28 @@ export default {
           if (element) {
             const offsetX = layerX - element.x1;
             const offsetY = layerY - element.y1;
-            const selectionBoundary = generateSelectionBoundary(
-              element.id,
-              element.type,
-              element.x1,
-              element.y1,
-              element.x2,
-              element.y2
-            );
+            const selectionBoundary = generateSelectionBoundary({
+              id: element.id,
+              type: element.type,
+              x1: element.x1,
+              y1: element.y1,
+              x2: element.x2,
+              y2: element.y2,
+              points: element.points,
+            });
             this.selectedElements = [
               {
                 ...element,
                 offsetX,
                 offsetY,
+                points: element.points
+                  ? element.points.map(({ x, y }) => ({
+                      x,
+                      y,
+                      offsetX: layerX - x,
+                      offsetY: layerY - y,
+                    }))
+                  : null,
                 selectionBoundary,
               },
             ];
@@ -231,14 +241,14 @@ export default {
           x2,
           y2,
         });
-        const selectionBoundary = generateSelectionBoundary(
-          updatedElement.id,
-          updatedElement.type,
+        const selectionBoundary = generateSelectionBoundary({
+          id: updatedElement.id,
+          type: updatedElement.type,
           x1,
           y1,
           x2,
-          y2
-        );
+          y2,
+        });
         this.selectedElements = [
           {
             ...selectedElement,
@@ -260,6 +270,7 @@ export default {
             y1,
             x2,
             y2,
+            points,
             offsetX,
             offsetY,
           } = selectedElement;
@@ -267,6 +278,14 @@ export default {
           const height = y2 - y1;
           const newX1 = layerX - offsetX;
           const newY1 = layerY - offsetY;
+          const newPoints =  points
+              ? points.map(({ offsetX, offsetY }) => ({
+                  x: layerX - offsetX,
+                  y: layerY - offsetY,
+                  offsetX,
+                  offsetY
+                }))
+              : null;
           const element = this.updateElement({
             id,
             type,
@@ -274,18 +293,21 @@ export default {
             y1: newY1,
             x2: newX1 + width,
             y2: newY1 + height,
+            points: newPoints
           });
           // update selection boundary for the element
-          const selectionBoundary = generateSelectionBoundary(
-            element.id,
-            element.type,
-            newX1,
-            newY1,
-            newX1 + width,
-            newY1 + height
-          );
+          const selectionBoundary = generateSelectionBoundary({
+            id: element.id,
+            type: element.type,
+            x1: newX1,
+            y1: newY1,
+            x2: newX1 + width,
+            y2: newY1 + height,
+            points: element.points,
+          });
           return {
             ...element,
+            points: newPoints,
             offsetX,
             offsetY,
             selectionBoundary,
@@ -342,14 +364,14 @@ export default {
             x2,
             y2,
           });
-          const selectionBoundary = generateSelectionBoundary(
-            updatedElement.id,
-            updatedElement.type,
+          const selectionBoundary = generateSelectionBoundary({
+            id: updatedElement.id,
+            type: updatedElement.type,
             x1,
             y1,
             x2,
-            y2
-          );
+            y2,
+          });
           this.selectedElements = [
             {
               ...updatedElement,

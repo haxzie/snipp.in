@@ -4,8 +4,9 @@ const generator = rough.generator();
 const padding = 3; // added padding to the edges of the selection boundary
 
 // root of [(x1-x2)^2 + (y1, y2)^2]
-const distance = (a, b) =>
-  Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+export function distance(a, b) {
+  return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+}
 
 export const ELEMENTS = {
   rectangle: "rectangle",
@@ -144,7 +145,15 @@ export function createElement({ id, type, x1, y1, x2, y2, points }) {
   }
 }
 
-export function generateSelectionBoundary(id, type, x1, y1, x2, y2) {
+export function generateSelectionBoundary({
+  id,
+  type,
+  x1,
+  y1,
+  x2,
+  y2,
+  points,
+}) {
   switch (type) {
     case ELEMENTS.line: {
       const edges = {
@@ -204,6 +213,110 @@ export function generateSelectionBoundary(id, type, x1, y1, x2, y2) {
       return {
         skeleton: skeletonLine,
         edges: [startEdge, endEdge],
+      };
+    }
+    case ELEMENTS.freehand: {
+      if (!(points && points.length > 0)) {
+        console.error(
+          `No points present to generate freehand selection boundary`
+        );
+        return null;
+      }
+      const edges = getBoundingEdgesOfPoints({ points });
+
+      const boundingRect = {
+        id,
+        type: ELEMENTS.rectangle,
+        ...edges,
+        element: generator.rectangle(
+          edges.x1,
+          edges.y1,
+          edges.x2 - edges.x1,
+          edges.y2 - edges.y1,
+          {
+            roughness: 0,
+            preserveVertices: true,
+            stroke: `rgb(23, 158, 248)`,
+            strokeWidth: 2,
+          }
+        ),
+      };
+
+      const topLeftBox = {
+        id,
+        position: "tl",
+        type: ELEMENTS.rectangle,
+        x1: edges.x1 - 4,
+        y1: edges.y1 - 4,
+        x2: edges.x1 + 4,
+        y2: edges.y1 + 4,
+        element: generator.rectangle(edges.x1 - 4, edges.y1 - 4, 8, 8, {
+          roughness: 0,
+          preserveVertices: true,
+          fill: `rgb(23, 158, 248)`,
+          fillStyle: "solid",
+          stroke: `rgb(255, 255, 255)`,
+          strokeWidth: 2,
+        }),
+      };
+      const topRightBox = {
+        id,
+        position: "tr",
+        type: ELEMENTS.rectangle,
+        x1: edges.x2 - 4,
+        y1: edges.y1 - 4,
+        x2: edges.x2 + 4,
+        y2: edges.y1 + 4,
+        element: generator.rectangle(edges.x2 - 4, edges.y1 - 4, 8, 8, {
+          roughness: 0,
+          preserveVertices: true,
+          fill: `rgb(23, 158, 248)`,
+          fillStyle: "solid",
+          stroke: `rgb(255, 255, 255)`,
+          strokeWidth: 2,
+        }),
+      };
+
+      const bottomLeftBox = {
+        id,
+        position: "bl",
+        type: ELEMENTS.rectangle,
+        x1: edges.x1 - 4,
+        y1: edges.y2 - 4,
+        x2: edges.x1 + 4,
+        y2: edges.y2 + 4,
+        element: generator.rectangle(edges.x1 - 4, edges.y2 - 4, 8, 8, {
+          roughness: 0,
+          preserveVertices: true,
+          fill: `rgb(23, 158, 248)`,
+          fillStyle: "solid",
+          stroke: `rgb(255, 255, 255)`,
+          strokeWidth: 2,
+        }),
+      };
+
+      const bottomRightBox = {
+        id,
+        position: "br",
+        type: ELEMENTS.rectangle,
+        x1: edges.x2 - 4,
+        y1: edges.y2 - 4,
+        x2: edges.x2 + 4,
+        y2: edges.y2 + 4,
+        element: generator.rectangle(edges.x2 - 4, edges.y2 - 4, 8, 8, {
+          roughness: 0,
+          preserveVertices: true,
+          fill: `rgb(23, 158, 248)`,
+          fillStyle: "solid",
+          stroke: `rgb(255, 255, 255)`,
+          strokeWidth: 2,
+        }),
+      };
+
+      return {
+        skeleton: boundingRect,
+        // edges: [topLeftBox, topRightBox, bottomLeftBox, bottomRightBox],
+        edges: [],
       };
     }
     default: {
@@ -311,8 +424,19 @@ export function generateSelectionBoundary(id, type, x1, y1, x2, y2) {
   }
 }
 
+export function getBoundingEdgesOfPoints({ points }) {
+  const xValues = points.map((point) => point.x);
+  const yValues = points.map((point) => point.y);
+  const edges = {
+    x1: Math.min(...xValues),
+    y1: Math.min(...yValues),
+    x2: Math.max(...xValues),
+    y2: Math.max(...yValues),
+  };
+  return edges;
+}
 export function isWithinElement(x, y, element) {
-  const { type, x1, y1, x2, y2 } = element;
+  const { type, x1, y1, x2, y2, points } = element;
   switch (type) {
     case ELEMENTS.rectangle: {
       const minX = Math.min(x1, x2);
@@ -341,6 +465,17 @@ export function isWithinElement(x, y, element) {
         1
         ? true
         : false;
+    }
+    case ELEMENTS.freehand: {
+      // const edges = getBoundingEdgesOfPoints({ points });
+      for (let i = 0, k = 1; i < points.length - 1; i++, k++) {
+        const a = points[i];
+        const b = points[k];
+        const c = { x, y };
+        const offset = distance(a, b) - (distance(a, c) + distance(b, c));
+        if (Math.abs(offset) < 1) return true;
+      }
+      return false;
     }
   }
 }
