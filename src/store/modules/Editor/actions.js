@@ -113,9 +113,6 @@ export default {
     await fileStorage.removeOpenFile({ id });
     console.log(`footprints of ${id} deleted!`);
     if (state.openFiles[editor].length === 0) {
-      await fileStorage.clearActiveFiles();
-      await fileStorage.clearOpenFiles();
-      console.log(`activeFiles emptied.`);
       // if one of the editors files is empty, always move things to primary editor
       // and clear out secondarye editor by default
       dispatch("swapEditorFiles");
@@ -123,10 +120,10 @@ export default {
   },
 
   swapEditorFiles: async ({ state, commit, dispatch }) => {
-    await fileStorage.clearActiveFiles();
-    await fileStorage.clearOpenFiles();
     // if the primary editor is empty, move files from the secondary editor to primary
     if (state.openFiles[EDITORS.primary].length === 0) {
+      await fileStorage.clearActiveFiles();
+      await fileStorage.clearOpenFiles();
       if (state.openFiles[EDITORS.secondary].length > 0) {
         const secondaryOpenFiles = state.openFiles[EDITORS.secondary];
         const secondayActiveFile = state.activeFiles[EDITORS.secondary];

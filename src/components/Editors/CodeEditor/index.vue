@@ -48,14 +48,13 @@ export default {
       this.$emit("contentChanged", newCode);
     },
     applyAppTheme() {
-      const monaco = this.$refs.editor.monaco;
       switch (this.getActiveTheme) {
         case THEMES.dark: {
-          monaco.editor.setTheme("Dracula");
+          this.monacoEditor.setTheme("Dracula");
           break;
         }
         case THEMES.light: {
-          monaco.editor.setTheme("GitHub");
+          this.monacoEditor.setTheme("GitHub");
           break;
         }
       }
@@ -64,10 +63,19 @@ export default {
       // monaco.editor.defineTheme("night-owl", NightOwl);
       // monaco.editor.setTheme("night-owl");
       editor.focus();
-      const monaco = this.$refs.editor.monaco;
-      monaco.editor.defineTheme("Dracula", DraculaTheme);
-      monaco.editor.defineTheme("GitHub", GitHubTheme);
+      this.monacoEditor = this.$refs.editor.monaco.editor;
+      this.monacoEditor.defineTheme("Dracula", DraculaTheme);
+      this.monacoEditor.defineTheme("GitHub", GitHubTheme);
       this.applyAppTheme();
+
+      try {
+        this.resizeObserver = new ResizeObserver(_ => {
+          editor.layout();
+        });
+        this.resizeObserver.observe(this.$refs.editor.$el);
+      } catch (error) {
+        console.log(error);
+      }
     },
   },
   computed: {
@@ -109,6 +117,13 @@ export default {
   },
   created() {
     this.code = this.file ? this.file.contents : "";
+    this.monacoEditor = null;
+    this.resizeObserver = null;
+  },
+  beforeDestroy() {
+    if (this.resizeObserver) {
+      this.resizeObserver.unobserve(this.$refs.editor.$el);
+    }
   },
 };
 </script>

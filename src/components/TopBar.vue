@@ -1,14 +1,13 @@
 <template>
-  <simplebar class="topbar">
-    <ul
-      class="file-tabs"
-      v-shortkey="['alt', 'w']"
-      @shortkey="closeFile({ editor, id: activeFile.id })"
-    >
-      <li
-        v-for="file in openFiles"
-        :key="file.id"
-        :class="[
+  <div @contextmenu.prevent="openContextMenu">
+    <simplebar class="topbar">
+      <ul
+          class="file-tabs"
+      >
+        <li
+            v-for="file in openFiles"
+            :key="file.id"
+            :class="[
           {
             active: file.id === (activeFile && activeFile.id) && isActive,
           },
@@ -17,38 +16,44 @@
               file.id === (activeFile && activeFile.id) && !isActive,
           },
         ]"
-        @click="setActiveFile({ editor, id: file.id })"
-        @click.middle="closeFile({ editor, id: file.id })"
+            @click="setActiveFile({ editor, id: file.id })"
+            @click.middle="closeFile({ editor, id: file.id })"
+            @click.right="setActiveFile({ editor, id: file.id })"
+        >
+          <span>{{ file.name }}</span>
+          <XIcon
+              size="16"
+              class="icon"
+              @click.stop="closeFile({ editor, id: file.id })"
+          />
+        </li>
+      </ul>
+    </simplebar>
+    <SlideYUpTransition>
+      <div
+          ref="contextMenu"
+          v-show="isContextMenuToggled"
+          class="context-menu"
+          v-click-outside="closeContextMenu"
       >
-        <span>{{ file.name }}</span>
-        <XIcon
-          size="16"
-          class="icon"
-          @click.stop="closeFile({ editor, id: file.id })"
-        />
-      </li>
-      <!-- Short cuts -->
-      <div
-        v-show="false"
-        v-shortkey="['alt', 'd']"
-        @shortkey="deleteFile({ id: activeFile ? activeFile.id : null })"
-      ></div>
-      <div
-        v-show="false"
-        v-shortkey="['alt', 'r']"
-        @shortkey="openRenameMode({ id: activeFile ? activeFile.id : null })"
-      ></div>
-    </ul>
-  </simplebar>
+        <div class="option-item" @click="closeOtherTabs">
+          <x-icon size="14" class="icon" /> Close other tabs
+        </div>
+      </div>
+    </SlideYUpTransition>
+  </div>
+
 </template>
 
 <script>
+import { SlideYUpTransition } from "vue2-transitions";
 import { XIcon } from "vue-feather-icons";
 import { mapActions, mapGetters } from "vuex";
 
 export default {
   components: {
     XIcon,
+    SlideYUpTransition
   },
   props: {
     editor: String,
@@ -56,9 +61,33 @@ export default {
     activeFile: Object,
     isActive: Boolean,
   },
+  data() {
+    return {
+      isContextMenuToggled: false,
+    };
+  },
+  computed: {
+    ...mapGetters("Editor", ["getActiveFiles", "getOpenFiles"]),
+  },
   methods: {
     ...mapActions("Editor", ["closeFile", "setActiveFile"]),
-    ...mapActions("Files", ["deleteFile", "openRenameMode"]),
+    closeContextMenu() {
+      this.isContextMenuToggled = false;
+    },
+    openContextMenu(e) {
+      this.isContextMenuToggled = !this.isContextMenuToggled;
+      this.$refs.contextMenu.style.top = `${e.y - 10}px`;
+      this.$refs.contextMenu.style.left = `${e.x - 320}px`;
+    },
+    closeOtherTabs() {
+      this.closeContextMenu();
+      const activeFileId = this.getActiveFiles.PRIMARY.id;
+      this.getOpenFiles.PRIMARY.map(openFile => {
+        if (openFile.id !== activeFileId) {
+          this.closeFile({editor: this.editor, id: openFile.id})
+        }
+      })
+    }
   },
 };
 </script>
@@ -127,6 +156,37 @@ export default {
       &.inActive {
         border-bottom: 2px solid var(--font-color);
       }
+    }
+  }
+}
+.context-menu {
+  position: absolute;
+  width: 170px;
+  height: auto;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  background: var(--color-secondary);
+  box-shadow: var(--smooth-shadow);
+  border: 1px solid var(--border-color);
+  padding: 5px;
+
+  .option-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 3px;
+
+    .icon {
+      margin-right: 5px;
+      width: 20px;
+    }
+
+    &:hover {
+      cursor: pointer;
+      // background: var(--color-secondary-light);
+      color: var(--color-primary);
     }
   }
 }

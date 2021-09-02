@@ -127,6 +127,22 @@
         @dragover.prevent
       ></div>
     </div>
+    <!-- Short cuts -->
+    <div
+      v-show="false"
+      v-shortkey="['alt', 'd']"
+      @shortkey="dispatchActiveFileAction('delete')"
+    ></div>
+    <div
+      v-show="false"
+      v-shortkey="['alt', 'r']"
+      @shortkey="dispatchActiveFileAction('rename')"
+    ></div>
+    <div
+      v-show="false"
+      v-shortkey="['alt', 'w']"
+      @shortkey="dispatchActiveFileAction('close')"
+    ></div>
   </div>
 </template>
 
@@ -209,12 +225,15 @@ export default {
       "updateFileContents",
       "createFile",
       "createDirectory",
+      "deleteFile",
+      "openRenameMode",
     ]),
     ...mapActions("Editor", [
       "setActiveEditor",
       "openFile",
       "setDraggingId",
       "setDraggingFileId",
+      "closeFile",
     ]),
     ...mapActions("UI", ["setShowCreateFileModal"]),
     updateContents(id, contents) {
@@ -263,6 +282,29 @@ export default {
       if (file && file.type !== fileTypes.DIRECTORY) {
         console.log({ id: fileId, editorTopBeDropped });
         this.openFile({ id: fileId, editor: editorTopBeDropped });
+      }
+    },
+    dispatchActiveFileAction(action) {
+      if (this.getActiveEditor) {
+        const activeFile = this.getActiveFiles[this.getActiveEditor];
+        if (activeFile && activeFile.id) {
+          switch (action) {
+            case "delete":
+              this.deleteFile({ id: activeFile.id });
+              break;
+            case "rename":
+              this.openRenameMode({ id: activeFile.id });
+              break;
+            case "close":
+              this.closeFile({
+                editor: this.getActiveEditor,
+                id: activeFile.id,
+              });
+              break;
+            default:
+              console.error(`Invalid active fileaction: ${action}`);
+          }
+        }
       }
     },
   },
