@@ -1,5 +1,7 @@
 import rough from "roughjs/bundled/rough.esm.js";
 import getStroke from "perfect-freehand";
+import * as geometric from "geometric";
+import { clamp } from "lodash";
 const generator = rough.generator();
 const padding = 3; // added padding to the edges of the selection boundary
 
@@ -315,8 +317,7 @@ export function generateSelectionBoundary({
 
       return {
         skeleton: boundingRect,
-        // edges: [topLeftBox, topRightBox, bottomLeftBox, bottomRightBox],
-        edges: [],
+        edges: [topLeftBox, topRightBox, bottomLeftBox, bottomRightBox],
       };
     }
     default: {
@@ -473,7 +474,7 @@ export function isWithinElement(x, y, element) {
         const b = points[k];
         const c = { x, y };
         const offset = distance(a, b) - (distance(a, c) + distance(b, c));
-        if (Math.abs(offset) < 1) return true;
+        if (Math.abs(offset) < 2) return true;
       }
       return false;
     }
@@ -507,19 +508,95 @@ export function adjustElementCoordinates(element) {
   }
 }
 
-export function resizeElement(x, y, position, element) {
-  const { x1, y1, x2, y2 } = element;
+export function scalePolygon(dimension, polygon, scale, origin) {
+  if (!origin){
+    origin = geometric.polygonCentroid(polygon);
+  }
+  
+  function move(point, angle, distance) {
+    let r = geometric.angleToRadians((angle-360)%360);
+    console.log(angle, distance) 
+    const p0 = point[0] + Math.abs(distance) * Math.cos(r);
+    const p1 = point[1] + Math.abs(distance) * Math.sin(r);
+    const result = [p0, p1];
+    // console.log(Math.abs(distance) * Math.cos(r), Math.abs(distance) * Math.sin(r))
+    return result;
+  }
+
+  let p = [...polygon];
+
+  for (let i = 0, l = polygon.length; i < l; i++){
+    const v = polygon[i],
+          d = geometric.lineLength([origin, v]),
+          a = geometric.lineAngle([origin, v]),
+          t = move(origin, a, (d * scale));
+
+    p[i][dimension] = t[dimension];
+  }
+  return p;
+}
+
+export function resizeElement(x, y, position, element, edge) {
+  const { x1, y1, x2, y2, type } = element;
+  const opposites = {
+    tl: "br",
+    tr: "bl",
+    bl: "tr",
+    br: "tl",
+  };
+  let updatedPoints = null;
+  if (type === ELEMENTS.freehand) {
+    const currentEdge = geometric.polygonCentroid([
+      [edge.x1, edge.y1],
+      [edge.x2, edge.y1],
+      [edge.x2, edge.y2],
+      [edge.x1, edge.y2],
+    ]);
+    const edge2 = element.selectionBoundary.edges.find(
+      (e) => e.position === opposites[position]
+    );
+    const oppositeEdge = geometric.polygonCentroid([
+      [edge2.x1, edge2.y1],
+      [edge2.x2, edge2.y1],
+      [edge2.x2, edge2.y2],
+      [edge2.x1, edge2.y2],
+    ]);
+
+    // Using geometric
+    const points = element.points.map((point) => [point.x, point.y]);
+    const initialWidth = (currentEdge[0] - oppositeEdge[0]);
+    const initialHeight = (currentEdge[1] - oppositeEdge[1]);
+    const width = (x - oppositeEdge[0]);
+    const height = (y - oppositeEdge[1]);
+    const scaleX = (width/(initialWidth|| -1));
+    const scaleY = (height/(initialHeight || -1));
+
+    // console.log({ scaleX:  width/initialWidth, scaleY: height/ initialHeight});
+    const updatedXPoints = scalePolygon(0, points, (scaleX || -1), oppositeEdge)
+    updatedPoints = scalePolygon(1,
+      updatedXPoints,
+      (scaleY || -1),
+      oppositeEdge
+    ).map((point) => ({ x: point[0], y: point[1] }));
+
+    // using excalidraw technique
+    // updatedPoints = rescalePoints(
+    //   0,
+    //   width,
+    //   rescalePoints(1, height, points)
+    // ).map((point) => ({ x: point[0], y: point[1] }));
+  }
   switch (position) {
     case "tl":
     case "start":
-      return { x1: x, y1: y, x2, y2 };
+      return { x1: x, y1: y, x2, y2, points: updatedPoints };
     case "tr":
-      return { x1, y1: y, x2: x, y2 };
+      return { x1, y1: y, x2: x, y2, points: updatedPoints };
     case "bl":
-      return { x1: x, y1, x2, y2: y };
+      return { x1: x, y1, x2, y2: y, points: updatedPoints };
     case "br":
     case "end":
-      return { x1, y1, x2: x, y2: y };
+      return { x1, y1, x2: x, y2: y, points: updatedPoints };
     default:
       return null; //should not really get here...
   }
@@ -557,4 +634,51 @@ export function getSvgPathFromStroke(stroke) {
 
   d.push("Z");
   return d.join(" ");
+}
+
+export function rescalePoints2(dimenstion, scaleFactor) {}
+
+export function rescalePoints(dimension, nextDimensionSize, prevPoints) {
+  const prevDimValues = prevPoints.map((point) => point[dimension]);
+  const prevMaxDimension = Math.max(...prevDimValues);
+  const prevMinDimension = Math.min(...prevDimValues);
+  const prevDimensionSize = prevMaxDimension - prevMinDimension;
+
+  const dimensionScaleFactor = nextDimensionSize / prevDimensionSize;
+
+  console.table({
+    side: dimension ? "height" : "width",
+    prevDimensionSize,
+    nextDimensionSize,
+    dimensionScaleFactor,
+  });
+
+  let nextMinDimension = Infinity;
+
+  const scaledPoints = prevPoints.map((prevPoint) =>
+    prevPoint.map((value, currentDimension) => {
+      if (currentDimension !== dimension) {
+        return value;
+      }
+      const scaledValue = value * dimensionScaleFactor;
+      nextMinDimension = Math.min(scaledValue, nextMinDimension);
+      return scaledValue;
+    })
+  );
+
+  if (scaledPoints.length === 2) {
+    // we don't tranlate two-point lines
+    return scaledPoints;
+  }
+
+  const translation = prevMinDimension - nextMinDimension;
+  // const translation = 0;
+
+  const nextPoints = scaledPoints.map((scaledPoint) =>
+    scaledPoint.map((value, currentDimension) => {
+      return currentDimension === dimension ? value + translation : value;
+    })
+  );
+
+  return nextPoints;
 }

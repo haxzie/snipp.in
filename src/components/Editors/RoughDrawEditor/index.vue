@@ -225,12 +225,13 @@ export default {
         this.selectedElements.length > 0
       ) {
         const { id, position } = this.selectedEdge;
-        const selectedElement = this.elements.find((item) => item.id === id);
-        const { x1, y1, x2, y2 } = resizeElement(
+        const selectedElement = this.selectedElements[0];
+        const { x1, y1, x2, y2, points } = resizeElement(
           layerX,
           layerY,
           position,
-          selectedElement
+          selectedElement,
+          this.selectedEdge
         );
 
         const updatedElement = this.updateElement({
@@ -240,6 +241,7 @@ export default {
           y1,
           x2,
           y2,
+          points,
         });
         const selectionBoundary = generateSelectionBoundary({
           id: updatedElement.id,
@@ -248,15 +250,17 @@ export default {
           y1,
           x2,
           y2,
+          points,
         });
         this.selectedElements = [
           {
-            ...selectedElement,
+            // ...selectedElement,
             ...updatedElement,
             // ...adjustElementCoordinates(updatedElement),
             selectionBoundary,
           },
         ];
+        this.selectedEdge = selectionBoundary.edges.find(e => e.position === position);
       } else if (
         this.moving &&
         this.selectedElements &&
@@ -355,7 +359,7 @@ export default {
       } else if (this.resizing && this.selectedEdge) {
         const element = { ...this.elements[this.selectedEdge.id] };
         if (element) {
-          const { x1, y1, x2, y2 } = adjustElementCoordinates(element);
+          const { x1, y1, x2, y2, points } = element.type === ELEMENTS.freehand? element: adjustElementCoordinates(element);
           const updatedElement = this.updateElement({
             id: element.id,
             type: element.type,
@@ -363,6 +367,7 @@ export default {
             y1,
             x2,
             y2,
+            points
           });
           const selectionBoundary = generateSelectionBoundary({
             id: updatedElement.id,
@@ -371,6 +376,7 @@ export default {
             y1,
             x2,
             y2,
+            points,
           });
           this.selectedElements = [
             {
