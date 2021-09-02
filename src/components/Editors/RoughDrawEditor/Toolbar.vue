@@ -47,6 +47,8 @@ import {
   MoveIcon,
   Trash2Icon,
 } from "vue-feather-icons";
+import FreehandIcon from "@/components/Icons/FreehandIcon";
+import LineIcon from "@/components/Icons/LineIcon";
 
 export default {
   components: {
@@ -59,6 +61,8 @@ export default {
     TypeIcon,
     MoveIcon,
     Trash2Icon,
+    FreehandIcon,
+    LineIcon
   },
   props: {
     activeTool: {

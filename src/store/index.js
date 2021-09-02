@@ -6,7 +6,8 @@ import { DB_VERSION } from "@/utils/db";
 import { validateBackup } from "@/utils/validators"
 
 Vue.use(Vuex);
-const debug = process.env.NODE_ENV !== "production";
+// const debug = process.env.NODE_ENV !== "production";
+const debug = false;
 
 export default new Vuex.Store({
   modules: {
