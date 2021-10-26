@@ -50,6 +50,9 @@
             <div class="option-item" @click="openRenameMode">
               <edit3-icon size="18" class="icon" />Rename
             </div>
+            <div class="option-item" @click="saveFolderAs">
+              <download-icon size="18" class="icon" />Download
+            </div>
             <div class="option-item" @click="deleteCurrentFolder">
               <trash2-icon size="18" class="icon" />Delete Folder
             </div>
@@ -134,6 +137,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions("Explorer", ["downloadDirectory"]),
     ...mapActions("Editor", ["setDraggingId"]),
     ...mapActions("Files", [
       "renameFile",
@@ -171,6 +175,9 @@ export default {
       this.createDirectory({ parent: this.file.id, editable: true });
       this.showContextMenu = false;
       this.showChildren = true;
+    },
+    saveFolderAs() {
+      this.downloadDirectory({ id: this.file.id, name: this.filename });
     },
     toggleShowChildren() {
       this.showChildren = !this.showChildren;
