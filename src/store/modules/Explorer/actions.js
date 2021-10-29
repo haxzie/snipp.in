@@ -6,7 +6,7 @@ export default {
 
     //Download current dir as .zip
     folder.generateAsync({ type: "blob" }).then((blob) => {
-      saveAs(blob, name);
+      saveAs(blob, `${name}.zip`);
     })
   }
 }
