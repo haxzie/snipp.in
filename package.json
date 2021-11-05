@@ -26,6 +26,7 @@
     "file-saver": "^2.0.5",
     "fuse.js": "^6.4.6",
     "geometric": "^2.2.8",
+    "jszip": "^3.7.1",
     "lodash": "^4.17.19",
     "mousetrap": "^1.6.5",
     "perfect-freehand": "^0.4.10",
