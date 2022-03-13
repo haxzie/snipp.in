@@ -111,7 +111,7 @@ export default {
     [fileTypes.DIRECTORY]: DirectoryItem,
     FadeTransition,
     FolderIcon,
-    FolderOpenIcon
+    FolderOpenIcon,
   },
   props: {
     file: Object,
@@ -151,7 +151,7 @@ export default {
         this.renameFile({ id: this.file.id, name: this.filename });
         this.readonly = true;
       } else {
-        this.deleteCurrentFolder({ id: this.file.id });
+        this.renameFile({ id: this.file.id, name: this.file.name });
       }
     },
     openRenameMode() {
@@ -196,9 +196,9 @@ export default {
       this.showChildren = true;
     },
     handleDrag(event) {
-      event.dataTransfer.dropEffect = 'move';
-      event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('fileId', this.file.id);
+      event.dataTransfer.dropEffect = "move";
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("fileId", this.file.id);
     },
   },
   watch: {
