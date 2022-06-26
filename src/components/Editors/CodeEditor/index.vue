@@ -36,6 +36,9 @@ export default {
         theme: "vs-dark",
         fontSize: 16,
         fontLigatures: true,
+        wordWrap: "wordWrapColumn",
+        wordWrapMinified: true,
+        wrappingIndent: "indent",
         minimap: {
           enabled: false,
         },
@@ -69,7 +72,7 @@ export default {
       this.applyAppTheme();
 
       try {
-        this.resizeObserver = new ResizeObserver(_ => {
+        this.resizeObserver = new ResizeObserver((_) => {
           editor.layout();
         });
         this.resizeObserver.observe(this.$refs.editor.$el);
