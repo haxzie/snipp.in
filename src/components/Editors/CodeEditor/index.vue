@@ -90,6 +90,7 @@ export default {
         ts: "typescript",
         py: "python",
         json: "json",
+        geojson: "json",
         html: "html",
         css: "css",
         md: "markdown",
