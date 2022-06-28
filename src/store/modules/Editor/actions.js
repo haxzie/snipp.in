@@ -41,6 +41,11 @@ export default {
     });
   },
 
+  /**
+   * Opens a local file from a file object being passed
+   * @param {Object} file 
+   * @param {String} editor 
+   */
   openLocalFile: async ({ commit, state, dispatch }, { file, editor }) => {
     editor = editor || state.activeEditor;
     const fileData = await fileLoader.loadLocalFile(file);
