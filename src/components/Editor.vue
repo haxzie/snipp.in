@@ -274,6 +274,7 @@ export default {
       this.targetDropEditor = editor;
     },
     openDroppedFile(event) {
+      event.preventDefault();
       const editorTopBeDropped = this.targetDropEditor;
       const fileId = this.getDraggingFileId;
       this.setDraggingId({ id: null });

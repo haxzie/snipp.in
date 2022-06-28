@@ -3,6 +3,9 @@ import OpenFileFootprint from "@/models/openFileFootprint.model";
 import { EDITORS } from "./initialState";
 import { saveAs } from "file-saver";
 import fileStorage from "@/utils/StorageDrivers/IndexedDB"; // Switch storage drivers if needed
+import { wrap } from "comlink";
+const worker = new Worker("./fileLoader.worker.js", { type: "module" });
+const fileLoader = wrap(worker);
 
 export default {
   /**
@@ -36,6 +39,19 @@ export default {
       editor: editor,
       id: id,
     });
+  },
+
+  openLocalFile: async ({ commit, state, dispatch }, { file, editor }) => {
+    editor = editor || state.activeEditor;
+    const fileData = await fileLoader.loadLocalFile(file);
+    if (fileData) {
+      const createdFile = await dispatch("Files/createFile", {
+        name: file.name,
+        contents: fileData,
+        editable: true
+      }, { root: true });
+      dispatch("openFile", { id: createdFile.id, editor: editor });
+    }
   },
 
   /**

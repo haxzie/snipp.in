@@ -125,6 +125,7 @@ export default {
         overflow: hidden;
         text-overflow: ellipsis;
         pointer-events: none;
+        max-width: 120px;
       }
 
       &:last-child {
