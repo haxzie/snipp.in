@@ -53,7 +53,7 @@ export default {
       const createdFile = await dispatch("Files/createFile", {
         name: file.name,
         contents: fileData,
-        editable: true
+        editable: false
       }, { root: true });
       dispatch("openFile", { id: createdFile.id, editor: editor });
     }
