@@ -1,6 +1,11 @@
 <template>
   <main>
-    <div id="main-layout" :class="[{ hidePanel: !getActivePanelId }]">
+    <div
+      id="main-layout"
+      :class="[{ hidePanel: !getActivePanelId }]"
+      @drop.prevent="captureDrop"
+      @dragover.prevent
+    >
       <SideNavigationBar />
       <div v-show="getActivePanelId" class="explorer-panel">
         <FileExplorer v-if="getActivePanelId === 'explorer'" />
@@ -8,7 +13,7 @@
       </div>
       <Editor />
     </div>
-    <FileCreationModal/>
+    <FileCreationModal />
     <CommandCenter />
     <SlideYUpTransition>
       <router-view></router-view>
@@ -22,9 +27,9 @@ import Editor from "@/components/Editor";
 import CommandCenter from "@/components/CommandCenter";
 import SideNavigationBar from "@/components/SideNavigationBar";
 import SearchPanel from "@/components/SearchPanel";
-import { mapGetters } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import { SlideYUpTransition } from "vue2-transitions";
-import FileCreationModal from "@/components/FileCreationModal"
+import FileCreationModal from "@/components/FileCreationModal";
 
 export default {
   components: {
@@ -35,7 +40,7 @@ export default {
     SideNavigationBar,
     SearchPanel,
     SlideYUpTransition,
-    FileCreationModal
+    FileCreationModal,
   },
   data() {
     return {};
@@ -44,8 +49,35 @@ export default {
     ...mapGetters("UI", ["getActivePanelId"]),
   },
   methods: {
+    ...mapActions("Files", ["createFile"]),
+    ...mapActions("Editor", ["openLocalFile"]),
     setActivePanel(optionId) {
       this.activePanel = optionId;
+    },
+    async captureDrop(event) {
+      const { dataTransfer } = event;
+      const files = dataTransfer.files;
+      if (files && files.length > 0) {
+        const filename = files[0]?.name;
+        const regex = new RegExp(`.*[.geojson|.kml|.csv]`, "i");
+        if (filename && regex.test(filename)) {
+          const file = files[0];
+          if (file.type.startsWith("image") || file.type.startsWith("video")) {
+            // we donot support videos or images yet
+            return;
+          }
+          // check file size, open only if below 10MB
+          if (file.size / 1024 / 1024 < 10) {
+            try {
+              console.log(`Opening`, file);
+              await this.openLocalFile({ file })
+            } catch (error) {
+              console.error(error);
+              return;
+            }
+          }
+        }
+      }
     },
   },
 };

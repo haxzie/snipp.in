@@ -5,6 +5,8 @@ export const fileTypes = {
     DIRECTORY: "directory",
     MARKDOWN: "markdown"
 }
+
+export const ALLOWED_FILES = [];
 export default class VFile {
     constructor({ id, parent, type = fileTypes.FILE, name, contents, created_at, editable }) {
         this.id = id || `${type}_${uuid()}`;
