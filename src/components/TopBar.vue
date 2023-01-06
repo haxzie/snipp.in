@@ -1,40 +1,47 @@
 <template>
   <div @contextmenu.prevent="openContextMenu">
     <simplebar class="topbar">
-      <ul
-          class="file-tabs"
-      >
-        <li
-            v-for="file in openFiles"
-            :key="file.id"
-            :class="[
-          {
-            active: file.id === (activeFile && activeFile.id) && isActive,
-          },
-          {
-            inActive:
-              file.id === (activeFile && activeFile.id) && !isActive,
-          },
-        ]"
-            @click="setActiveFile({ editor, id: file.id })"
-            @click.middle="closeFile({ editor, id: file.id })"
-            @click.right="setActiveFile({ editor, id: file.id })"
+      <div class="file-tabs">
+        <Container
+          @drop="onDrop"
+          lock-axis="y"
+          orientation="horizontal"
+          behaviour="contain"
         >
-          <span>{{ file.name }}</span>
-          <XIcon
-              size="16"
-              class="icon"
-              @click.stop="closeFile({ editor, id: file.id })"
-          />
-        </li>
-      </ul>
+          <Draggable v-for="file in draggableOpenFiles" :key="file.id">
+            <div
+              class="tab"
+              :key="file.id"
+              :class="[
+                {
+                  active: file.id === (activeFile && activeFile.id) && isActive,
+                },
+                {
+                  inActive:
+                    file.id === (activeFile && activeFile.id) && !isActive,
+                },
+              ]"
+              @click="setActiveFile({ editor, id: file.id })"
+              @click.middle="closeFile({ editor, id: file.id })"
+              @click.right="setActiveFile({ editor, id: file.id })"
+            >
+              <span>{{ file.name }}</span>
+              <XIcon
+                size="16"
+                class="icon"
+                @click.stop="closeFile({ editor, id: file.id })"
+              />
+            </div>
+          </Draggable>
+        </Container>
+      </div>
     </simplebar>
     <SlideYUpTransition>
       <div
-          ref="contextMenu"
-          v-show="isContextMenuToggled"
-          class="context-menu"
-          v-click-outside="closeContextMenu"
+        ref="contextMenu"
+        v-show="isContextMenuToggled"
+        class="context-menu"
+        v-click-outside="closeContextMenu"
       >
         <div class="option-item" @click="closeOtherTabs">
           <x-icon size="14" class="icon" /> Close other tabs
@@ -42,18 +49,21 @@
       </div>
     </SlideYUpTransition>
   </div>
-
 </template>
 
 <script>
 import { SlideYUpTransition } from "vue2-transitions";
 import { XIcon } from "vue-feather-icons";
 import { mapActions, mapGetters } from "vuex";
+import { Container, Draggable } from "vue-smooth-dnd";
+import { applyDrag, generateItems } from "../utils/dnd-helpers";
 
 export default {
   components: {
     XIcon,
-    SlideYUpTransition
+    SlideYUpTransition,
+    Container,
+    Draggable,
   },
   props: {
     editor: String,
@@ -64,6 +74,7 @@ export default {
   data() {
     return {
       isContextMenuToggled: false,
+      draggableOpenFiles: this.openFiles,
     };
   },
   computed: {
@@ -82,12 +93,15 @@ export default {
     closeOtherTabs() {
       this.closeContextMenu();
       const activeFileId = this.getActiveFiles.PRIMARY.id;
-      this.getOpenFiles.PRIMARY.map(openFile => {
+      this.getOpenFiles.PRIMARY.map((openFile) => {
         if (openFile.id !== activeFileId) {
-          this.closeFile({editor: this.editor, id: openFile.id})
+          this.closeFile({ editor: this.editor, id: openFile.id });
         }
-      })
-    }
+      });
+    },
+    onDrop(dropResult) {
+      this.draggableOpenFiles = applyDrag(this.draggableOpenFiles, dropResult);
+    },
   },
 };
 </script>
@@ -107,7 +121,7 @@ export default {
     flex-direction: row;
     align-items: center;
 
-    li {
+    .tab {
       padding: 7px 5px 7px 15px;
       opacity: 0.7;
       background: var(--color-secondary);
