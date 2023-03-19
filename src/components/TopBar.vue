@@ -1,6 +1,6 @@
 <template>
   <div @contextmenu.prevent="openContextMenu">
-    <simplebar class="topbar">
+    <div class="topbar">
       <div class="file-tabs">
         <Container
           @drop="onDrop"
@@ -35,7 +35,7 @@
           </Draggable>
         </Container>
       </div>
-    </simplebar>
+    </div>
     <SlideYUpTransition>
       <div
         ref="contextMenu"

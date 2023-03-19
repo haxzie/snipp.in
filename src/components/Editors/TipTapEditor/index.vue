@@ -1,7 +1,7 @@
 <template>
-  <simplebar class="prosemirror-wrapper">
+  <div class="prosemirror-wrapper">
     <editor-content :editor="editor" class="tiptap-editor" />
-  </simplebar>
+  </div>
 </template>
 
 <script>

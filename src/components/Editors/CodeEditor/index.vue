@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import MonacoEditor from "vue-monaco";
+import MonacoEditor from "@/components/Editors/MonacoEditor/index";
 // import NightOwl from "@/themes/NightOwl";
 import DraculaTheme from "@/themes/Dracula";
 import GitHubTheme from "@/themes/GitHub";
