@@ -72,14 +72,14 @@
         <li
           @click="setShowCreateFileModal({ flag: true, filename: 'untitled' })"
         >
-          <FilePlusIcon class="icon" size="18" /> Create new empty file
+          <FilePlusIcon class="icon" size="18" /> Create new snippet file
         </li>
         <li
           @click="
             setShowCreateFileModal({ flag: true, filename: 'untitled.doc' })
           "
         >
-          <FilePlusIcon class="icon" size="18" /> Create new document
+          <FileTextIcon class="icon" size="18" /> Create new document
         </li>
         <li @click="createDirectory({ editable: true })">
           <FolderPlusIcon class="icon" size="18" /> Create new Folder
@@ -153,12 +153,15 @@ import { mapActions, mapGetters } from "vuex";
 import { EDITORS } from "@/store/modules/Editor/initialState";
 import debounce from "lodash/debounce";
 import {
+FileIcon,
   FilePlusIcon,
+  FileTextIcon,
   FolderPlusIcon,
   GithubIcon,
   GitPullRequestIcon,
 } from "vue-feather-icons";
 import { fileTypes } from "@/models/vFile.model";
+import FileDocumentIcon from "./Icons/FileDocumentIcon.vue";
 
 const CodeEditor = () => ({
   component: import(
@@ -194,7 +197,10 @@ export default {
     GitPullRequestIcon,
     TipTapEditor,
     RoughDrawEditor,
-  },
+    FileDocumentIcon,
+    FileIcon,
+    FileTextIcon
+},
   data() {
     return {
       dragAndDropMode: false,
@@ -379,7 +385,10 @@ export default {
         display: flex;
         align-items: center;
         margin-bottom: 5px;
-        color: var(--color-primary);
+        color: var(--font-color);
+        text-decoration: underline;
+        text-decoration-style: dashed;
+        text-decoration-color: var(--color-primary);
         align-self: flex-start;
         border-radius: 5px;
         transition: 0.3s all ease-in-out;
@@ -387,7 +396,7 @@ export default {
         a {
           display: flex;
           align-items: center;
-          color: var(--color-primary);
+          color: var(--font-color);
         }
 
         .icon {
