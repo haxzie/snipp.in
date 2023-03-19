@@ -4,7 +4,7 @@ import { EDITORS } from "./initialState";
 import { saveAs } from "file-saver";
 import fileStorage from "@/utils/StorageDrivers/IndexedDB"; // Switch storage drivers if needed
 import { wrap } from "comlink";
-const worker = new Worker("./fileLoader.worker.js", { type: "module" });
+const worker = new Worker(new URL("./fileLoader.worker.js", import.meta.url));
 const fileLoader = wrap(worker);
 
 export default {

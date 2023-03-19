@@ -19,9 +19,9 @@
           </div>
         </div>
       </div>
-      <simplebar class="contents">
+      <div class="contents">
         <component :is="settingsPanels[activeTab].component" />
-      </simplebar>
+      </div>
     </div>
   </div>
 </template>

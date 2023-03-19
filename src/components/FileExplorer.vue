@@ -26,7 +26,7 @@
         </div>
       </div>
     </header>
-    <simplebar class="content-area">
+    <div class="content-area">
       <DirectoryListing
         v-if="children && children.length > 0"
         :files="children"
@@ -38,7 +38,7 @@
           snippets
         </p>
       </div>
-    </simplebar>
+    </div>
     <SlideYUpTransition>
       <div
         ref="contextMenu"

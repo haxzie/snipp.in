@@ -1,5 +1,5 @@
 import * as Comlink from "comlink";
-const worker = new Worker("./worker.js", { type: "module" });
+const worker = new Worker(new URL("./worker.js", import.meta.url));
 console.log("Initializing IndexedDB Storage drivers...");
 const driver = Comlink.wrap(worker);
 
@@ -33,15 +33,15 @@ export default {
     await driver.addActiveFile({ fileFootPrint });
   },
   removeOpenFile: async ({ id }) => {
-    await driver.removeOpenFile({id});
+    await driver.removeOpenFile({ id });
   },
   removeActiveFile: async ({ id }) => {
-    await driver.removeActiveFile({id});
+    await driver.removeActiveFile({ id });
   },
   clearOpenFiles: async () => {
     await driver.clearOpenFiles();
   },
   clearActiveFiles: async () => {
     await driver.clearActiveFiles();
-  }
+  },
 };
