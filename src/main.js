@@ -4,7 +4,7 @@ import store from "./store";
 import "./styles/global.scss";
 import WebFont from "webfontloader";
 import simplebar from "simplebar-vue";
-import "simplebar/dist/simplebar.min.css";
+import 'simplebar-vue/dist/simplebar.min.css';
 import vClickOutside from "v-click-outside";
 import VTooltip from "v-tooltip";
 import router from "./routes";

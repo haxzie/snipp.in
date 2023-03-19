@@ -18,6 +18,7 @@
     <SlideYUpTransition>
       <router-view></router-view>
     </SlideYUpTransition>
+    <SwitchToMobileViewModal/>
   </main>
 </template>
 
@@ -30,6 +31,7 @@ import SearchPanel from "@/components/SearchPanel";
 import { mapActions, mapGetters } from "vuex";
 import { SlideYUpTransition } from "vue2-transitions";
 import FileCreationModal from "@/components/FileCreationModal";
+import SwitchToMobileViewModal from "@/components/SwitchToMobileViewModal.vue";
 
 export default {
   components: {
@@ -41,6 +43,7 @@ export default {
     SearchPanel,
     SlideYUpTransition,
     FileCreationModal,
+    SwitchToMobileViewModal
   },
   data() {
     return {};
