@@ -2,38 +2,39 @@
   <div @contextmenu.prevent="openContextMenu">
     <div class="topbar">
       <div class="file-tabs">
-        <Container
+        <!-- <Container
           @drop="onDrop"
           lock-axis="y"
           orientation="horizontal"
           behaviour="contain"
-        >
-          <Draggable v-for="file in draggableOpenFiles" :key="file.id">
-            <div
-              class="tab"
-              :key="file.id"
-              :class="[
-                {
-                  active: file.id === (activeFile && activeFile.id) && isActive,
-                },
-                {
-                  inActive:
-                    file.id === (activeFile && activeFile.id) && !isActive,
-                },
-              ]"
-              @click="setActiveFile({ editor, id: file.id })"
-              @click.middle="closeFile({ editor, id: file.id })"
-              @click.right="setActiveFile({ editor, id: file.id })"
-            >
-              <span>{{ file.name }}</span>
-              <XIcon
-                size="16"
-                class="icon"
-                @click.stop="closeFile({ editor, id: file.id })"
-              />
-            </div>
-          </Draggable>
-        </Container>
+        > -->
+          <!-- <Draggable v-for="file in draggableOpenFiles" :key="file.id"> -->
+          <div
+            v-for="file in openFiles"
+            :key="file.id"
+            class="tab"
+            :class="[
+              {
+                active: file.id === (activeFile && activeFile.id) && isActive,
+              },
+              {
+                inActive:
+                  file.id === (activeFile && activeFile.id) && !isActive,
+              },
+            ]"
+            @click="setActiveFile({ editor, id: file.id })"
+            @click.middle="closeFile({ editor, id: file.id })"
+            @click.right="setActiveFile({ editor, id: file.id })"
+          >
+            <span>{{ file.name }}</span>
+            <XIcon
+              size="16"
+              class="icon"
+              @click.stop="closeFile({ editor, id: file.id })"
+            />
+          </div>
+          <!-- </Draggable> -->
+        <!-- </Container> -->
       </div>
     </div>
     <SlideYUpTransition>
@@ -74,7 +75,7 @@ export default {
   data() {
     return {
       isContextMenuToggled: false,
-      draggableOpenFiles: this.openFiles,
+      // draggableOpenFiles: this.openFiles,
     };
   },
   computed: {
@@ -99,9 +100,9 @@ export default {
         }
       });
     },
-    onDrop(dropResult) {
-      this.draggableOpenFiles = applyDrag(this.draggableOpenFiles, dropResult);
-    },
+    // onDrop(dropResult) {
+    //   this.draggableOpenFiles = applyDrag(this.draggableOpenFiles, dropResult);
+    // },
   },
 };
 </script>
