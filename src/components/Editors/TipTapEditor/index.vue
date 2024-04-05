@@ -124,14 +124,18 @@ export default {
 
   .tiptap-editor {
     width: 100%;
+    height: 100%;
     max-width: 700px;
     margin: 0 auto;
     padding: 50px 15px;
-    overflow-x: hidden;
+    overflow: hidden;
     background: var(--color-secondary);
 
     .ProseMirror {
       outline: none !important;
+      min-height: 100%;
+      overflow: hidden;
+      color: var(--font-color);
 
       a {
         color: #4183c4;
@@ -144,8 +148,8 @@ export default {
 
       a.anchor {
         display: block;
-        padding-left: 30px;
-        margin-left: -30px;
+        padding-left: 20px;
+        margin-left: -20px;
         cursor: pointer;
         position: absolute;
         top: 0;
@@ -159,12 +163,15 @@ export default {
       h4,
       h5,
       h6 {
-        margin: 20px 0 10px;
-        padding: 0;
+        margin: 10px 0 0 0;
+        padding: 15px 0px;
         font-weight: bold;
         -webkit-font-smoothing: antialiased;
         cursor: text;
         position: relative;
+        color: var(--font-color);
+        border-bottom: 1px solid var(--border-color);
+        line-height: 1.6rem;
       }
 
       h2:first-child,
@@ -218,30 +225,25 @@ export default {
       }
 
       h1 {
-        font-size: 28px;
+        font-size: 2rem;
+        line-height: 2.2rem;
         color: var(--font-color);
       }
 
       h2 {
-        font-size: 24px;
+        font-size: 1.5rem;
+        line-height: 1.8rem;
         color: var(--font-color);
       }
 
       h3 {
-        font-size: 18px;
+        font-size: 1.2rem;
+        line-height: 1.5rem;
       }
 
       h4 {
-        font-size: 16px;
-      }
-
-      h5 {
-        font-size: 14px;
-      }
-
-      h6 {
-        color: #777777;
-        font-size: 14px;
+        font-size: 1rem;
+        line-height: 1.2rem;
       }
 
       p,
@@ -252,13 +254,16 @@ export default {
       li,
       table,
       pre {
+        font-size: 16px;
+        line-height: 1.65rem;
         margin: 15px 0;
+        color: var(--font-color);
       }
 
       hr {
         border: 0 none;
-        color: #cccccc;
-        height: 4px;
+        background: var(--border-color);
+        height: 1px;
         padding: 0;
       }
 
@@ -318,7 +323,7 @@ export default {
 
       ul,
       ol {
-        padding-left: 30px;
+        padding-left: 20px;
       }
 
       li {
@@ -337,7 +342,7 @@ export default {
 
       ul[data-type="taskList"] {
         list-style: none;
-        padding: 0 0 0 15px;
+        padding: 0 0 0 10px;
 
         li {
           display: flex;
@@ -348,7 +353,8 @@ export default {
             margin-right: 0.5rem;
 
             input[type="checkbox"]:checked {
-              background: var(--color-primary)
+              background: var(--color-primary);
+              margin-right: 5px;
             }
           }
         }
