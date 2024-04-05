@@ -563,20 +563,20 @@ export default {
       .highlight pre {
         background-color: var(--color-secondary-light);
         border: 1px solid var(--border-color);
-        font-size: 15 px;
+        font-size: 15px;
         line-height: 19px;
         overflow: auto;
-        padding: 6px 10px;
+        padding: 15px;
         border-radius: 3px;
       }
 
       pre {
         background-color: var(--color-secondary-light);
         border: 1px solid var(--border-color);
-        font-size: 15 px;
+        font-size: 15px;
         line-height: 19px;
         overflow: auto;
-        padding: 6px 10px;
+        padding: 15px;
         border-radius: 3px;
       }
 
