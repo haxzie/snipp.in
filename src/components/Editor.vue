@@ -72,7 +72,7 @@
         <li
           @click="setShowCreateFileModal({ flag: true, filename: 'untitled' })"
         >
-          <FilePlusIcon class="icon" size="18" /> Create new snippet file
+          <FilePlusIcon class="icon" size="18" /> Create new snippet file <span>ALT+N</span>
         </li>
         <li
           @click="
@@ -127,22 +127,6 @@
         @dragover.prevent
       ></div>
     </div>
-    <!-- Short cuts -->
-    <div
-      v-show="false"
-      v-shortkey="['alt', 'd']"
-      @shortkey="dispatchActiveFileAction('delete')"
-    ></div>
-    <div
-      v-show="false"
-      v-shortkey="['alt', 'r']"
-      @shortkey="dispatchActiveFileAction('rename')"
-    ></div>
-    <div
-      v-show="false"
-      v-shortkey="['alt', 'w']"
-      @shortkey="dispatchActiveFileAction('close')"
-    ></div>
   </div>
 </template>
 
@@ -360,17 +344,20 @@ export default {
 
     .title {
       font-size: 1.2rem;
-      padding: 10px 0;
+      padding: 10px 15px;
+      font-weight: 600;
     }
 
     .description {
       opacity: 0.7;
+      padding: 0px 15px;
     }
 
     .menu-title {
       font-size: 1rem;
-      margin-top: 20px;
+      margin-top: 50px;
       padding: 0 15px;
+      font-weight: 600;
     }
 
     .menu {
@@ -389,9 +376,16 @@ export default {
         text-decoration: underline;
         text-decoration-style: dashed;
         text-decoration-color: var(--color-primary);
+        text-underline-offset: 5px;
         align-self: flex-start;
         border-radius: 5px;
         transition: 0.3s all ease-in-out;
+
+        span {
+          margin-left: 5px;
+          color: var(--font-color-light);
+          text-decoration: none;
+        }
 
         a {
           display: flex;

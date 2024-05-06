@@ -1,5 +1,5 @@
 <template>
-  <div class="file-creation" v-shortkey="['alt', 'n']" @shortkey="toggleModal">
+  <div class="file-creation">
     <SlideYUpTransition>
       <div class="file-creation-modal" v-if="showModal">
         <div class="creation-card" v-shortkey="['esc']" @shortkey="closeModal">

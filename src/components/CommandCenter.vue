@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="command-center"
-    v-shortkey="['alt', 'k']"
-    @shortkey="toggleCommandMenu"
-  >
+  <div class="command-center">
     <!-- <ZoomCenterTransition>
       <div class="toggle" v-if="!showMenu" @click="toggleCommandMenu">
         <CommandIcon />
@@ -102,6 +98,7 @@ export default {
       activeCommand: null,
       command: "",
       parameter: "",
+      shortkeyListener: null,
       commands: [
         {
           command: "/k",
@@ -160,9 +157,10 @@ export default {
     showMenu: {
       get() {
         return this.getShowCommandCenter;
-      }, set(val) {
+      },
+      set(val) {
         this.setShowCommandCenter(val);
-      }
+      },
     },
     filtererdCommands() {
       const regex = new RegExp(this.command ? this.command.trim() : "", "i");
@@ -195,12 +193,71 @@ export default {
       this.showMenu = !this.showMenu;
       if (this.showMenu) {
         setTimeout(() => {
-          this.$refs.commandInput.focus();
+          try {
+            if (!this.command) {
+              this.$refs.commandInput.focus();
+            }
+          } catch (error) {
+            // do nothing
+          }
         }, 300);
       } else {
         this.command = null;
         this.activeCommand = null;
         this.parameter = null;
+      }
+    },
+    async runCommandAction(command) {
+      let activeFile = null;
+      switch (command) {
+        case "/k":
+          this.toggleCommandMenu();
+          break;
+        case "/n":
+          if (this.parameter && this.parameter.length > 0) {
+            const file = await this.createFile({ name: this.parameter });
+            this.openFile(file);
+          } else {
+            this.createFile({ editable: true });
+          }
+          break;
+        case "/f":
+          if (this.parameter && this.parameter.length > 0) {
+            this.createDirectory({ name: this.parameter });
+          } else {
+            this.createDirectory({ editable: true });
+          }
+          break;
+        case "/w":
+          activeFile = this.getActiveFiles[this.getActiveEditor];
+          if (activeFile && activeFile.id) {
+            this.closeFile({ editor: this.getActiveEditor, id: activeFile.id });
+          }
+          break;
+        case "/d":
+          activeFile = this.getActiveFiles[this.getActiveEditor];
+          if (activeFile && activeFile.id) {
+            this.deleteFile(activeFile);
+          }
+          break;
+        case "/r":
+          activeFile = this.getActiveFiles[this.getActiveEditor];
+          if (this.parameter && this.parameter.length > 0 && activeFile) {
+            this.renameFile({ id: activeFile.id, name: this.parameter });
+          }
+          break;
+        case "/s":
+          activeFile = this.getActiveFiles[this.getActiveEditor];
+          if (activeFile) {
+            this.downloadFile({ id: activeFile.id });
+          }
+          break;
+        case "/c":
+          activeFile = this.getActiveFiles[this.getActiveEditor];
+          if (activeFile) {
+            navigator.clipboard.writeText(activeFile.contents);
+          }
+          break;
       }
     },
     async execute() {
@@ -229,66 +286,8 @@ export default {
         return;
       }
 
-      let activeFile = null;
-      switch (commandToExecute.command) {
-        case "/k":
-          this.toggleCommandMenu();
-          break;
-        case "/n":
-          if (this.parameter && this.parameter.length > 0) {
-            const file = await this.createFile({ name: this.parameter });
-            this.openFile(file);
-          } else {
-            this.createFile({ editable: true });
-          }
-          this.toggleCommandMenu();
-          break;
-        case "/f":
-          if (this.parameter && this.parameter.length > 0) {
-            this.createDirectory({ name: this.parameter });
-          } else {
-            this.createDirectory({ editable: true });
-          }
-          this.toggleCommandMenu();
-          break;
-        case "/w":
-          activeFile = this.getActiveFiles[this.getActiveEditor];
-          if (activeFile && activeFile.id) {
-            this.closeFile({ editor: this.getActiveEditor, id: activeFile.id });
-          }
-          this.toggleCommandMenu();
-          break;
-        case "/d":
-          activeFile = this.getActiveFiles[this.getActiveEditor];
-          if (activeFile && activeFile.id) {
-            this.deleteFile(activeFile);
-          }
-          this.toggleCommandMenu();
-          break;
-        case "/r":
-          activeFile = this.getActiveFiles[this.getActiveEditor];
-          if (this.parameter && this.parameter.length > 0 && activeFile) {
-            this.renameFile({ id: activeFile.id, name: this.parameter });
-          }
-          this.toggleCommandMenu();
-          break;
-        case "/s":
-          activeFile = this.getActiveFiles[this.getActiveEditor];
-          if (activeFile) {
-            this.downloadFile({ id: activeFile.id });
-          }
-          this.toggleCommandMenu();
-          break;
-        case "/c":
-          activeFile = this.getActiveFiles[this.getActiveEditor];
-          if (activeFile) {
-            navigator.clipboard.writeText(activeFile.contents);
-          }
-          this.toggleCommandMenu();
-          break;
-        default:
-          this.toggleCommandMenu();
-      }
+      this.runCommandAction(commandToExecute.command);
+      this.toggleCommandMenu();
     },
     clearIfEmpty(e) {
       if (
@@ -300,25 +299,83 @@ export default {
         this.$refs.commandInput.focus();
       }
     },
+    addShortkeyListener() {
+      console.log(`Creating shortkey listener`);
+      this.shortkeyListener = window.addEventListener("keydown", (e) => {
+        const { altKey } = e;
+        if (altKey) {
+          const key = String.fromCharCode(e.keyCode);
+          const commandKeys = ["k", "w", "r", "d", "n", ];
+          if (commandKeys.includes(key.toLowerCase())) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            switch (key.toLowerCase()) {
+              case "k":
+                this.toggleCommandMenu();
+                break;
+              case "w":
+                this.runCommandAction("/w");
+                break;
+              case "r":
+                this.command = "/r";
+                this.toggleCommandMenu();
+                break;
+              case "d":
+                this.runCommandAction("/d");
+                break;
+              case "n":
+                this.command = "/n";
+                this.toggleCommandMenu();
+                break;
+            }
+          }
+        }
+
+        // const isModifierActive = () =>
+        //   e.getModifierState("Control") ||
+        //   e.getModifierState("Meta") ||
+        //   e.getModifierState("OS") ||
+        //   e.getModifierState("Win");
+
+        // console.log(isModifierActive())
+
+        // if (e.keyCode === 74 && isModifierActive()) {
+        //   e.preventDefault();
+        //   e.stopPropagation();
+        //   // this.handleShortkey();
+
+        //   console.log(e)
+        // }
+      });
+    },
   },
   watch: {
-    command(value) {
-      for (let i = 0; i < this.commands.length; i++) {
-        const commandItem = this.commands[i];
-        // check if the command matches and the command requires a parameter
-        if (value === `${commandItem.command} ` && commandItem.parameter) {
-          // set the active command and ask user for the parameter
-          this.activeCommand = commandItem;
-          setTimeout(() => {
-            this.$refs.parameterInput.focus();
-          }, 100);
-          console.log(commandItem);
-          return;
+    command: {
+      handler(value) {
+        for (let i = 0; i < this.commands.length; i++) {
+          const commandItem = this.commands[i];
+          // check if the command matches and the command requires a parameter
+          if (value === `${commandItem.command}`) {
+            // set the active command and ask user for the parameter
+            this.activeCommand = commandItem;
+            setTimeout(() => {
+              this.$refs.parameterInput.focus();
+            }, 100);
+            return;
+          }
         }
-      }
 
-      this.activeCommand = null;
+        this.activeCommand = null;
+      },
+      immediate: true,
     },
+  },
+  created() {
+    this.addShortkeyListener();
+  },
+  beforeDestroy() {
+    window.removeEventListener("keydown", this.shortkeyListener);
   },
 };
 </script>
@@ -350,7 +407,7 @@ export default {
 }
 
 .command-center {
-  z-index: 99;
+  z-index: 9999;
 
   .command-menu {
     position: absolute;
@@ -359,9 +416,11 @@ export default {
     width: 100%;
     height: 100%;
     background: var(--popup-background);
+    backdrop-filter: blur(5px);
     display: flex;
     align-items: flex-start;
     justify-content: center;
+    z-index: 999;
 
     .command-card {
       display: flex;

@@ -260,36 +260,29 @@ export default {
             selectionBoundary,
           },
         ];
-        this.selectedEdge = selectionBoundary.edges.find(e => e.position === position);
+        this.selectedEdge = selectionBoundary.edges.find(
+          (e) => e.position === position
+        );
       } else if (
         this.moving &&
         this.selectedElements &&
         this.selectedElements.length > 0
       ) {
         this.selectedElements = this.selectedElements.map((selectedElement) => {
-          const {
-            id,
-            type,
-            x1,
-            y1,
-            x2,
-            y2,
-            points,
-            offsetX,
-            offsetY,
-          } = selectedElement;
+          const { id, type, x1, y1, x2, y2, points, offsetX, offsetY } =
+            selectedElement;
           const width = x2 - x1;
           const height = y2 - y1;
           const newX1 = layerX - offsetX;
           const newY1 = layerY - offsetY;
-          const newPoints =  points
-              ? points.map(({ offsetX, offsetY }) => ({
-                  x: layerX - offsetX,
-                  y: layerY - offsetY,
-                  offsetX,
-                  offsetY
-                }))
-              : null;
+          const newPoints = points
+            ? points.map(({ offsetX, offsetY }) => ({
+                x: layerX - offsetX,
+                y: layerY - offsetY,
+                offsetX,
+                offsetY,
+              }))
+            : null;
           const element = this.updateElement({
             id,
             type,
@@ -297,7 +290,7 @@ export default {
             y1: newY1,
             x2: newX1 + width,
             y2: newY1 + height,
-            points: newPoints
+            points: newPoints,
           });
           // update selection boundary for the element
           const selectionBoundary = generateSelectionBoundary({
@@ -359,7 +352,10 @@ export default {
       } else if (this.resizing && this.selectedEdge) {
         const element = { ...this.elements[this.selectedEdge.id] };
         if (element) {
-          const { x1, y1, x2, y2, points } = element.type === ELEMENTS.freehand? element: adjustElementCoordinates(element);
+          const { x1, y1, x2, y2, points } =
+            element.type === ELEMENTS.freehand
+              ? element
+              : adjustElementCoordinates(element);
           const updatedElement = this.updateElement({
             id: element.id,
             type: element.type,
@@ -367,7 +363,7 @@ export default {
             y1,
             x2,
             y2,
-            points
+            points,
           });
           const selectionBoundary = generateSelectionBoundary({
             id: updatedElement.id,
@@ -560,8 +556,12 @@ export default {
       }
     },
     bindShortcuts(e) {
+      console.log(e.key);
       switch (e.key) {
         case "Delete":
+          this.deleteActiveShapes();
+          break;
+        case "Backspace":
           this.deleteActiveShapes();
           break;
         case "v":
