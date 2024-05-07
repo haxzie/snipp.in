@@ -57,20 +57,21 @@
           </form>
           <div class="contents">
             <div
-              v-for="(command, index) in filtererdCommands"
+              v-for="(cmd, index) in filtererdCommands"
               :key="index"
               class="item"
+              @click="command = cmd.command"
             >
               <CommandIcon size="18" />
-              <span class="command">{{ command.command }}</span>
+              <span class="command">{{ cmd.command }}</span>
               <span class="name"
-                >{{ command.name
-                }}<span v-if="command.parameter" class="parameter">
-                  -> {{ command.parameter }}</span
+                >{{ cmd.name
+                }}<span v-if="cmd.parameter" class="parameter">
+                  -> {{ cmd.parameter }}</span
                 ></span
               >
               <span class="shortcut">{{
-                command.shortcut ? command.shortcut.join(" + ") : ""
+                cmd.shortcut ? cmd.shortcut.join(" + ") : ""
               }}</span>
             </div>
           </div>
@@ -302,15 +303,15 @@ export default {
     addShortkeyListener() {
       console.log(`Creating shortkey listener`);
       this.shortkeyListener = window.addEventListener("keydown", (e) => {
-        const { altKey } = e;
+        const { altKey, metaKey, ctrlKey } = e;
+        const key = String.fromCharCode(e.keyCode).toLowerCase();
         if (altKey) {
-          const key = String.fromCharCode(e.keyCode);
-          const commandKeys = ["k", "w", "r", "d", "n", ];
-          if (commandKeys.includes(key.toLowerCase())) {
+          const commandKeys = ["k", "w", "r", "d", "n"];
+          if (commandKeys.includes(key)) {
             e.preventDefault();
             e.stopPropagation();
 
-            switch (key.toLowerCase()) {
+            switch (key) {
               case "k":
                 this.toggleCommandMenu();
                 break;
@@ -328,25 +329,19 @@ export default {
                 this.command = "/n";
                 this.toggleCommandMenu();
                 break;
+              case "f":
+                if (e.ctrlKey) {
+                  this.command = "/f";
+                  this.toggleCommandMenu();
+                }
+                break;
             }
           }
+        } else if ((metaKey || ctrlKey) && key === "k") {
+          e.preventDefault();
+          e.stopPropagation();
+          this.toggleCommandMenu();
         }
-
-        // const isModifierActive = () =>
-        //   e.getModifierState("Control") ||
-        //   e.getModifierState("Meta") ||
-        //   e.getModifierState("OS") ||
-        //   e.getModifierState("Win");
-
-        // console.log(isModifierActive())
-
-        // if (e.keyCode === 74 && isModifierActive()) {
-        //   e.preventDefault();
-        //   e.stopPropagation();
-        //   // this.handleShortkey();
-
-        //   console.log(e)
-        // }
       });
     },
   },
@@ -375,6 +370,7 @@ export default {
     this.addShortkeyListener();
   },
   beforeDestroy() {
+    console.log(`Removing listners`);
     window.removeEventListener("keydown", this.shortkeyListener);
   },
 };
@@ -501,6 +497,17 @@ export default {
 
           .shortcut {
             opacity: 0.7;
+            background: var(--color-secondary-light);
+            padding: 2px 5px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            font-weight: 600;
+          }
+
+          &:hover {
+            cursor: pointer;
+            background: var(--color-secondary-light);
           }
         }
       }
